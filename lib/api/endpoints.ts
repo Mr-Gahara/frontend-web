@@ -105,6 +105,9 @@ export const EP = {
     perangkatById: (id: string) => `/sesikasir/perangkat/${id}`,
     /** Perangkat trusted se-toko (B334, kelola-perangkat-kasir). */
     perangkatToko: "/sesikasir/perangkat-toko",
+    /** Periode struk laporan tutup kasir (B375, B376). */
+    periode: "/sesikasir/periode",
+    periodeById: (id: string) => `/sesikasir/periode/${id}`,
   },
   jurnalTransfer: "/jurnaltransfer",
   jurnalTransferById: (id: string) => `/jurnaltransfer/${id}`,

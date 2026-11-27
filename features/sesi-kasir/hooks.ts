@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQueries,
@@ -71,6 +72,30 @@ export function useDetailSesi(id: string) {
   return useQuery({
     queryKey: queryKeys.sesiKasir.detail(id),
     queryFn: () => sesiKasirApi.detail(id),
+    refetchOnMount: "always",
+  });
+}
+
+/**
+ * Satu halaman daftar periode laporan tutup kasir (B375); paginasi server
+ * bersama seluruh filternya (keputusan rancangan butir 27).
+ */
+export function useDaftarPeriode(params: Record<string, string>) {
+  return useQuery({
+    queryKey: queryKeys.sesiKasir.periode(params),
+    queryFn: () => sesiKasirApi.daftarPeriode(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Detail periode beserta laporannya. Dimuat ulang setiap halaman dibuka,
+ * karena periode BUKA dapat ditutup dari aplikasi kapan saja.
+ */
+export function useDetailPeriode(id: string) {
+  return useQuery({
+    queryKey: queryKeys.sesiKasir.periodeDetail(id),
+    queryFn: () => sesiKasirApi.detailPeriode(id),
     refetchOnMount: "always",
   });
 }

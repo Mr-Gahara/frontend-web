@@ -1,11 +1,19 @@
 import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
-import type { PerangkatKasir, PerangkatToko, PeriodeSesiTutup, SesiKasir } from "@/types/sesiKasir";
+import type {
+  PerangkatKasir,
+  PerangkatToko,
+  PeriodeKasir,
+  PeriodeKasirDetail,
+  PeriodeSesiTutup,
+  SesiKasir,
+} from "@/types/sesiKasir";
 import type { PayloadMesinKasir } from "./dialog-mesin-kasir";
 import type { PayloadTutupKasir } from "./dialog-tutup-kasir";
 
 export type HalamanSesiKasir = { data: SesiKasir[]; pagination: Paginasi | null };
+export type HalamanPeriodeKasir = { data: PeriodeKasir[]; pagination: Paginasi | null };
 
 /**
  * Respons tutup (mapSesiKasirButa): tanpa angka (hitung buta), ditambah periode
@@ -42,4 +50,15 @@ export const sesiKasirApi = {
 
   /** Perangkat trusted se-toko untuk pilihan mesin kasir (B334). */
   perangkatToko: () => apiData.get<PerangkatToko[]>(EP.sesiKasir.perangkatToko),
+
+  /**
+   * Daftar periode laporan tutup kasir (B375), selalu berhalaman, terbaru di
+   * atas. Query yang diterima: status, locationID, dari, sampai, page, limit.
+   */
+  daftarPeriode: async (params: Record<string, string>): Promise<HalamanPeriodeKasir> => {
+    const hasil = await api.get<PeriodeKasir[]>(EP.sesiKasir.periode, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
+  },
+  /** Detail periode beserta laporan; laporan null selama periode BUKA. */
+  detailPeriode: (id: string) => apiData.get<PeriodeKasirDetail>(EP.sesiKasir.periodeById(id)),
 };

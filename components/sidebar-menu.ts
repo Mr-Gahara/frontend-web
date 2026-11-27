@@ -168,6 +168,11 @@ export const outletMenus: MenuGroup[] = [
             label: "Pembayaran per Metode",
             href: "/dashboard/outlet/keuangan/pembayaranMetode",
           },
+          {
+            // Struk laporan tutup kasir per periode (PW10, B375).
+            label: "Tutup Kasir",
+            href: "/dashboard/outlet/keuangan/laporanTutupKasir",
+          },
         ],
       },
     ],

@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import type { StatusPeriodeKasir } from "@/types/sesiKasir";
+import { LABEL_STATUS_PERIODE } from "./laporan";
 import type { LabelSelisih, NadaSelisih } from "./tampilan";
 
 const LATAR_SELISIH: Record<NadaSelisih, string> = {
@@ -42,6 +44,23 @@ export function ChipStatusKasir({ buka }: { buka: boolean }) {
       )}
     >
       {buka ? "Buka" : "Tutup"}
+    </span>
+  );
+}
+/**
+ * Status periode laporan tutup kasir (PW10): Selesai sage, Berjalan karamel
+ * muda (pemilik proyek, 27 November 2026); maknanya tetap terbaca dari teks.
+ */
+export function BadgeStatusPeriode({ status, className }: { status: StatusPeriodeKasir; className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-kecil font-bold text-navy",
+        status === "BUKA" ? "bg-karamel/35" : "bg-sage/20",
+        className,
+      )}
+    >
+      {LABEL_STATUS_PERIODE[status]}
     </span>
   );
 }

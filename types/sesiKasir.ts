@@ -120,3 +120,53 @@ export interface PerangkatToko {
   pengguna: { id: string; nama: string }[];
   mesinKasir: { id: string; namaPerangkat: string } | null;
 }
+
+/** STATUS_PERIODE_KASIR backend: BUKA selama masih ada mesin kasir yang buka di outlet. */
+export type StatusPeriodeKasir = "BUKA" | "TUTUP";
+
+/**
+ * Periode struk laporan tutup kasir (B375, mapPeriodeKasirResponse): gabungan
+ * seluruh sesi kasir di satu outlet per shift atau hari toko (P88 butir 9).
+ */
+export interface PeriodeKasir {
+  id: string;
+  tenantID: string | null;
+  locationID: string | null;
+  status: StatusPeriodeKasir;
+  dibukaPada: string;
+  ditutupPada: string | null;
+  /** Jumlah sesi yang masih buka di periode itu. */
+  sesiBuka: number;
+  jumlahSesi: number;
+  sesiKasirIDs: string[];
+  dipotretPada: string | null;
+}
+
+/** Isi struk laporan tutup kasir, dipotret saat periode ditutup (periodeKasirService.potret). */
+export interface LaporanPeriodeKasir {
+  toko: { namaToko: string | null; alamat: string | null; logoUrl: string | null };
+  outlet: { id: string; nama: string; alamat: string | null } | null;
+  kasir: string[];
+  dibukaPada: string;
+  ditutupPada: string;
+  jumlahSesi: number;
+  modalAwal: number;
+  penerimaanPerMetode: { namaMetodePembayaran: string; jumlah: number }[];
+  totalPenerimaanKasir: number;
+  totalPenerimaanInvoice: number;
+  totalPenerimaan: number;
+  jendelaInvoice: { dari: string; sampai: string };
+  saldoAkhir: number;
+  transaksiSelesai: number;
+  transaksiBelumTerbayar: number;
+  totalSistem: number;
+  tunaiAktual: number;
+  selisih: number;
+  produkTerjual: { produkID: string; namaProduk: string; jumlah: number }[];
+  totalProdukTerjual: number;
+}
+
+/** Detail periode (mapPeriodeKasirDetail): laporan null selama BUKA. */
+export interface PeriodeKasirDetail extends PeriodeKasir {
+  laporan: LaporanPeriodeKasir | null;
+}

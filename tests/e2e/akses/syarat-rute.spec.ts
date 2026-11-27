@@ -44,6 +44,7 @@ const SUMBER_ID: Record<string, string> = {
   "/dashboard/outlet/penjualan/[id]/pembayaran": "/penjualan?page=1&limit=1&statusPenjualan=UNPAID",
   "/dashboard/outlet/keuangan/akunkas/[id]/ubah": "/akunkas",
   "/dashboard/outlet/keuangan/mesinKasir/[id]": "/sesikasir?page=1&limit=1&status=TUTUP",
+  "/dashboard/outlet/keuangan/laporanTutupKasir/[id]": "/sesikasir/periode?page=1&limit=1&status=TUTUP",
   "/dashboard/outlet/reservasi/aset/[id]/edit": "/aset",
   "/dashboard/outlet/reservasi/tarif/[id]/edit": "/tarif",
   "/dashboard/outlet/reservasi/tipeAset/[id]/edit": "/tipeaset",

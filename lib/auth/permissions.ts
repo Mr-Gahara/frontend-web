@@ -245,6 +245,10 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // pemilik proyek, 7 November 2026; features/sesi-kasir/izin.ts).
   "/dashboard/outlet/keuangan/mesinKasir": [IZIN.sesiKasir],
   "/dashboard/outlet/keuangan/mesinKasir/[id]": [IZIN.sesiKasir],
+  // Laporan Tutup Kasir per periode (PW10, B375): read-sesi-kasir, seperti
+  // Mesin Kasir; buka-tutup-kasir hanya untuk aplikasi kasir.
+  "/dashboard/outlet/keuangan/laporanTutupKasir": [IZIN.sesiKasir],
+  "/dashboard/outlet/keuangan/laporanTutupKasir/[id]": [IZIN.sesiKasir],
   // Belanja Stok: pembelian di ruang yang diizinkan (izin umum untuk semua
   // ruang, atau izin per ruang yang dijumlahkan backend sesuai ruangnya, B116);
   // daftar lokasi mengisi pilihan filter lokasi penerima.

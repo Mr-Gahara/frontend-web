@@ -147,6 +147,9 @@ export const queryKeys = {
     detail: (id: string) => ["sesiKasir", "detail", id] as const,
     perangkat: () => ["sesiKasir", "perangkat"] as const,
     perangkatToko: () => ["sesiKasir", "perangkatToko"] as const,
+    /** Daftar periode laporan tutup kasir; di bawah akar sesiKasir agar ikut segar saat kasir ditutup. */
+    periode: (params?: Filter) => ["sesiKasir", "periode", params] as const,
+    periodeDetail: (id: string) => ["sesiKasir", "periodeDetail", id] as const,
   },
   bebanOperasional: {
     semua: kunci(["bebanOperasional"] as const),

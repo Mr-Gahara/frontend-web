@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/format";
 import type { SesiKasir } from "@/types/sesiKasir";
 import { ChipSelisih } from "./label";
+import { urlLaporanPeriode } from "./laporan";
 import { type BarisHitungan, barisHitunganBuka, jamLokal, labelSelisih } from "./tampilan";
 
 const FORMAT_HARI = new Intl.DateTimeFormat("id-ID", {
@@ -108,6 +109,17 @@ export function RincianSesi({
             {namaMesin}, {judulHari(sesi.dibukaPada)}
           </h1>
           <p className="text-besar text-navy/70">Mesin kasir dengan laci {laci}</p>
+          {/* Laporan tutup kasir per periode (PW10); sesi sebelum AR48 tidak punya periode. */}
+          {sesi.periodeKasirID ? (
+            <Link
+              href={urlLaporanPeriode(sesi.periodeKasirID)}
+              className="self-start text-isi font-bold text-navy underline underline-offset-4"
+            >
+              Lihat laporan tutup kasir
+            </Link>
+          ) : (
+            <p className="text-isi text-navy/70">Sesi ini dibuka sebelum laporan tutup kasir tersedia.</p>
+          )}
         </div>
         {buka && bolehTutup && (
           <Button onClick={onTutup} className="h-12 bg-navy px-6 text-besar font-bold text-gading hover:bg-navy/90">
