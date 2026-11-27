@@ -161,8 +161,8 @@ PW09 sampai PW13 (`referensi/antrean-web.md`):
    MVP (keputusan 8), selesai di PW11 (`c289fd9`): kertas 80 mm setinggi
    struk, satu lembar.
 3. **Unduh** PDF atau Excel dari `?format=`, mengikuti keputusan
-   rancangan butir 37 (berkas dibangun backend). Ikut MVP (keputusan 8;
-   PW12).
+   rancangan butir 37 (berkas dibangun backend). Ikut MVP (keputusan 8),
+   selesai di PW12 (`e42caa9`).
 4. **Spec e2e** dengan respons nyata: sesi baru dibuka dari aplikasi uji
    (`bukaKasirLewatAplikasi`), transaksi tunai dan non-tunai bersesi,
    pembayaran invoice dari web, ditutup, lalu angka laporan di web

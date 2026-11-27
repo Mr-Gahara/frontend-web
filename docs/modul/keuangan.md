@@ -553,6 +553,10 @@ seluruh mesin kasir di outlet per shift atau hari toko (B375, B376).
   dipasang di body (`AreaCetakStruk`), dan `@media print` menyembunyikan
   seluruh aplikasi selainnya. Kertas 80 mm setinggi struk disetel pada
   `beforeprint`, sehingga berlaku juga dari menu cetak browser.
+- Unduh laporan (PW12, `e42caa9`, keputusan rancangan butir 37): tombol
+  "Unduh" bergaris tepi di samping Cetak struk, menu PDF dan Excel saja
+  (backend menolak format lain), hanya periode TUTUP; berkas dari
+  `GET /sesikasir/periode/:id?format=`.
 
 ### Sub-menu Keuangan dan Laporan
 

@@ -226,6 +226,10 @@ Dicatat 24 November 2026 (rombak panel admin):
   juga ke papan terpilih sebelum kode ditulis, agar pemilik proyek dapat
   menolaknya lebih awal: sorotan latar baris Berjalan langsung diganti
   badge karamel sesudah papannya terlihat.
+- Warna tombol di potret dapat berasal dari hover kursor Playwright yang
+  tertinggal: tombol Unduh tampak krem di 1280 px, padahal latarnya gading
+  (`getComputedStyle` sesudah `page.mouse.move` ke pojok, PW12). Gerakkan
+  kursor menjauh sebelum memotret.
 
 ## Keputusan berdasar bukti
 

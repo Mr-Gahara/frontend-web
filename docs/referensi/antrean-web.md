@@ -43,7 +43,7 @@ tetap `AR`, `B`, dan `P`.
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Selesai | `c289fd9` |
-| PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Belum | |
+| PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Selesai | `e42caa9` |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Belum | |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
@@ -193,12 +193,11 @@ PDF.
 
 ### PW12: struk tutup kasir, unduh
 
-Keputusan rancangan butir 37: `GET /sesikasir/periode/:id?format=pdf`
-atau `xlsx` lewat `apiClient.unduh` dan `simpanBerkas`, hanya bagi
-`read-sesi-kasir`, hanya periode `TUTUP` (409 bila `BUKA`). Tombol
-"Unduh" bergaris tepi di kepala laman laporan, di samping Cetak struk
-(papan A). Isi Excel
-dibaca `exceljs` di spec seperti `unduh/ekspor-daftar`.
+Selesai 27 November 2026 (`e42caa9`). Tombol "Unduh" bergaris tepi di
+samping Cetak struk (papan A) memakai `TombolUnduhLaporan` dengan pilihan
+PDF dan Excel saja, lewat `sesiKasirApi.unduhPeriode` (`apiClient.unduh`),
+hanya untuk periode TUTUP. Isi Excel dibaca `exceljs` di spec dan sama
+dengan laporan backend. Penolakan 403 bagi kasir tetap di PW13.
 
 ### PW13: struk tutup kasir, e2e alur nyata
 

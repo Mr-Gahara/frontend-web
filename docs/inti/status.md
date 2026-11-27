@@ -36,7 +36,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW11)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW12)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -55,8 +55,8 @@ dipindah saat buka kasir (MK18a), dan penanda asal Pindah Dana buka kasir
 dilaporkan ke backend (butir 196, MK19a). PW10 selesai (`00fbd5d`):
 Laporan Tutup Kasir di grup Laporan, daftar periode dan laporan
 bersusunan struk (PT1a sampai PT5a). PW11 selesai (`c289fd9`): cetak
-struk dari browser di kertas 80 mm setinggi struk. Vitest kini 1331
-lolos. Suite
+struk dari browser di kertas 80 mm setinggi struk. PW12 selesai
+(`e42caa9`): unduh laporan PDF dan Excel. Vitest kini 1331 lolos. Suite
 e2e penuh terakhir 26 November 2026 (`fb186f2`,
 backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
@@ -66,8 +66,8 @@ suite berikutnya tidak mengharapkan kegagalan.
 `PW01` sampai `PW14`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** PW12 unduh dan PW13 e2e alur nyata struk tutup kasir;
-   PW10 dan PW11 sudah selesai.
+1. **Sekarang:** PW13 e2e alur nyata struk tutup kasir; PW10 sampai PW12
+   sudah selesai.
 2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
    PW08 lonceng perangkat menunggu izin, dan PW16 kelas `font-mono`
    menjadi Geist Mono.
