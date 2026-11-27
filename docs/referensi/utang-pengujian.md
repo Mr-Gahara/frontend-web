@@ -213,6 +213,11 @@ skip bersyarat data, dan catatan proses.
   Jadwal, karena data disiapkan lewat API sekali jalan. "Toko ini hanya
   saya" per perangkat teruji di satu konteks peramban; perangkat lain
   yang bertanya lagi tidak diuji.
+- **Kesiapan ruang gudang PW20: kotak Pola Roster dan Generate Jadwal
+  gudang hanya teruji di unit test** (`kesiapan.test.ts`); e2e
+  `dashboard/lonceng-pemberitahuan` melalui langkah barang gudang dan
+  kotak Master Shift gudang. Staf berizin dua ruang hanya teruji di unit
+  test.
 
 ## Data uji yang menetap dan data per run
 

@@ -51,7 +51,7 @@ tetap `AR`, `B`, dan `P`.
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Selesai | `041238b` |
 | PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Selesai | `f606985` |
-| PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Belum | |
+| PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Selesai | `3198f5d` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -259,23 +259,13 @@ sehingga langkahnya cukup punya produk (KS5a).
 
 ### PW20: kesiapan ruang gudang (Pro)
 
-Dari pertanyaan pemilik proyek 27 November 2026 tentang plan Advanced
-dan Pro, dipilih di dialog PW18 ("PW18 outlet, gudang PW20"). Kartu
-Siapkan toko sudah memuat langkah fitur plan (Setup Sesi Booking untuk
-Advanced dan Pro, Setup Gudang untuk Pro; PW19), dan aset serta tarif
-Sesi Booking dijamin wizard. Yang belum tercakup ada di ruang gudang:
-petugas gudang, absensi gudang (shift, pola roster, dan jadwal gudang
-terpisah dari outlet, sedangkan langkah KS11a dan penahan KS8a dihitung
-dari outlet), dan barang gudang pertama, karena gudang baru mulai kosong
-dan barang ditarik dari master. Sebelum dialog, periksa keadaan kosong
-ruang gudang akun Pro baru dan siapa pemegang izinnya. Catatan dari
-PW18: "ada staf" dihitung dari seluruh pengguna toko lebih dari satu,
-sedangkan langkah absensi dan penahan KS8a memakai data outlet, sehingga
-toko Pro dengan Owner dan petugas gudang saja mendapat langkah absensi
-outlet walau outlet tanpa staf; putuskan staf dihitung per ruang atau
-tetap se-toko. Pertanyaannya: bidang dan urutan gudang di kartu (satu
-kartu bersama outlet atau per ruang), syarat siap barang gudang, dan
-apakah penahan pengingat berlaku per ruang.
+Selesai 27 November 2026 (`3198f5d`), atas keputusan pemilik proyek
+KS14a sampai KS16a (`modul/pemberitahuan.md`, Ruang gudang di kesiapan
+toko). Kartu Siapkan toko memuat bidang gudang di akhir: Masukkan barang
+gudang, lalu absensi gudang bila ada petugas gudang; staf dihitung per
+ruang, sehingga toko dengan petugas gudang saja tidak mendapat langkah
+absensi outlet. Kotak langkah di Inventaris, Master Shift, Pola Roster,
+dan Generate Jadwal gudang.
 
 ## Perubahan backend tanpa pekerjaan web
 

@@ -264,6 +264,10 @@ bersyarat).
   (`tests/helpers/terkunci-uji.ts`); `undefined` terkirim sebagai id
   dan ditolak 400 dengan pesan format tidak valid (PW19, dua putaran
   terbuang di skenario kesiapan toko).
+- Penyaring permintaan per ruang tidak cukup memakai path bila endpoint
+  yang sama dipakai kedua ruang: `/jadwalshift` dibaca lonceng untuk
+  outlet dan, sejak PW20, untuk gudang. Bedakan lewat `locationID` di
+  URL terhadap id lokasi yang dibaca halaman (`auth/ruang-lokasi-kerja`).
 - Run spec yang panjang bergantung pada dev server yang tetap hidup.
   Pada 27 November 2026 (PW18) `next dev` berhenti tanpa galat di log di
   tengah run; kegagalan sesudahnya bukan bukti kode. Begitu notifikasi

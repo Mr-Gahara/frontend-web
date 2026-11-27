@@ -349,6 +349,33 @@ proyek):
 - Staf di Generate Jadwal dihitung dari daftar karyawan ruang lebih dari
   satu, karena daftar itu selalu memuat Owner.
 
+### Ruang gudang di kesiapan toko (27 November 2026)
+
+Diputuskan pemilik proyek lewat dialog PW20 (`3198f5d`), dari
+pertanyaannya tentang cakupan plan Advanced dan Pro.
+
+- **KS14a: satu kartu, bidang gudang di akhir.** Sesudah fitur plan:
+  Masukkan barang gudang, lalu absensi gudang (Master Shift, Pola
+  Roster, Generate jadwal gudang) bila ada petugas gudang. Kotak
+  langkahnya di Inventaris, Master Shift, Pola Roster, dan Generate
+  Jadwal gudang.
+- **KS15a: staf per ruang.** Absensi outlet hanya bila ada staf ruang
+  outlet, absensi gudang hanya bila ada staf ruang gudang (`GET
+  /pengguna?workspace=`, Owner selalu termuat); penahan KS8a memakai
+  staf outlet. Langkah karyawan tetap se-toko (staf di ruang mana pun),
+  dan "Toko ini hanya saya" tetap melewati keduanya. Staf berizin dua
+  ruang terhitung di keduanya. Menggantikan hitungan se-toko KS8a dan
+  KS11a.
+- **KS16a: barang gudang pertama.** Selesai bila inventaris gudang punya
+  sedikitnya satu barang (sekali punya tetap siap walau stoknya habis,
+  seperti KS5a), tautan "Masukkan barang" ke Inventaris Gudang, tingkat
+  Perlu tindakan; kotaknya di samping petunjuk "Gudang masih kosong".
+
+Rincian penerapan, bukan bagian teks opsi: bidang gudang hanya bila ruang
+gudang dapat dimasuki dan toko punya lokasi gudang; langkah absensi
+gudang bertingkat Perlu tindakan seperti outlet; jumlah barang dari `GET
+/inventory?locationID=` satu baris (`pagination.total`).
+
 ## Catatan
 
 - Lonceng ada di setiap halaman dashboard, sehingga setiap sumber hanya
