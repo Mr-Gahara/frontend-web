@@ -247,30 +247,34 @@ kerja" tidak menyebut urutan, wizard setup tidak punya langkah shift
 maupun jadwal, dan halaman Pola Roster, Jadwal, dan Generate Jadwal
 tidak memberi catatan saat syaratnya belum ada.
 
-Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026,
-"PW19 induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka
-kesiapan toko PW19, sehingga lonceng "absensi belum disiapkan" memakai
-kerangka itu, dan PW18 mengisi langkah berurutan serta catatan
-syaratnya. Termasuk (pemilik proyek, 27 November 2026) pemberitahuan
-opsional "tambah karyawan atau pengguna dulu" bila pengguna toko hanya
-Owner, ditampilkan sebelum langkah absensi dan jadwal; opsional karena
-toko boleh dijalankan Owner sendiri, sehingga dialog perlu memutuskan
-cara klien menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak
-menetap. Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
-tanpa pola atau karyawan, Jadwal tanpa shift, Rekap Absensi tanpa
-jadwal), di ruang outlet dan gudang. Arah dari pemilik proyek: akun yang
-absensinya belum disiapkan tidak mendapat pengingat jadwal minggu depan,
-melainkan pemberitahuan "absensi belum disiapkan" yang mengajak
-menyiapkannya; mengkliknya membuka langkah berurutan yang mengarahkan ke
-halaman pertama, lalu halaman berikutnya, sampai absensi aktif.
-Pertanyaan untuk pemilik proyek: (0) syarat "absensi siap" (karyawan,
-shift aktif, pola roster, jadwal) dan bentuk langkahnya (halaman panduan
-tersendiri, tur sorotan, atau daftar periksa); (1) catatan syarat di
-halaman beserta tautan ke halaman yang dibutuhkan; (2) tombol Simpan
-pola dimatikan atau tetap aktif selama ruang belum punya shift aktif
-(backend menerima pola libur semua); (3) titik tur dashboard menyebut
-urutan empat langkah; (4) daftar periksa "Siapkan absensi" di dashboard,
-cakupan lebih besar.
+Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026, "PW19
+induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka kesiapan
+toko PW19, sehingga lonceng "absensi belum disiapkan" memakai kerangka
+itu, dan PW18 mengisi langkah berurutan serta catatan syaratnya.
+Termasuk (pemilik proyek, 27 November 2026) pemberitahuan opsional
+"tambah karyawan atau pengguna dulu" bila pengguna toko hanya Owner,
+ditampilkan sebelum langkah absensi dan jadwal; opsional karena toko
+boleh dijalankan Owner sendiri, sehingga dialog perlu memutuskan cara
+klien menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak
+menetap. Urutannya (pemilik proyek, 27 November 2026): pemberitahuan
+tambah staf lebih dulu, tidak wajib; bila diklik, ia juga membuka
+panduan menambah staf. Pemberitahuan absensi PW18 baru tampil sesudah
+toko punya sedikitnya satu staf selain Owner; perlakuan absensi bagi
+toko yang menyatakan hanya Owner diputuskan di dialog. Sebelum dialog,
+periksa keadaan kosong setiap halaman (Generate Jadwal tanpa pola atau
+karyawan, Jadwal tanpa shift, Rekap Absensi tanpa jadwal), di ruang
+outlet dan gudang. Arah dari pemilik proyek: akun yang absensinya belum
+disiapkan tidak mendapat pengingat jadwal minggu depan, melainkan
+pemberitahuan "absensi belum disiapkan" yang mengajak menyiapkannya;
+mengkliknya membuka langkah berurutan yang mengarahkan ke halaman
+pertama, lalu halaman berikutnya, sampai absensi aktif. Pertanyaan untuk
+pemilik proyek: (0) syarat "absensi siap" (karyawan, shift aktif, pola
+roster, jadwal) dan bentuk langkahnya (halaman panduan tersendiri, tur
+sorotan, atau daftar periksa); (1) catatan syarat di halaman beserta
+tautan ke halaman yang dibutuhkan; (2) tombol Simpan pola dimatikan atau
+tetap aktif selama ruang belum punya shift aktif (backend menerima pola
+libur semua); (3) titik tur dashboard menyebut urutan empat langkah; (4)
+daftar periksa "Siapkan absensi" di dashboard, cakupan lebih besar.
 
 ### PW19: lonceng kesiapan toko
 
