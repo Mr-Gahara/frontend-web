@@ -49,8 +49,9 @@ tetap `AR`, `B`, dan `P`.
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
-| PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Belum | |
+| PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Selesai | `041238b` |
 | PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Selesai | `f606985` |
+| PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -229,55 +230,17 @@ hanya PW15, label usulan dibuang dari Kriteria selesai MVP di
 
 ### PW18: panduan menyiapkan absensi
 
-Dari laporan pemilik proyek 27 November 2026. Awalnya lonceng: akun baru
-mendapat "Jadwal minggu depan belum dibuat" (LN4a,
-`pemberitahuanJadwalMingguDepan` di
-`features/notifikasi/sumber-staf.ts`, Kamis sampai Minggu bila jadwal
-minggu depan kosong) dengan tautan Buat jadwal ke Generate Jadwal, tanpa
-memeriksa apakah shift dan pola roster sudah ada. Pemilik proyek
-mengikutinya, sadar pola roster belum ada, lalu membuat pola. Di toko
-baru (outlet ampera, tanpa shift) dialog Buat Pola Roster hanya
-menawarkan "Libur / Off" tanpa penjelasan, sehingga tersimpan pola
-"reguler 5-2" yang ketujuh harinya libur. Diperiksa: form dan backend
-menerima banyak hari libur (dibuktikan Playwright di outlet dan gudang,
-1280 dan 390 px); yang kurang adalah panduan. Urutan menyiapkan absensi,
-Karyawan, Master Shift, Pola Roster, Generate Jadwal, lalu absen lewat
-aplikasi, tidak tertulis di aplikasi: titik tur dashboard "Atur jadwal
-kerja" tidak menyebut urutan, wizard setup tidak punya langkah shift
-maupun jadwal, dan halaman Pola Roster, Jadwal, dan Generate Jadwal
-tidak memberi catatan saat syaratnya belum ada.
-
-Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026, "PW19
-induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka kesiapan
-toko PW19, sehingga lonceng "absensi belum disiapkan" memakai kerangka
-itu, dan PW18 mengisi langkah berurutan serta catatan syaratnya: slot
-karyawan dan absensi di `langkahKesiapan`
-(`features/notifikasi/kesiapan.ts`, KS1a, PW19 selesai `f606985`),
-dengan penahan pengingat absensi KS8a yang sudah berlaku. Termasuk
-(pemilik proyek, 27 November 2026) pemberitahuan opsional "tambah
-karyawan atau pengguna dulu" bila pengguna toko hanya Owner, ditampilkan
-sebelum langkah absensi dan jadwal; opsional karena toko boleh
-dijalankan Owner sendiri, sehingga dialog perlu memutuskan cara klien
-menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak menetap.
-Urutannya (pemilik proyek, 27 November 2026): pemberitahuan tambah staf
-lebih dulu, tidak wajib; bila diklik, ia juga membuka panduan menambah
-staf. Pemberitahuan absensi PW18 baru tampil sesudah toko punya
-sedikitnya satu staf selain Owner; perlakuan absensi bagi toko yang
-menyatakan hanya Owner diputuskan di dialog. Sebelum dialog, periksa
-keadaan kosong setiap halaman (Generate Jadwal tanpa pola atau karyawan,
-Jadwal tanpa shift, Rekap Absensi tanpa jadwal), di ruang outlet dan
-gudang. Arah dari pemilik proyek: akun yang absensinya belum disiapkan
-tidak mendapat pengingat jadwal minggu depan, melainkan pemberitahuan
-"absensi belum disiapkan" yang mengajak menyiapkannya; mengkliknya
-membuka langkah berurutan yang mengarahkan ke halaman pertama, lalu
-halaman berikutnya, sampai absensi aktif. Pertanyaan untuk pemilik
-proyek: (0) syarat "absensi siap" (karyawan, shift aktif, pola roster,
-jadwal) dan bentuk langkahnya (halaman panduan tersendiri, tur sorotan,
-atau daftar periksa); (1) catatan syarat di halaman beserta tautan ke
-halaman yang dibutuhkan; (2) tombol Simpan pola dimatikan atau tetap
-aktif selama ruang belum punya shift aktif (backend menerima pola libur
-semua); (3) titik tur dashboard menyebut urutan empat langkah; (4)
-daftar periksa "Siapkan absensi" di dashboard, cakupan lebih besar.
+Selesai 27 November 2026 (`041238b`), atas keputusan pemilik proyek
+KS10a sampai KS13a (`modul/pemberitahuan.md`, Karyawan dan absensi di
+kesiapan toko). Kartu Siapkan toko kini memuat langkah karyawan (Buat
+posisi, Tambah karyawan; opsional dengan tombol "Toko ini hanya saya" per
+perangkat) dan absensi bila ada staf (Master Shift, Pola Roster, Generate
+jadwal; jadwal selesai bila pernah ada dalam 62 hari sampai akhir minggu
+depan). Catatan syarat bertaut di Tambah Pengguna, dialog Pola Roster
+(Simpan mati tanpa shift aktif), dan Generate Jadwal, di outlet dan
+gudang; titik tur Atur jadwal kerja menyebut urutannya. Kotak langkah di
+Posisi, Pengguna, Master Shift, Pola Roster, dan Generate Jadwal outlet.
+Ruang gudang menjadi PW20.
 
 ### PW19: lonceng kesiapan toko
 
@@ -293,6 +256,22 @@ sama di Buat Produk dan wizard Setup. Slot karyawan dan absensi di
 `langkahKesiapan` diisi PW18. Urutan bergantung di bidang produk (bahan,
 satuan, resep, stok, harga, pajak) dijamin wizard (SA9a sampai SA11a),
 sehingga langkahnya cukup punya produk (KS5a).
+
+### PW20: kesiapan ruang gudang (Pro)
+
+Dari pertanyaan pemilik proyek 27 November 2026 tentang plan Advanced
+dan Pro, dipilih di dialog PW18 ("PW18 outlet, gudang PW20"). Kartu
+Siapkan toko sudah memuat langkah fitur plan (Setup Sesi Booking untuk
+Advanced dan Pro, Setup Gudang untuk Pro; PW19), dan aset serta tarif
+Sesi Booking dijamin wizard. Yang belum tercakup ada di ruang gudang:
+petugas gudang, absensi gudang (shift, pola roster, dan jadwal gudang
+terpisah dari outlet, sedangkan langkah KS11a dan penahan KS8a dihitung
+dari outlet), dan barang gudang pertama, karena gudang baru mulai kosong
+dan barang ditarik dari master. Sebelum dialog, periksa keadaan kosong
+ruang gudang akun Pro baru dan siapa pemegang izinnya; pertanyaannya:
+bidang dan urutan gudang di kartu (satu kartu bersama outlet atau per
+ruang), syarat siap barang gudang, dan apakah penahan pengingat berlaku
+per ruang.
 
 ## Perubahan backend tanpa pekerjaan web
 

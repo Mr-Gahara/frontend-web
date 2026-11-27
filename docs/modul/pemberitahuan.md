@@ -305,6 +305,48 @@ proyek):
   setup inti berjalan.
 - Panel terbuka sendiri LN13a membaca pemicu LN1a langsung.
 
+### Karyawan dan absensi di kesiapan toko (27 November 2026)
+
+Diputuskan pemilik proyek lewat dialog PW18 (`041238b`), mengisi slot
+karyawan dan absensi KS1a. Ruang gudang menjadi PW20.
+
+- **KS10a: langkah karyawan opsional, dengan "Toko ini hanya saya".**
+  Buat posisi lalu Tambah karyawan, bertingkat Info. Kartu dan kotak
+  langkahnya membawa tombol "Toko ini hanya saya" yang melewati langkah
+  karyawan dan absensi, disimpan per perangkat di localStorage karena
+  backend tidak punya tempatnya; perangkat lain bertanya lagi sekali.
+  Begitu ada staf, langkah absensi muncul walau pernah dilewati.
+- **KS11a: langkah absensi hanya bila ada staf**: Buat Master Shift, Buat
+  Pola Roster, lalu Generate jadwal. Langkah jadwal selesai bila ada
+  jadwal outlet dalam 62 hari terakhir sampai akhir minggu depan (batas
+  rentang backend), sehingga toko berjalan tidak kembali ke mode setup;
+  selanjutnya pengingat Jadwal minggu depan yang mengingatkan. Selama
+  langkah jadwal berjalan, pengingat itu tidak tampil agar tidak dobel.
+- **KS12a: catatan syarat bertaut di outlet dan gudang**: dialog Tambah
+  Pengguna tanpa posisi ("Buat posisi dulu"), dialog Pola Roster tanpa
+  shift aktif ("Buat shift dulu", dan Simpan dimatikan agar tidak
+  tersimpan pola libur semua seperti "reguler 5-2"), Generate Jadwal tanpa
+  pola atau tanpa staf. Titik tur dashboard "Atur jadwal kerja" menyebut
+  urutan: karyawan, shift, pola roster, generate jadwal.
+- **KS13a: kotak langkah** dipasang di Posisi, Pengguna, Master Shift,
+  Pola Roster, dan Generate Jadwal (`CatatanSyarat` di
+  `components/catatan-syarat.tsx` untuk KS12a).
+
+Rincian penerapan, bukan bagian teks opsi (dapat dibatalkan pemilik
+proyek):
+
+- Langkah absensi bertingkat Perlu tindakan; posisi dihitung dari role
+  berlevel di bawah 100 (Owner berlevel 100); data yang belum termuat
+  atau tidak berizin tidak dihitung (KS4a).
+- Kunci "Toko ini hanya saya" per akun (`hanya-owner.ts`), sehingga akun
+  lain di perangkat yang sama tidak mewarisinya (keputusan rancangan
+  butir 33); kartu lonceng dan kotak berbagi nilainya lewat satu
+  peristiwa di tab yang sama.
+- Kotak langkah karyawan dan absensi hanya di halaman ruang outlet, karena
+  langkahnya dihitung dari outlet; catatan syarat KS12a di kedua ruang.
+- Staf di Generate Jadwal dihitung dari daftar karyawan ruang lebih dari
+  satu, karena daftar itu selalu memuat Owner.
+
 ## Catatan
 
 - Lonceng ada di setiap halaman dashboard, sehingga setiap sumber hanya

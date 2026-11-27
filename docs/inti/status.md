@@ -39,7 +39,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW19)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW18)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -69,20 +69,22 @@ kasir selesai. PW16 selesai (`0d30692`): kelas `font-mono` menjadi Geist
 Mono dan blok CSS mati di `app/globals.css` dibuang (FN1a, FN2a). PW19
 selesai (`f606985`): lonceng kesiapan toko, satu kartu "Siapkan toko"
 berlangkah dan penahan pengingat absensi (KS1a sampai KS9a,
-`modul/pemberitahuan.md`). Vitest kini 1344 lolos dari 159 berkas. PW14
-selesai: suite e2e penuh 27 November 2026 (`81e9214`, backend `6478d29`)
-837 lolos dari 837, tanpa gagal maupun dilewati, termasuk spec ber-OTP
+`modul/pemberitahuan.md`). PW18 selesai (`041238b`): langkah karyawan
+(opsional, "Toko ini hanya saya") dan absensi di kartu itu, catatan
+syarat di Tambah Pengguna, Pola Roster, dan Generate Jadwal (KS10a
+sampai KS13a). Vitest kini 1353 lolos dari 159 berkas. PW14 selesai:
+suite e2e penuh 27 November 2026 (`81e9214`, backend `6478d29`) 837
+lolos dari 837, tanpa gagal maupun dilewati, termasuk spec ber-OTP
 (Baseline `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW19`, satu paket per sesi lewat
+`PW01` sampai `PW20`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14, PW16, PW17, dan PW19
+1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW19
    selesai.
-2. **Diawali dialog keputusan:** PW18, bidang karyawan (opsional) dan
-   absensi di kerangka kesiapan toko PW19 (langkah berurutan dan catatan
-   syarat di halaman).
+2. **Diawali dialog keputusan:** PW20, kesiapan ruang gudang (Pro):
+   petugas, absensi gudang, dan barang gudang pertama.
 3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya

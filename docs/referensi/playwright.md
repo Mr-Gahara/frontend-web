@@ -264,6 +264,11 @@ bersyarat).
   (`tests/helpers/terkunci-uji.ts`); `undefined` terkirim sebagai id
   dan ditolak 400 dengan pesan format tidak valid (PW19, dua putaran
   terbuang di skenario kesiapan toko).
+- Run spec yang panjang bergantung pada dev server yang tetap hidup.
+  Pada 27 November 2026 (PW18) `next dev` berhenti tanpa galat di log di
+  tengah run; kegagalan sesudahnya bukan bukti kode. Begitu notifikasi
+  dev server berhenti muncul, hentikan run, nyalakan ulang, periksa
+  `curl localhost:3000` 200, lalu ulangi seluruh berkas terdampak.
 - Bukti bahwa sebuah aksi tidak mengirim permintaan diambil dari penghitung
   `page.on("request", ...)` yang dilepas dengan `page.off`, bukan hanya dari
   toast. Contoh: langkah pengosongan di spec draft stock opname.

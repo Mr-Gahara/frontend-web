@@ -207,6 +207,12 @@ skip bersyarat data, dan catatan proses.
   wizard Setup teruji e2e di skenario Pro `setup/setup.spec.ts` (tampil
   di langkah Sesi booking dan Gudang, tidak di Pajak), dan tidak tampil
   selagi setup inti berjalan (`dashboard/lonceng-pemberitahuan`).
+- **Kesiapan toko PW18: kotak langkah Tambah karyawan, Master Shift, dan
+  Pola Roster hanya teruji di unit test** (`kesiapan.test.ts`); e2e
+  `dashboard/lonceng-pemberitahuan` melalui kotak Posisi dan Generate
+  Jadwal, karena data disiapkan lewat API sekali jalan. "Toko ini hanya
+  saya" per perangkat teruji di satu konteks peramban; perangkat lain
+  yang bertanya lagi tidak diuji.
 
 ## Data uji yang menetap dan data per run
 

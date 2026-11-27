@@ -280,6 +280,12 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
 
 ## Catatan
 
+- Sejak PW18 (`041238b`, KS12a di `modul/pemberitahuan.md`): dialog Pola
+  Roster tanpa shift aktif menampilkan catatan "Buat shift dulu" dan
+  mematikan Simpan, Generate Jadwal menampilkan catatan bila belum ada
+  pola roster atau staf selain Owner, dan dialog Tambah Pengguna bila
+  belum ada posisi di bawah level pengguna. Berlaku di outlet dan gudang.
+
 ### Catatan dari modul jadwal dan shift
 
 Modul jadwal dan shift selesai pada 29 September 2026 dalam empat
