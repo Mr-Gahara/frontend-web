@@ -36,7 +36,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW10)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -52,7 +52,9 @@ bertahan dimuat ulang (`569c3f9`), Rekap Absensi boleh kosong
 lonceng pengembalian bagi pengguna gudang saja (`efb5596`). PW09 selesai
 27 November 2026 (`b232cad`): rincian sesi menampilkan isi laci yang
 dipindah saat buka kasir (MK18a), dan penanda asal Pindah Dana buka kasir
-dilaporkan ke backend (butir 196, MK19a). Vitest kini 1318 lolos. Suite
+dilaporkan ke backend (butir 196, MK19a). PW10 selesai (`00fbd5d`):
+Laporan Tutup Kasir di grup Laporan, daftar periode dan laporan
+bersusunan struk (PT1a sampai PT5a). Vitest kini 1328 lolos. Suite
 e2e penuh terakhir 26 November 2026 (`fb186f2`,
 backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
@@ -63,10 +65,10 @@ suite berikutnya tidak mengharapkan kegagalan.
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
 1. **Sekarang:** PW11 sampai PW13 cetak, unduh, dan e2e struk tutup
-   kasir sesudah PW10.
+   kasir; PW10 sudah selesai.
 2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
-   PW08 lonceng perangkat menunggu izin, dan PW10 letak serta tampilan
-   laporan periode struk tutup kasir (wajib MVP).
+   PW08 lonceng perangkat menunggu izin, dan PW16 kelas `font-mono`
+   menjadi Geist Mono.
 3. **Menunggu izin pemilik proyek:** PW14 suite e2e penuh.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya

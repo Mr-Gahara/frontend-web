@@ -1185,3 +1185,6 @@ digabung. Pemetaan per label B ke paket web ada di antrean.
   Batalkan Pindah Dana buka kasir tetap tampil dengan pesan 409 backend
   apa adanya sampai respons jurnal transfer membawa penanda asal (MK19a,
   `kontrak/temuan.md` butir 196); keduanya di `modul/keuangan.md`.
+- **Laporan periode** (B375, B376, PW10, 27 November 2026, `00fbd5d`):
+  daftar dan laporan bersusunan struk di grup Laporan (PT1a sampai PT5a,
+  `modul/keuangan.md`).

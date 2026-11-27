@@ -517,6 +517,38 @@ berubah hanya tampilan pantau.
   web, sehingga perubahan B374 (hanya pembayaran ke laci) tidak mengubah
   label apa pun.
 
+### Laporan Tutup Kasir
+
+Diputuskan pemilik proyek 27 November 2026 (PW10, `00fbd5d`), dari
+kanvas tiga desain (A tabel, B per hari, C berdampingan; artifact
+"Laporan Tutup Kasir"). Laporan dibentuk backend per periode, gabungan
+seluruh mesin kasir di outlet per shift atau hari toko (B375, B376).
+
+- **PT1a: anak menu "Tutup Kasir" di grup Laporan**, rute
+  `/dashboard/outlet/keuangan/laporanTutupKasir` (daftar) dan
+  `/laporanTutupKasir/[id]` (laporan), keduanya `read-sesi-kasir` di
+  `IZIN_HALAMAN`; rincian sesi Mesin Kasir menautkan ke periodenya lewat
+  `periodeKasirID` ("Lihat laporan tutup kasir").
+- **PT2a: kedua laman desain A.** Daftar berupa `DataTable` server
+  (Dibuka, Ditutup, Sesi kasir, Status, Lihat laporan) di kartu krem
+  berikon karamel seperti Pembayaran per Metode, dengan filter Periode
+  dibuka tanpa bawaan. Laporan di laman sendiri: tautan kembali, badge
+  status, judul tanggal, jam, jumlah sesi, dan outlet, lalu struk di
+  tengah di atas latar krem. Pemilik proyek sempat memilih B untuk daftar,
+  lalu mengganti keduanya ke A.
+- **PT3a: badge Selesai sage, Berjalan karamel muda**; latar baris tidak
+  diubah (pemilik proyek menolak sorotan latar baris).
+- **PT4a: keterangan di kedua keadaan khusus.** Periode BUKA: "Laporan
+  tersedia setelah semua mesin kasir di outlet ditutup." beserta waktu
+  dibuka dan sesi yang masih buka; sesi tanpa periode (sebelum AR48):
+  "Sesi ini dibuka sebelum laporan tutup kasir tersedia." tanpa tautan.
+- **PT5a: laporan di layar bersusunan struk**: sembilan section dan
+  pemisah persis Susunan struk (`referensi/rencana-struk-tutup-kasir.md`)
+  dalam satu komponen `StrukLaporan`, yang dipakai cetak PW11. Angka tanpa
+  "Rp" seperti struk kertas (`angkaStruk`), huruf Geist Mono.
+- Tombol Cetak dan Unduh di kanvas hanya penanda letak (kepala laman:
+  Unduh bergaris tepi, Cetak struk navy); dipasang di PW11 dan PW12.
+
 ### Sub-menu Keuangan dan Laporan
 
 Diputuskan pemilik proyek pada 12 November 2026 (`arsip/catatan-putaran.md`,

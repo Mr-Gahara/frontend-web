@@ -14,7 +14,8 @@ yang tetap.
 
 Susunan struk dan aturan modal awal di bawah **diputuskan pemilik
 proyek**. Data dan laporannya sudah dibangun backend `6478d29` (AR47,
-AR48); peran web di bawah masih **usulan** sampai diputuskan di PW10.
+AR48); letak dan tampilan web diputuskan di PW10 (`modul/keuangan.md`,
+PT1a sampai PT5a).
 
 ## Tujuan
 
@@ -150,11 +151,11 @@ Web bukan mesin kasir, tetapi Owner memantau dan dapat menutup kasir dari
 web (`ditutupDari: "web"`, Mesin Kasir). Peran web, dikerjakan lewat paket
 PW09 sampai PW13 (`referensi/antrean-web.md`):
 
-1. **Laporan periode di Mesin Kasir** dari `GET /sesikasir/periode/:id`,
-   dengan section yang sama dengan struk. Letaknya (tab atau bagian di
-   Mesin Kasir, tautan dari rincian sesi lewat `periodeKasirID`, atau
-   keduanya) dan tampilan periode BUKA diputuskan di PW10; usulan awal
-   "di rincian sesi" disusun saat laporan masih dibayangkan per sesi.
+1. **Laporan periode** dari `GET /sesikasir/periode` dan
+   `/periode/:id`, selesai di PW10 (`00fbd5d`): anak menu "Tutup Kasir"
+   di grup Laporan dengan daftar periode dan laman laporan bersusunan
+   struk, serta tautan dari rincian sesi lewat `periodeKasirID`
+   (PT1a sampai PT5a).
 2. **Cetak dari browser** untuk periode TUTUP: halaman cetak selebar
    struk (80 mm) lewat `window.print`, tanpa driver printer khusus. Ikut
    MVP (keputusan 8; PW11).

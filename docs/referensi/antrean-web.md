@@ -41,12 +41,13 @@ tetap `AR`, `B`, dan `P`.
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
-| PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Belum | |
+| PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Belum | |
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Belum | |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Belum | |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
+| PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -172,32 +173,21 @@ membuktikan keduanya terhadap respons nyata.
 
 ### PW10: struk tutup kasir, daftar dan laporan periode
 
-Backend B375 dan B376 (P88 butir 9): `GET /sesikasir/periode` (daftar
-berhalaman, query `status`, `locationID`, `dari`, `sampai`) dan
-`GET /sesikasir/periode/:id` (detail dengan `laporan`, `null` selama
-`BUKA`), izin `read-sesi-kasir` atau `buka-tutup-kasir`.
-
-Bagian web di `referensi/rencana-struk-tutup-kasir.md` masih mengusulkan
-laporan per sesi di rincian sesi, padahal backend memakai periode
-(gabungan sesi di outlet, keputusan 2). Keputusan yang perlu diajukan:
-
-- Letak: tab atau bagian Laporan Tutup Kasir di Mesin Kasir, tautan dari
-  rincian sesi lewat `periodeKasirID`, atau keduanya; rute baru tercatat
-  di `IZIN_HALAMAN` (`lib/auth/permissions.ts`).
-- Tampilan periode `BUKA` (laporan belum ada) dan sesi lama tanpa
-  periode (`periodeKasirID: null`).
-- Bentuk tampilan di layar: susunan sembilan section struk atau kartu
-  web; kanvas desain bila pemilik proyek ingin memilih dulu
-  (`inti/cara-kerja.md`, Kanvas desain).
-
-Pelaksanaan: tipe, API, hooks, dan `queryKeys` di `features/sesi-kasir`,
-tampilan, unit test pemetaan, dan integration test komponen.
+Selesai 27 November 2026 (`00fbd5d`). Dari kanvas tiga desain, pemilik
+proyek memilih desain A untuk kedua laman: anak menu "Tutup Kasir" di
+grup Laporan dengan daftar periode (`DataTable` server, filter Periode
+dibuka) dan laman laporan bersusunan struk di tengah, serta tautan dari
+rincian sesi (PT1a sampai PT5a, `modul/keuangan.md`). Komponen
+`StrukLaporan` dipakai cetak PW11. Ditemukan: kelas `font-mono` jatuh ke
+tumpukan bawaan Tailwind (PW16).
 
 ### PW11: struk tutup kasir, cetak dari browser
 
 Keputusan 8 (25 November 2026): cetak dari browser ikut MVP. Halaman
 cetak selebar 80 mm lewat `window.print`, susunan dan garis putus-putus
-sesuai Susunan struk, hanya untuk periode `TUTUP`. Uji: unit atau
+sesuai Susunan struk, hanya untuk periode `TUTUP`. Struk memakai
+`StrukLaporan` dari PW10; tombol "Cetak struk" (navy) di kepala laman
+laporan sesuai papan A (PT5a). Uji: unit atau
 integration untuk susunan, dan e2e yang memeriksa halaman cetak (gaya
 `@media print`).
 
@@ -205,7 +195,9 @@ integration untuk susunan, dan e2e yang memeriksa halaman cetak (gaya
 
 Keputusan rancangan butir 37: `GET /sesikasir/periode/:id?format=pdf`
 atau `xlsx` lewat `apiClient.unduh` dan `simpanBerkas`, hanya bagi
-`read-sesi-kasir`, hanya periode `TUTUP` (409 bila `BUKA`). Isi Excel
+`read-sesi-kasir`, hanya periode `TUTUP` (409 bila `BUKA`). Tombol
+"Unduh" bergaris tepi di kepala laman laporan, di samping Cetak struk
+(papan A). Isi Excel
 dibaca `exceljs` di spec seperti `unduh/ekspor-daftar`.
 
 ### PW13: struk tutup kasir, e2e alur nyata
@@ -233,6 +225,18 @@ Batalkan di `features/jurnal-transfer/halaman-pindah-dana.tsx`
 disembunyikan untuk jurnal itu (aturan di `features/jurnal-transfer/izin.ts`
 atau fungsi murni), skenario 409 di `keuangan/mesin-kasir` diganti
 pemeriksaan tanpa Batalkan, dan MK19a diperbarui.
+
+### PW16: kelas `font-mono` menjadi Geist Mono
+
+Ditemukan saat PW10 (27 November 2026): `getComputedStyle` elemen
+ber-`font-mono` memberi tumpukan bawaan Tailwind (`ui-monospace` sampai
+`Courier New`), padahal `app/globals.css` memetakan `--font-mono` ke
+`--font-geist-mono`, dan variabel itu terisi Geist Mono di `html`.
+Pemakainya antara lain jumlah di riwayat Pindah Dana. `StrukLaporan`
+menulis Geist Mono lewat variabelnya. Keputusan yang perlu diajukan:
+membetulkan token (tampilan angka mono di laman lain ikut berubah) atau
+membiarkannya. Sesudahnya potret laman pemakai dan buang penulisan
+langsung di struk.
 
 ## Perubahan backend tanpa pekerjaan web
 

@@ -148,6 +148,8 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
 | `/dashboard/outlet/keuangan/mesinKasir` | `read-sesi-kasir` | `/sesikasir` (kasir buka, riwayat, terakhir dipakai per mesin, dan ada sesi); bagi pemegang kelola juga `/sesikasir/perangkat`, `/akunkas`, `/pengguna`, dan `/device/:userId` | Tab kelima Keuangan; bagian kelola menurut `features/sesi-kasir/izin.ts` |
 | `/dashboard/outlet/keuangan/mesinKasir/[id]` | `read-sesi-kasir` | `/sesikasir/:id`; bagi pemegang kelola juga `/sesikasir/perangkat` dan `/akunkas` | Rincian sesi; tutup dari web bagi pemegang kelola |
+| `/dashboard/outlet/keuangan/laporanTutupKasir` | `read-sesi-kasir` | `/sesikasir/periode` | Daftar periode laporan tutup kasir, anak menu Tutup Kasir di grup Laporan (PW10, PT1a) |
+| `/dashboard/outlet/keuangan/laporanTutupKasir/[id]` | `read-sesi-kasir` | `/sesikasir/periode/:id` | Laporan bersusunan struk; keterangan selama periode BUKA (PT4a) |
 | `/dashboard/outlet/pengeluaran/catatBeban` | `read-kategori-beban`, `read-akunkas`, `create-beban-operasional` | `/kategoribeban`, `/akunkas` | Form; kategori dan akun kas wajib (GR5a, GR7a) |
 | `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
 | `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |

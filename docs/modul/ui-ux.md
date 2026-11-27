@@ -1020,7 +1020,11 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 
 ## Utang terbuka
 
-Tidak ada utang terbuka per 26 November 2026. Teks kaki dan tombol halaman
+- Kelas `font-mono` jatuh ke tumpukan bawaan Tailwind, bukan Geist Mono
+  (terukur 27 November 2026 saat PW10); keputusan dan perbaikannya di
+  PW16 (`referensi/antrean-web.md`).
+
+Selain itu tidak ada utang terbuka per 26 November 2026. Teks kaki dan tombol halaman
 `DataTable` (klien dan server: total data, Halaman N dari M, Previous dan
 Next mati di ujung dan selama server sibuk, keadaan kosong, memuat, dan
 pencarian) teruji integrasi sejak 26 November 2026, dan label sel di HP

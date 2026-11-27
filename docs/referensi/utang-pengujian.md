@@ -189,6 +189,12 @@ skip bersyarat data, dan catatan proses.
   uji "E2E Lokasi Gudang" hanya memegang izin baca. Pembuktian e2e butuh
   peran uji gudang berizin terima dan surat jalan pengembalian yang
   dikirim lewat UI (stok outlet berpindah ke gudang setiap run).
+- **Angka struk Laporan Tutup Kasir dengan transaksi nyata belum diuji
+  e2e** (PW10): periode uji tanpa penjualan, sehingga penerimaan per
+  metode dan produk terjual teruji di test integrasi
+  (`tests/integration/components/sesi-kasir/struk-laporan.test.tsx`);
+  e2e membandingkan setiap angka struk dengan laporan backend yang bernilai
+  0. Transaksi tunai, non-tunai, dan invoice bersesi adalah PW13.
 - **Lihat semua di panel lonceng (LN19a) hanya teruji di test integrasi**
   (`tests/integration/components/notifikasi`), karena akun uji per
   25 November 2026 punya tepat lima pemberitahuan; spec
@@ -408,6 +414,11 @@ tanggal di butir di bawah adalah pembersihan sebelumnya.
   dipakai ulang lewat `akunUjiTetap`, karena batas 10 akun kas aktif.
   Bila laci uji sudah kosong, skenario memindah Rp1 dengan catatan
   selisih.
+- **Data per run spec Laporan Tutup Kasir** (`keuangan/laporan-tutup-kasir`,
+  PW10, 27 November 2026): satu sesi kasir dan satu periode tertutup di
+  laci uji, dibuka lewat aplikasi lalu ditutup lewat API dengan hitungan
+  sama dengan saldo. Skenario periode berjalan dilewati bila mesin kasir
+  lain masih buka, karena periode uji baru tertutup oleh sesi terakhir.
 - **Data per run spec kelompok reservasi, jadwal, dan tampilan**
   (24 November 2026): dua penjualan booking VOID dari
   `reservasi/daftar/lihat-reservasi` (Digunakan dan TL1a, termasuk satu

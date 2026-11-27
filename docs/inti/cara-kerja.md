@@ -212,6 +212,20 @@ Dicatat 24 November 2026 (rombak panel admin):
   px lalu bandingkan dengan papan terpilih sebelum menjalankan spec.
   Perbandingan ini menemukan tombol utama hitam (`primary` bawaan),
   padahal kanvas navy, dan baris admin bertuliskan "- · admin".
+- Dicatat 27 November 2026 (Laporan Tutup Kasir, PW10): kanvas dibuat
+  sebagai artifact bertipe Design (quickstart `design`), dengan judul
+  dan kartu ringkasan layout modul ikut digambar agar papan sebanding
+  dengan laman nyata. Komponen yang dipakai beberapa papan (struk) dibuat
+  satu papan sendiri lalu diimpor, sehingga ketiga varian memakai isi
+  yang sama. Potret laman nyata menemukan dua selisih yang tidak
+  terlihat di kode: `h2` di dalam komponen mewarisi ukuran bawaan
+  `app/globals.css` (24 px), dan `font-mono` tidak menjadi Geist Mono.
+  Ukur `getComputedStyle` elemen yang tampak berbeda sebelum menebak
+  penyebabnya.
+- Ubahan kecil atas pilihan desain (misalnya warna badge) diterapkan
+  juga ke papan terpilih sebelum kode ditulis, agar pemilik proyek dapat
+  menolaknya lebih awal: sorotan latar baris Berjalan langsung diganti
+  badge karamel sesudah papannya terlihat.
 
 ## Keputusan berdasar bukti
 
