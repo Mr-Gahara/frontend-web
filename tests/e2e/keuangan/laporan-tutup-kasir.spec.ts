@@ -365,7 +365,13 @@ test.describe("Laporan Tutup Kasir", () => {
     const tutup = data.find((p) => p.status === "TUTUP");
     test.skip(!tutup, "belum ada periode tertutup");
     await page.goto(`${URL_LAPORAN_TUTUP_KASIR}/${tutup!.id}`);
-    await expect(page.getByRole("article", { name: "Struk laporan tutup kasir" })).toBeVisible({ timeout: 20_000 });
+    const struk = page.getByRole("article", { name: "Struk laporan tutup kasir" });
+    await expect(struk).toBeVisible({ timeout: 20_000 });
     await tanpaGulir("laporan");
+    // Token --font-mono di @theme aktif app/globals.css (PW16): kelas font-mono
+    // menjadi Geist Mono, bukan tumpukan bawaan Tailwind (ui-monospace dst.).
+    await expect(struk).toHaveClass(/(^|\s)font-mono(\s|$)/);
+    const huruf = await struk.evaluate((el) => getComputedStyle(el).fontFamily);
+    expect(huruf, "huruf kelas font-mono").toMatch(/^"Geist Mono"/);
   });
 });

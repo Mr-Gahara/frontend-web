@@ -37,9 +37,7 @@ function BagianTransaksi({ laporan }: { laporan: LaporanPeriodeKasir }) {
  * Struk laporan tutup kasir dengan sembilan section dan pemisah garis
  * putus-putus sesuai Susunan struk (referensi/rencana-struk-tutup-kasir.md):
  * dua garis antara section 6 dan 7. Angka dibaca apa adanya dari laporan
- * yang dipotret backend saat periode ditutup. Huruf Geist Mono ditulis
- * langsung lewat variabelnya, karena kelas font-mono jatuh ke tumpukan bawaan
- * Tailwind (ui-monospace sampai Courier New), bukan Geist Mono.
+ * yang dipotret backend saat periode ditutup.
  */
 export function StrukLaporan({ laporan, cetak = false }: { laporan: LaporanPeriodeKasir; cetak?: boolean }) {
   const alamat = laporan.outlet?.alamat ?? laporan.toko.alamat;
@@ -47,7 +45,7 @@ export function StrukLaporan({ laporan, cetak = false }: { laporan: LaporanPerio
     <article
       aria-label={cetak ? "Struk cetak laporan tutup kasir" : "Struk laporan tutup kasir"}
       className={cn(
-        "flex w-full flex-col gap-2.5 bg-permukaan font-[family-name:var(--font-geist-mono)] text-isi leading-relaxed text-navy",
+        "flex w-full flex-col gap-2.5 bg-permukaan font-mono text-isi leading-relaxed text-navy",
         // Kertas 80 mm (PW11): tanpa bayangan dan sudut, tepi 4 mm agar tidak terpotong printer.
         cetak
           ? "px-[4mm] py-[5mm]"
