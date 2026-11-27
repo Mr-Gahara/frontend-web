@@ -251,7 +251,12 @@ Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026,
 "PW19 induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka
 kesiapan toko PW19, sehingga lonceng "absensi belum disiapkan" memakai
 kerangka itu, dan PW18 mengisi langkah berurutan serta catatan
-syaratnya. Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
+syaratnya. Termasuk (pemilik proyek, 27 November 2026) pemberitahuan
+opsional "tambah karyawan atau pengguna dulu" bila pengguna toko hanya
+Owner, ditampilkan sebelum langkah absensi dan jadwal; opsional karena
+toko boleh dijalankan Owner sendiri, sehingga dialog perlu memutuskan
+cara klien menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak
+menetap. Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
 tanpa pola atau karyawan, Jadwal tanpa shift, Rekap Absensi tanpa
 jadwal), di ruang outlet dan gudang. Arah dari pemilik proyek: akun yang
 absensinya belum disiapkan tidak mendapat pengingat jadwal minggu depan,
@@ -282,8 +287,13 @@ Isinya kerangka: daftar syarat siap per bidang dan sumber datanya
 lonceng "toko belum siap" yang menampilkan pemberitahuan setup lebih
 dulu, dan pengalihan pengingat biasa yang bergantung pada bidang yang
 belum siap (misalnya "Jadwal minggu depan belum dibuat" tidak tampil
-selama absensi belum disiapkan). Sumber "setup fitur plan belum selesai"
-(LN4a) dan wizard setup ikut ditinjau agar tidak bertumpuk.
+selama absensi belum disiapkan). Urutan berlaku di setiap bidang, bukan
+hanya absensi (pemilik proyek, 27 November 2026): produk yang memakai
+resep dan stok bergantung pada bahan baku, satuan dan ukuran, resep,
+stok, harga, dan pajak, dan pemberitahuannya muncul menurut prioritas
+dan urutan itu, satu langkah yang dapat dikerjakan sekarang lebih dulu.
+Sumber "setup fitur plan belum selesai" (LN4a) dan wizard setup ikut
+ditinjau agar tidak bertumpuk.
 
 Pertanyaan untuk pemilik proyek, diajukan sesudah fakta diperiksa:
 bidang dan syarat siap masing-masing serta urutannya; apakah pemberitahuan
