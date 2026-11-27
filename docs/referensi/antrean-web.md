@@ -39,7 +39,7 @@ tetap `AR`, `B`, dan `P`.
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Selesai | `c214786` |
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Selesai | `efb5596` |
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Selesai | `b9fe4a0` |
-| PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
+| PW08 | Lonceng: perangkat menunggu izin | Keputusan | Selesai | `9b6c133` |
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Selesai | `c289fd9` |
@@ -130,23 +130,12 @@ daftar produk; laporannya dipindah ke `arsip/laporan-backend.md`.
 
 ### PW08: lonceng, perangkat menunggu izin
 
-Backend B381: `GET /device?status=pending` (`update-pengguna`) memuat
-perangkat menunggu se-toko milik pengguna berlevel di bawah peminta
-(P39), dengan `pengguna { id, nama, status, level }`.
-
-- Tingkat sudah diputuskan: Perlu tindakan (LN11a).
-- `determineTokenKey` di `lib/apiClient.ts` memilih token pengguna lewat
-  pola `/device/` (bergaris miring); `GET /device?status=pending` tanpa
-  garis miring akan memakai token akun. Panggil dengan `tokenType`
-  `pengguna` eksplisit atau perluas polanya (dicatat saat PW03).
-- Keputusan yang perlu diajukan: web tidak punya halaman perangkat
-  (tidak ada pemanggil `/device` di `features`), sehingga tautan kartu
-  belum ada tujuannya: tanpa tautan seperti izin cuti, ke Kelola
-  Pengguna, atau halaman persetujuan perangkat baru (cakupan membesar).
-  Juga isi kartu (jumlah dan nama pengguna).
-- Hitungan berbeda per peminta karena P39; spec memakai pengguna uji
-  berlevel rendah dengan perangkat pending, disiapkan seperti
-  `bukaKasirLewatAplikasi` di `tests/helpers/sesi-kasir-uji.ts`.
+Selesai 27 November 2026 (`9b6c133`). Kartu Perlu tindakan tingkat toko
+dari `GET /device?status=pending` (B381) bagi pemegang `update-pengguna`:
+angka dan sampai tiga nama pengguna, "Setujui lewat aplikasi.", tanpa
+tautan (LN23a). Token pengguna dikirim eksplisit lewat `apiData`, sehingga
+`determineTokenKey` tidak diubah. Dibuktikan e2e dengan perangkat kedua
+pengguna uji E2E Kasir Outlet; laporannya dipindah ke arsip.
 
 ### PW09: Mesin Kasir, data sesi tahap 1
 

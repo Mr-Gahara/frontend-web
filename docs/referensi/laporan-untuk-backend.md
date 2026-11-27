@@ -50,30 +50,6 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
   sesi kasir (keputusan 10), dengan baris "Total penerimaan invoice"
   tersendiri di bawah "Total penerimaan kasir" (keputusan 11).
 
-## Laporan 25 November 2026 (pemberitahuan lonceng)
-
-Diperiksa terhadap backend `ridho` lokal `1718030`. Bukan bug, tetapi
-data yang dibutuhkan lonceng pemberitahuan web (`modul/pemberitahuan.md`,
-LN8a). Backend tidak punya sistem notifikasi, sehingga web membentuk
-pemberitahuan dari endpoint yang ada.
-
-### Kebutuhan: daftar perangkat menunggu persetujuan se-toko
-
-Modul auth dan perangkat (Ridho).
-
-- **Bukti:** `routes/deviceRoute.js` hanya punya `GET /device/:userId`
-  (per pengguna, `read-pengguna`) dan SSE `GET /device/events` untuk
-  sesi aplikasi; tidak ada daftar atau hitungan perangkat berstatus
-  PENDING untuk seluruh toko.
-- **Kenapa penting:** pemberitahuan "perangkat menunggu izin" (LN4a)
-  tidak dapat dibentuk tanpa memanggil endpoint per pengguna satu per
-  satu.
-- **Saran:** `GET /device?status=PENDING` (atau hitungannya) per toko,
-  dengan izin yang sama dengan persetujuan (`update-pengguna`), memuat
-  pengguna pemilik perangkat.
-- **Penanganan sementara di frontend:** tidak ada; sumber ini belum
-  tampil sampai endpointnya tersedia.
-
 ## Laporan 27 November 2026 (Mesin Kasir)
 
 Diperiksa terhadap backend `ridho` lokal `6478d29`.
@@ -110,5 +86,4 @@ Modul akun kas dan jurnal transfer (Nizar), dikerjakan Ridho.
 | Prioritas | Butir | Pemilik | Dampak |
 |---|---|---|---|
 | 2 | Struk tutup kasir | Ridho dan Nizar | Wajib MVP; data per sesi belum tersedia |
-| 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |
 | 9 | Butir 196: penanda asal Pindah Dana buka kasir | Ridho (modul Nizar) | Batalkan tampil lalu ditolak 409 |

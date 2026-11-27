@@ -557,3 +557,26 @@ Modul produk dan dashboard (Yoga).
   dengan hitungan dari `GET /produk` beserta stok terhitung resepnya
   (`dashboard/lonceng-pemberitahuan`). Lonceng kini membaca pemicu LN1a
   dari ringkasan dan tidak lagi memuat seluruh produk (LN22a).
+
+### Kebutuhan: daftar perangkat menunggu persetujuan se-toko (laporan 25 November 2026)
+
+Modul auth dan perangkat (Ridho).
+
+- **Bukti:** `routes/deviceRoute.js` hanya punya `GET /device/:userId`
+  (per pengguna, `read-pengguna`) dan SSE `GET /device/events` untuk
+  sesi aplikasi; tidak ada daftar atau hitungan perangkat berstatus
+  PENDING untuk seluruh toko.
+- **Kenapa penting:** pemberitahuan "perangkat menunggu izin" (LN4a)
+  tidak dapat dibentuk tanpa memanggil endpoint per pengguna satu per
+  satu.
+- **Saran:** `GET /device?status=PENDING` (atau hitungannya) per toko,
+  dengan izin yang sama dengan persetujuan (`update-pengguna`), memuat
+  pengguna pemilik perangkat.
+- **Penanganan sementara di frontend:** tidak ada; sumber ini belum
+  tampil sampai endpointnya tersedia.
+- **Dibuktikan:** 27 November 2026 (PW08, `9b6c133`) terhadap backend
+  `6478d29` (B381): perangkat kedua pengguna uji berlevel rendah yang login
+  aplikasi tercantum di `GET /device?status=pending` dengan nama
+  penggunanya, dan lonceng Owner menampilkannya sebagai kartu Perlu
+  tindakan; pengguna tanpa `update-pengguna` tidak memintanya
+  (`dashboard/lonceng-pemberitahuan`, LN23a).

@@ -419,6 +419,11 @@ tanggal di butir di bawah adalah pembersihan sebelumnya.
   dipakai ulang lewat `akunUjiTetap`, karena batas 10 akun kas aktif.
   Bila laci uji sudah kosong, skenario memindah Rp1 dengan catatan
   selisih.
+- **Perangkat uji pending menetap sebagai dicabut** (PW08,
+  `dashboard/lonceng-pemberitahuan`): `E2E-KASIR-OUTLET-PENDING-001` milik
+  pengguna uji E2E Kasir Outlet menjadi PENDING lewat login aplikasi setiap
+  run, lalu dicabut di akhir skenario; satu catatan perangkat menetap dan
+  kembali PENDING pada run berikutnya, sehingga tidak menumpuk.
 - **Data per run spec Laporan Tutup Kasir** (`keuangan/laporan-tutup-kasir`,
   PW10, 27 November 2026): satu sesi kasir dan satu periode tertutup di
   laci uji, dibuka lewat aplikasi lalu ditutup lewat API dengan hitungan

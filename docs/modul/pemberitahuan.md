@@ -68,7 +68,7 @@ pemegang izin endpoint serta plan fiturnya.
   memakai endpoint daftarnya dengan limit kecil dan kunci cache sendiri,
   dan penunggu spec yang terdampak diberi syarat query.
 - **LN8a: produk yang dapat dijual.** (Selesai: sejak PW07 dari ringkasan,
-  LN22a.) Lonceng memuat seluruh produk
+  LN22a; perangkat menunggu izin sejak PW08, LN23a.) Lonceng memuat seluruh produk
   (`GET /produk` tanpa paginasi, satu-satunya yang mengisi stok
   terhitung produk beresep; kunci cache sendiri) dan menghitung sendiri
   LN1a. Hitungan itu dilaporkan ke backend agar masuk ringkasan
@@ -222,6 +222,18 @@ Diputuskan pemilik proyek lewat dialog PW07, sesudah backend B380:
   Banner dan pesan halaman (LN3a, LN15a) memakai sumber yang sama. Soal
   izin gugur: seluruh laman pemakai pesan stok berada di ruang outlet yang
   menuntut izin dashboard outlet (`b9fe4a0`).
+
+### Perangkat menunggu izin (27 November 2026)
+
+Diputuskan pemilik proyek lewat dialog PW08, sesudah backend B381:
+
+- **LN23a: kartu perangkat menunggu izin tanpa tautan, disetujui lewat
+  aplikasi**, seperti kartu izin cuti, karena web tidak punya laman
+  perangkat. Isinya angka dan nama pengguna: "N perangkat menunggu izin
+  (Sari, Budi, dan 1 lainnya). Setujui lewat aplikasi." Tingkat Perlu
+  tindakan (LN11a), tingkat toko, hanya bagi pemegang `update-pengguna`;
+  sumbernya `GET /device?status=pending`, disaring level peminta (P39).
+  Satu pengguna dengan beberapa perangkat disebut sekali (`9b6c133`).
 
 ## Catatan
 
