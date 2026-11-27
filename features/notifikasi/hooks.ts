@@ -21,6 +21,7 @@ import { absensiApi } from "@/features/absensi/api";
 import { izinCutiApi } from "@/features/izin-cuti/api";
 import { jadwalApi } from "@/features/jadwal/api";
 import { penggunaApi } from "@/features/pengguna/api";
+import { penggunaDiRuang } from "@/features/pengguna/ruang-staf";
 import { roleApi } from "@/features/role/api";
 import { polaRosterApi } from "@/features/pola-roster/api";
 import { shiftApi } from "@/features/shift/api";
@@ -162,23 +163,69 @@ export function useKesiapanToko() {
 }
 
 /**
+ * Staf per ruang untuk lonceng (RS1a, `features/pengguna/ruang-staf.ts`):
+ * seluruh pengguna, kedua daftar ruang backend sebagai izin dashboard, dan
+ * tipe lokasi kerja; null selama belum termuat. Owner ada di kedua ruang,
+ * sehingga staf selain Owner berarti daftar ruang lebih dari satu.
+ */
+function useStafRuangLonceng(aktif: boolean) {
+  const { permissions } = useSession();
+  const semua = useQuery({
+    queryKey: queryKeys.notifikasi.pengguna(),
+    queryFn: () => penggunaApi.daftarSemua(),
+    enabled: aktif,
+    ...OPSI_SEGAR,
+  });
+  const outlet = useQuery({
+    queryKey: queryKeys.notifikasi.penggunaRuang("outlet"),
+    queryFn: () => penggunaApi.daftar("outlet"),
+    enabled: aktif,
+    ...OPSI_SEGAR,
+  });
+  const gudang = useQuery({
+    queryKey: queryKeys.notifikasi.penggunaRuang("gudang"),
+    queryFn: () => penggunaApi.daftar("gudang"),
+    enabled: aktif,
+    ...OPSI_SEGAR,
+  });
+  const lokasi = useQuery({
+    queryKey: queryKeys.lokasi.daftar(),
+    queryFn: lokasiApi.daftar,
+    enabled: aktif && permissions.includes(IZIN.location),
+  });
+  const [dSemua, dOutlet, dGudang, dLokasi] = [semua.data, outlet.data, gudang.data, lokasi.data];
+  return useMemo(() => {
+    const siap = dSemua && dOutlet && dGudang;
+    const data = siap
+      ? {
+          semua: dSemua,
+          diRuangBackend: { outlet: new Set(dOutlet.map((p) => p.id)), gudang: new Set(dGudang.map((p) => p.id)) },
+          tipeLokasi: new Map((dLokasi ?? []).map((l) => [l.id, l.tipe as string])),
+        }
+      : null;
+    return {
+      outlet: data ? penggunaDiRuang("outlet", data) : null,
+      gudang: data ? penggunaDiRuang("gudang", data) : null,
+      gagal: semua.isError || outlet.isError || gudang.isError,
+      sumber: [semua, outlet, gudang] as UseQueryResult<unknown>[],
+    };
+    // Objek kueri berganti setiap render; cukup data yang dipakai.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dSemua, dOutlet, dGudang, dLokasi]);
+}
+
+/**
  * Data absensi satu ruang kartu kesiapan (KS11a, KS15a): staf ruang
  * (GET /pengguna?workspace=, selalu memuat Owner), shift aktif, pola roster,
  * dan jadwal 62 hari sampai akhir minggu depan. Kunci outlet sama dengan
  * penahan KS8a, sehingga tidak ada permintaan ganda. Data yang tidak
  * berizin atau belum termuat bernilai null (langkahnya tidak dihitung).
  */
-function useAbsensiRuangKesiapan(ruang: "outlet" | "gudang", aktif: boolean, lokasiId: string) {
+function useAbsensiRuangKesiapan(aktif: boolean, lokasiId: string, stafRuang: readonly unknown[] | null) {
   const { permissions } = useSession();
   const punya = (i: string) => permissions.includes(i);
   const kini = useJamBerjalan(60_000);
   const boleh = aktif && punya(IZIN.pengguna);
-  const staf = useQuery({
-    queryKey: queryKeys.notifikasi.penggunaRuang(ruang),
-    queryFn: () => penggunaApi.daftar(ruang),
-    enabled: boleh,
-    ...OPSI_SEGAR,
-  });
   const shift = useQuery({
     queryKey: queryKeys.notifikasi.shift(lokasiId),
     queryFn: () => shiftApi.daftar({ locationID: lokasiId }),
@@ -198,7 +245,7 @@ function useAbsensiRuangKesiapan(ruang: "outlet" | "gudang", aktif: boolean, lok
     enabled: boleh && punya(IZIN.jadwalShift) && !!lokasiId,
     ...OPSI_SEGAR,
   });
-  const [dStaf, dShift, dPola, dJadwal] = [staf.data, shift.data, pola.data, jadwal.data];
+  const [dStaf, dShift, dPola, dJadwal] = [boleh ? stafRuang : null, shift.data, pola.data, jadwal.data];
   return useMemo(
     () => ({
       data: {
@@ -207,7 +254,7 @@ function useAbsensiRuangKesiapan(ruang: "outlet" | "gudang", aktif: boolean, lok
         pola: dPola ? dPola.length > 0 : null,
         jadwal: dJadwal ? dJadwal.length > 0 : null,
       },
-      sumber: [staf, shift, pola, jadwal] as UseQueryResult<unknown>[],
+      sumber: [shift, pola, jadwal] as UseQueryResult<unknown>[],
     }),
     // Objek kueri berganti setiap render; cukup data yang dipakai.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,8 +290,9 @@ function useKaryawanAbsensiKesiapan() {
     enabled: bolehPengguna,
     ...OPSI_SEGAR,
   });
-  const absensiOutlet = useAbsensiRuangKesiapan("outlet", ruangOutlet, idOutlet);
-  const absensiGudang = useAbsensiRuangKesiapan("gudang", ruangGudang && !!idGudang, idGudang);
+  const stafRuang = useStafRuangLonceng((ruangOutlet || ruangGudang) && punya(IZIN.pengguna));
+  const absensiOutlet = useAbsensiRuangKesiapan(ruangOutlet, idOutlet, stafRuang.outlet);
+  const absensiGudang = useAbsensiRuangKesiapan(ruangGudang && !!idGudang, idGudang, stafRuang.gudang);
   const barangGudang = useQuery({
     queryKey: queryKeys.notifikasi.barangGudang(idGudang),
     queryFn: () => notifikasiApi.jumlahBarangLokasi(idGudang),
@@ -261,7 +309,14 @@ function useKaryawanAbsensiKesiapan() {
       },
       absensi: absensiOutlet.data,
       gudang: idGudang ? { barang: dBarang === undefined ? null : dBarang > 0, absensi: absensiGudang.data } : undefined,
-      sumber: [peran, penggunaToko, barangGudang, ...absensiOutlet.sumber, ...absensiGudang.sumber] as UseQueryResult<unknown>[],
+      sumber: [
+        peran,
+        penggunaToko,
+        barangGudang,
+        ...stafRuang.sumber,
+        ...absensiOutlet.sumber,
+        ...absensiGudang.sumber,
+      ] as UseQueryResult<unknown>[],
     }),
     // Objek kueri berganti setiap render; cukup data yang dipakai.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -411,13 +466,8 @@ function useStafLonceng(akses: AksesTautan) {
   // Penahan pengingat absensi (KS8a): staf selain Owner, shift aktif, dan pola roster outlet.
   const bolehPenahan =
     (bolehKehadiran || bolehJadwalDepan) && punya(IZIN.pengguna) && punya(IZIN.shift) && punya(IZIN.polaRoster);
-  // Staf ruang outlet (KS15a, PW20): Owner selalu ada di daftar ruang.
-  const penggunaToko = useQuery({
-    queryKey: queryKeys.notifikasi.penggunaRuang("outlet"),
-    queryFn: () => penggunaApi.daftar("outlet"),
-    enabled: bolehPenahan,
-    ...OPSI_SEGAR,
-  });
+  // Staf ruang outlet (KS15a, RS1a): Owner selalu ada di kedua ruang.
+  const stafRuang = useStafRuangLonceng(bolehPenahan);
   const shiftOutlet = useQuery({
     queryKey: queryKeys.notifikasi.shift(idOutlet),
     queryFn: () => shiftApi.daftar({ locationID: idOutlet }),
@@ -432,8 +482,8 @@ function useStafLonceng(akses: AksesTautan) {
   });
   const tahan = tahanPengingatAbsensi({
     berizin: bolehPenahan && punya(IZIN.location),
-    gagal: penggunaToko.isError || shiftOutlet.isError || polaOutlet.isError,
-    pengguna: penggunaToko.data ?? null,
+    gagal: stafRuang.gagal || shiftOutlet.isError || polaOutlet.isError,
+    pengguna: stafRuang.outlet,
     shift: shiftOutlet.data ?? null,
     pola: polaOutlet.data ?? null,
   });
@@ -462,7 +512,7 @@ function useStafLonceng(akses: AksesTautan) {
     monitoring,
     jadwalHariIni,
     jadwalDepan,
-    penggunaToko,
+    ...stafRuang.sumber,
     shiftOutlet,
     polaOutlet,
     pengajuan,

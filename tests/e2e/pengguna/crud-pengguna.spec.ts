@@ -2,6 +2,7 @@ import { test, expect, Page } from "@playwright/test";
 import { AKUN_UJI, PENGGUNA_UJI, isiLoginAkun, isiLoginPengguna, masuk } from "../../helpers/masuk-uji";
 import { IZIN } from "../../../lib/auth/permissions";
 import { masukBacaSaja, masukSebagai, siapkanPeran } from "../../helpers/terkunci-uji";
+import { BASIS as BASIS_UJI } from "../../helpers/transfer-uji";
 import { api, bukaDenganAuth } from "../../helpers/transfer-uji";
 
 // ============================================================
@@ -273,6 +274,9 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
       expect(String((await buat.json()).data.locationID), "lokasi kerja tersimpan").toBe(lokasiGudang);
       await expect(page.getByRole("dialog")).not.toBeVisible();
 
+      // Berlokasi kerja gudang, sehingga masuk ruang gudang (RS1a), bukan outlet.
+      await expect(page.getByRole("row", { name: new RegExp(nama, "i") })).toHaveCount(0);
+      await page.goto("/dashboard/gudang/pengguna");
       await bukaEdit(nama);
       await expect(isian, "lokasi tersimpan terbaca saat edit").toContainText("(Gudang)");
       await page.getByLabel(/nama lengkap/i).fill(namaUbah);
@@ -295,7 +299,12 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
       expect((await lepas.json()).data.locationID, "lokasi kerja kosong").toBeNull();
       await expect(page.getByRole("dialog")).not.toBeVisible();
     } finally {
-      await bersihkanPengguna(page, namaAkhir);
+      // Sesudah lokasi dilepas, ruangnya mengikuti izin posisi (RS1a); dihapus lewat API.
+      const auth = await bukaDenganAuth(page, BASIS_UJI + "/dashboard/gudang/pengguna");
+      const semua = await api<{ id: string; nama: string }[]>(page, auth, "GET", "/pengguna");
+      for (const p of semua.data.filter((x) => x.nama === namaAkhir || x.nama === nama)) {
+        await api(page, auth, "DELETE", `/pengguna/${p.id}`);
+      }
     }
   });
 
@@ -571,6 +580,54 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     await test.step("Cleanup", async () => {
       await bersihkanPengguna(page, nama);
     });
+  });
+
+  test("staf akses aplikasi dengan posisi tanpa izin dashboard tampil di daftar Pengguna dan Generate Jadwal outlet (RS1a)", async ({
+    page,
+  }) => {
+    // Posisi kasir aplikasi: hanya izin penjualan, tanpa read-dashboard-outlet,
+    // sehingga GET /pengguna?workspace=outlet backend tidak memuatnya (butir 197).
+    const peran = {
+      nama: "E2E Kasir Aplikasi Saja",
+      pin: "135792",
+      deskripsi: "Peran uji staf akses aplikasi tanpa izin dashboard",
+      izin: (n: string) => n === "read-penjualan" || n === "create-penjualan",
+    };
+    const nama = `Kasir Aplikasi Test ${Date.now()}`;
+    await login(page);
+    await siapkanPeran(page, peran);
+    const auth = await bukaDenganAuth(page, BASIS_UJI + "/dashboard/outlet/pengguna");
+    const workspace = await api<{ id: string }[]>(page, auth, "GET", "/pengguna?workspace=outlet");
+    try {
+      await test.step("tambah lewat UI: akses App Kasir, posisi tanpa izin dashboard", async () => {
+        await bukaHalamanPengguna(page);
+        await bukaTambahPengguna(page);
+        await isiFormPengguna(page, { nama, nomorHp: `0812${Date.now().toString().slice(-8)}`, pin: "777888", akses: "app" });
+        await page.getByRole("dialog").getByRole("combobox").first().click();
+        await page.getByRole("option", { name: peran.nama }).click();
+        await page.getByRole("button", { name: /simpan/i }).click();
+        await expect(page.getByText(/pengguna berhasil ditambahkan/i).first()).toBeVisible({ timeout: 10_000 });
+      });
+
+      await test.step("tampil di daftar Pengguna outlet walau backend tidak memuatnya di workspace outlet", async () => {
+        await cariPengguna(page, nama);
+        const semua = await api<{ id: string; nama: string }[]>(page, auth, "GET", "/pengguna");
+        const baru = semua.data.find((p) => p.nama === nama);
+        expect(baru, "pengguna baru tersimpan").toBeTruthy();
+        const diOutlet = await api<{ id: string }[]>(page, auth, "GET", "/pengguna?workspace=outlet");
+        expect(diOutlet.data.some((p) => p.id === baru!.id), "backend workspace=outlet tanpa staf ini (butir 197)").toBe(false);
+        expect(workspace.status).toBe(200);
+      });
+
+      await test.step("tersedia sebagai karyawan di Generate Jadwal outlet", async () => {
+        await page.goto("/dashboard/outlet/jadwal/generate");
+        await expect(page.getByText("Target Karyawan")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByText(nama)).toBeVisible();
+      });
+    } finally {
+      await page.goto("/dashboard/outlet/pengguna");
+      await bersihkanPengguna(page, nama);
+    }
   });
 
   // ==========================================================
