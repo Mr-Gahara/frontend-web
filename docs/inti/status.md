@@ -39,7 +39,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW16)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW14)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -66,19 +66,18 @@ disetujui lewat aplikasi (LN23a). PW13 selesai (`86aa357`): struk tutup
 kasir terbukti e2e dari transaksi nyata; bagian web MVP struk tutup kasir
 selesai. PW16 selesai (`0d30692`): kelas `font-mono` menjadi Geist Mono
 dan blok CSS mati di `app/globals.css` dibuang (FN1a, FN2a). Vitest kini
-1333 lolos dari 158 berkas. Suite
-e2e penuh terakhir 26 November 2026 (`fb186f2`,
-backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
-193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
-suite berikutnya tidak mengharapkan kegagalan.
+1333 lolos dari 158 berkas. PW14 selesai: suite e2e penuh
+27 November 2026 (`81e9214`, backend `6478d29`) 837 lolos dari 837,
+tanpa gagal maupun dilewati, termasuk spec ber-OTP (Baseline
+`inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
 `PW01` sampai `PW16`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW13 dan PW16 selesai.
+1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 selesai.
 2. **Diawali dialog keputusan:** tidak ada.
-3. **Menunggu izin pemilik proyek:** PW14 suite e2e penuh.
+3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
    (butir 196, `referensi/laporan-untuk-backend.md`). Langkah pertama

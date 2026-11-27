@@ -45,7 +45,7 @@ tetap `AR`, `B`, dan `P`.
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Selesai | `c289fd9` |
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Selesai | `e42caa9` |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Selesai | `86aa357` |
-| PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
+| PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Selesai | `81e9214` |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 
@@ -190,10 +190,12 @@ bagian web ditutup.
 
 ### PW14: suite e2e penuh
 
-Hanya setelah pemilik proyek mengizinkan, dengan charger tersambung dan
-layanan uji lengkap (Mailpit, env inline). Spec ber-OTP hanya di sini.
-Harapan: tanpa merah disengaja bila PW02 lolos. Baseline baru di
-`inti/pengujian.md`.
+Selesai 27 November 2026 atas izin pemilik proyek, pada web `81e9214`
+dan backend `6478d29`, dengan charger tersambung dan layanan uji lengkap
+(Mailpit, env inline): e2e 837 lolos dari 837 dalam 54,8 menit, tanpa
+gagal maupun dilewati, termasuk spec ber-OTP; vitest 1333 lolos dari
+158 berkas. Ketiga merah disengaja (butir 191, 192, 193) lolos tanpa
+diubah. Tidak ada perbaikan kode; baseline baru di `inti/pengujian.md`.
 
 ### PW15: Pindah Dana buka kasir tanpa Batalkan
 

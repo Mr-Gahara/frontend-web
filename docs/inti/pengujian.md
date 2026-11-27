@@ -12,16 +12,13 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
-**Suite penuh 26 November 2026** (web `fb186f2`, backend `ridho` lokal
-`1718030`, pukul 11.55 sampai 12.47 WIB, sesudah LN20a dan LN21a): vitest
-1302 lolos dari 155 berkas, dan e2e 822 lolos, 3 gagal, dan 1 dilewati
-dari 826. Termasuk spec ber-OTP. Ketiga yang gagal adalah merah disengaja
-yang menunggu backend: template General Manajer di `akses/template-role`
-(butir 191, "permissions maksimal 120 item"), revisi surat jalan per
-kemasan di `inventaris/bahanBaku/konversi-satuan` (butir 192, 1 kaleng
-tersimpan 1, bukan 290 ml), dan booking lewat jam yang masih terbaca
-Aktif di `reservasi/daftar/tandai-selesai` (butir 193). Tidak ada
-kegagalan lain; harapan 826 tercapai.
+**Suite penuh 27 November 2026** (web `81e9214`, backend `ridho` lokal
+`6478d29`, pukul 16.18 sampai 17.13 WIB, penutup putaran PW01 sampai
+PW16, PW14): vitest 1333 lolos dari 158 berkas, dan e2e 837 lolos dari
+837 dalam 54,8 menit, tanpa gagal maupun dilewati. Termasuk spec ber-OTP.
+Ketiga merah disengaja suite sebelumnya (butir 191, 192, dan 193) lolos
+tanpa diubah, sesuai harapan sejak PW02; sebelas skenario baru sejak
+suite sebelumnya ikut lolos.
 
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
@@ -30,8 +27,9 @@ penyesuaian backend `ridho` `b5b367a` (21 Oktober 2026), dipindah ke
 `arsip/riwayat-pengujian.md` (Riwayat baseline) pada 14, 17, dan
 20 November 2026. Baseline 18 sampai 24 November 2026, dari pembuktian
 kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
-pada 24 November 2026, dan suite penuh 24 dan 25 November 2026 pada
-26 November 2026; yang tersisa di atas hanya suite penuh terbaru.
+pada 24 November 2026, suite penuh 24 dan 25 November 2026 pada
+26 November 2026, dan suite penuh 26 November 2026 pada 27 November 2026;
+yang tersisa di atas hanya suite penuh terbaru.
 
 ## Kredensial uji
 
@@ -189,7 +187,7 @@ Begitu backend memperbaikinya, skenario itu harus lolos tanpa diubah
 (`referensi/laporan-untuk-backend.md`). Berakhir 26 November 2026:
 backend `6478d29` (B369, B370, B377) memperbaiki ketiganya, dan ketiga
 spec lolos tanpa diubah, dua kali berturut-turut, 14 dari 14 (PW02).
-Suite penuh berikutnya tidak mengharapkan kegagalan.
+Suite penuh 27 November 2026 (PW14) membuktikannya: tanpa kegagalan.
 
 Cara membuktikan sebuah fixme: lepas sementara, jalankan dua kali,
 kembalikan berkasnya dengan `git checkout`, lalu lepas dan commit per test
