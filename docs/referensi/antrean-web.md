@@ -50,6 +50,7 @@ tetap `AR`, `B`, dan `P`.
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Belum | |
+| PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -246,7 +247,11 @@ kerja" tidak menyebut urutan, wizard setup tidak punya langkah shift
 maupun jadwal, dan halaman Pola Roster, Jadwal, dan Generate Jadwal
 tidak memberi catatan saat syaratnya belum ada.
 
-Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
+Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026,
+"PW19 induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka
+kesiapan toko PW19, sehingga lonceng "absensi belum disiapkan" memakai
+kerangka itu, dan PW18 mengisi langkah berurutan serta catatan
+syaratnya. Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
 tanpa pola atau karyawan, Jadwal tanpa shift, Rekap Absensi tanpa
 jadwal), di ruang outlet dan gudang. Arah dari pemilik proyek: akun yang
 absensinya belum disiapkan tidak mendapat pengingat jadwal minggu depan,
@@ -261,6 +266,31 @@ pola dimatikan atau tetap aktif selama ruang belum punya shift aktif
 (backend menerima pola libur semua); (3) titik tur dashboard menyebut
 urutan empat langkah; (4) daftar periksa "Siapkan absensi" di dashboard,
 cakupan lebih besar.
+
+### PW19: lonceng kesiapan toko
+
+Arah pemilik proyek 27 November 2026, lanjutan LN4a (lonceng diberdayakan
+maksimal, `modul/pemberitahuan.md`): untuk toko yang belum siap
+beroperasi, lonceng mendahulukan setup yang belum lengkap, yaitu produk,
+bahan baku, karyawan, jam dan jadwal toko, absensi, dan bidang lain yang
+dibutuhkan. Setelah semuanya lengkap, prioritas lonceng yang sekarang
+berlaku (LN4a, LN5a). Dipilih sebagai paket induk; PW18 (bidang absensi)
+dikerjakan sesudahnya.
+
+Isinya kerangka: daftar syarat siap per bidang dan sumber datanya
+(endpoint yang ada, karena backend tidak punya sistem notifikasi), mode
+lonceng "toko belum siap" yang menampilkan pemberitahuan setup lebih
+dulu, dan pengalihan pengingat biasa yang bergantung pada bidang yang
+belum siap (misalnya "Jadwal minggu depan belum dibuat" tidak tampil
+selama absensi belum disiapkan). Sumber "setup fitur plan belum selesai"
+(LN4a) dan wizard setup ikut ditinjau agar tidak bertumpuk.
+
+Pertanyaan untuk pemilik proyek, diajukan sesudah fakta diperiksa:
+bidang dan syarat siap masing-masing serta urutannya; apakah pemberitahuan
+lain disembunyikan, diturunkan, atau tetap tampil di bawah setup selama
+toko belum siap; perlakuan per plan dan per ruang (outlet dan gudang);
+dan apakah kesiapan dihitung sekali (toko lama yang datanya lengkap
+langsung siap) atau terus diperiksa.
 
 ## Perubahan backend tanpa pekerjaan web
 

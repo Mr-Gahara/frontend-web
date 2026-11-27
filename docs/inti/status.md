@@ -74,13 +74,13 @@ tanpa gagal maupun dilewati, termasuk spec ber-OTP (Baseline
 `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW18`, satu paket per sesi lewat
+`PW01` sampai `PW19`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
 1. **Sekarang:** tidak ada; PW01 sampai PW14, PW16, dan PW17 selesai.
-2. **Diawali dialog keputusan:** PW18, panduan menyiapkan absensi
-   (catatan syarat di halaman Pola Roster, Jadwal, dan Generate Jadwal,
-   serta urutan langkah di tur dashboard).
+2. **Diawali dialog keputusan:** PW19, lonceng kesiapan toko (akun baru
+   mendahulukan setup sampai siap beroperasi), lalu PW18, bidang absensi
+   di kerangkanya (langkah berurutan dan catatan syarat di halaman).
 3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
