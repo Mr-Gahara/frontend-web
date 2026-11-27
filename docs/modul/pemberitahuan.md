@@ -288,8 +288,8 @@ Diputuskan pemilik proyek lewat dialog PW08, sesudah backend B381:
 
 ## Utang terbuka
 
-- Pengerjaan bertahap per kelompok sumber; daftar yang belum selesai ada
-  di `inti/status.md` (Mulai di sini).
+- Seluruh sumber LN4a terpasang sejak PW08 (27 November 2026); tidak ada
+  kelompok sumber yang tertunda.
 - Sumber yang datanya hanya dibuat aplikasi atau bergantung hari (kasir
   lupa ditutup, kehadiran, jadwal minggu depan, izin cuti diajukan, hasil
   pengajuan dalam 24 jam, booking lewat jam) hanya teruji di unit test;

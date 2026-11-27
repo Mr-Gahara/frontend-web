@@ -47,7 +47,7 @@ tetap `AR`, `B`, dan `P`.
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Selesai | `86aa357` |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
-| PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Belum | |
+| PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -206,15 +206,13 @@ pemeriksaan tanpa Batalkan, dan MK19a diperbarui.
 
 ### PW16: kelas `font-mono` menjadi Geist Mono
 
-Ditemukan saat PW10 (27 November 2026): `getComputedStyle` elemen
-ber-`font-mono` memberi tumpukan bawaan Tailwind (`ui-monospace` sampai
-`Courier New`), padahal `app/globals.css` memetakan `--font-mono` ke
-`--font-geist-mono`, dan variabel itu terisi Geist Mono di `html`.
-Pemakainya antara lain jumlah di riwayat Pindah Dana. `StrukLaporan`
-menulis Geist Mono lewat variabelnya. Keputusan yang perlu diajukan:
-membetulkan token (tampilan angka mono di laman lain ikut berubah) atau
-membiarkannya. Sesudahnya potret laman pemakai dan buang penulisan
-langsung di struk.
+Selesai 27 November 2026 (`0d30692`). Pemetaan `--font-mono` hanya ada
+di blok lama `app/globals.css` yang seluruhnya dikomentari; atas
+keputusan pemilik proyek token ditambah ke `@theme inline` aktif, blok
+mati dibuang, dan `StrukLaporan` kembali berkelas `font-mono` (FN1a,
+FN2a, `modul/ui-ux.md`). Geist Mono 0 sampai 5% lebih sempit tanpa
+luberan baru; skenario HP `keuangan/laporan-tutup-kasir` memeriksa
+hurufnya.
 
 ## Perubahan backend tanpa pekerjaan web
 

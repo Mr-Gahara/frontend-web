@@ -174,6 +174,26 @@ Arial langsung. Kini `--font-sans` dan `body` memakai
 `--font-geist-sans`; `--font-mono` tidak berubah. Ukuran huruf dan
 tinggi baris belum menjadi token.
 
+Ternyata blok `@theme` pertama beserta `:root` dan gaya dasarnya
+(baris 1 sampai 95) seluruhnya berada di dalam komentar, sehingga
+pemetaan `--font-mono` di sana tidak pernah berlaku, dan kelas
+`font-mono` jatuh ke tumpukan bawaan Tailwind (`ui-monospace` sampai
+`Courier New`): Liberation Mono di Linux, Consolas di Windows, Menlo di
+Mac (terukur saat PW10, 27 November 2026). Diputuskan pemilik proyek
+27 November 2026 (PW16, `0d30692`):
+
+- **FN1a: kelas `font-mono` memakai Geist Mono** lewat
+  `--font-mono: var(--font-geist-mono)` di `@theme inline` aktif, untuk
+  sekitar 110 pemakai (nomor referensi, rupiah, jumlah stok, isian
+  angka, laman utama). Geist Mono terukur 0 sampai 5% lebih sempit di
+  15 laman (390 dan 1280 px) tanpa luberan baru. `StrukLaporan` kembali
+  berkelas `font-mono`, tanpa menulis variabelnya langsung; skenario HP
+  `keuangan/laporan-tutup-kasir` memeriksa kelas dan hurufnya.
+- **FN2a: blok komentar mati di `app/globals.css` dibuang.** Potret 10
+  laman di 390, 768, dan 1280 px sebelum dan sesudah membuktikan
+  tampilannya tidak berubah; delapan warna heksadesimal di blok itu ikut
+  hilang dari metrik (`inti/status.md`).
+
 ### Cacat tampilan 14 November 2026
 
 Diputuskan pemilik proyek pada 14 November 2026. Sampel tampilan diambil
@@ -1020,11 +1040,8 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 
 ## Utang terbuka
 
-- Kelas `font-mono` jatuh ke tumpukan bawaan Tailwind, bukan Geist Mono
-  (terukur 27 November 2026 saat PW10); keputusan dan perbaikannya di
-  PW16 (`referensi/antrean-web.md`).
-
-Selain itu tidak ada utang terbuka per 26 November 2026. Teks kaki dan tombol halaman
+Tidak ada utang terbuka per 27 November 2026: kelas `font-mono` menjadi
+Geist Mono di PW16 (FN1a). Teks kaki dan tombol halaman
 `DataTable` (klien dan server: total data, Halaman N dari M, Previous dan
 Next mati di ujung dan selama server sibuk, keadaan kosong, memuat, dan
 pencarian) teruji integrasi sejak 26 November 2026, dan label sel di HP

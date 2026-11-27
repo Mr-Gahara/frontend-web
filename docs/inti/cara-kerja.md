@@ -221,7 +221,10 @@ Dicatat 24 November 2026 (rombak panel admin):
   terlihat di kode: `h2` di dalam komponen mewarisi ukuran bawaan
   `app/globals.css` (24 px), dan `font-mono` tidak menjadi Geist Mono.
   Ukur `getComputedStyle` elemen yang tampak berbeda sebelum menebak
-  penyebabnya.
+  penyebabnya. Penyebab yang kedua ternyata pemetaannya berada di dalam
+  blok komentar `/* … */` sepanjang 95 baris (dibetulkan PW16,
+  `modul/ui-ux.md` FN1a); saat token tampak benar tetapi tidak berlaku,
+  cari `/*` dan `*/` di sekitarnya lebih dulu.
 - Ubahan kecil atas pilihan desain (misalnya warna badge) diterapkan
   juga ke papan terpilih sebelum kode ditulis, agar pemilik proyek dapat
   menolaknya lebih awal: sorotan latar baris Berjalan langsung diganti
