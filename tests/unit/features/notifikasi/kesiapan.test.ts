@@ -73,7 +73,8 @@ describe("pemberitahuanKesiapan (KS3a, KS6a, KS7a)", () => {
 
 describe("langkah karyawan dan absensi (PW18, KS10a dan KS11a)", () => {
   const dasar = { produk: { total: 2, dapatDijual: 2 }, fitur: [{ fitur: "sesi-booking" as const, selesai: false }] };
-  const absensi = { shiftAktif: false, pola: false, jadwal: false };
+  const absensi = { staf: false, shiftAktif: false, pola: false, jadwal: false };
+  const absensiStaf = { ...absensi, staf: true };
 
   it("toko hanya Owner: Buat posisi (info, bertombol Toko ini hanya saya), lalu Tambah karyawan, sebelum fitur plan", () => {
     const daftar = langkahKesiapan({ ...dasar, karyawan: { posisi: false, staf: false, hanyaOwner: false }, absensi });
@@ -89,7 +90,7 @@ describe("langkah karyawan dan absensi (PW18, KS10a dan KS11a)", () => {
   });
 
   it("langkah absensi hanya bila ada staf: shift, pola roster, jadwal, bertingkat perlu tindakan tanpa tombol", () => {
-    const data = { ...dasar, karyawan: { posisi: true, staf: true, hanyaOwner: false }, absensi };
+    const data = { ...dasar, karyawan: { posisi: true, staf: true, hanyaOwner: false }, absensi: absensiStaf };
     expect(langkahKesiapan(data).map((l) => l.kunci)).toEqual([
       "produk", "posisi", "karyawan", "shift", "pola", "jadwal", "sesi-booking",
     ]);
@@ -97,21 +98,21 @@ describe("langkah karyawan dan absensi (PW18, KS10a dan KS11a)", () => {
     expect(p).toMatchObject({ tingkat: "tindakan", judul: "Siapkan toko (langkah 4 dari 7)" });
     expect(p?.tombol).toBeUndefined();
     expect(p?.tautan).toEqual([{ href: "/dashboard/outlet/shift", label: "Buat shift" }]);
-    const jadwal = kartu({ ...data, absensi: { shiftAktif: true, pola: true, jadwal: false } });
+    const jadwal = kartu({ ...data, absensi: { staf: true, shiftAktif: true, pola: true, jadwal: false } });
     expect(jadwal?.tautan).toEqual([{ href: "/dashboard/outlet/jadwal/generate", label: "Generate jadwal" }]);
   });
 
   it("Toko ini hanya saya melewati karyawan dan absensi selama tanpa staf; begitu ada staf, absensi muncul", () => {
     const solo = { ...dasar, karyawan: { posisi: false, staf: false, hanyaOwner: true }, absensi };
     expect(langkahKesiapan(solo).map((l) => l.kunci)).toEqual(["produk", "sesi-booking"]);
-    const adaStaf = { ...dasar, karyawan: { posisi: true, staf: true, hanyaOwner: true }, absensi };
+    const adaStaf = { ...dasar, karyawan: { posisi: true, staf: true, hanyaOwner: true }, absensi: absensiStaf };
     expect(langkahKesiapan(adaStaf).map((l) => l.kunci)).toContain("shift");
   });
 
   it("data karyawan atau absensi yang belum diketahui tidak dihitung", () => {
     expect(langkahKesiapan({ ...dasar, karyawan: { posisi: null, staf: null, hanyaOwner: false }, absensi }).map((l) => l.kunci))
       .toEqual(["produk", "sesi-booking"]);
-    const sebagian = { shiftAktif: true, pola: null, jadwal: null };
+    const sebagian = { staf: true, shiftAktif: true, pola: null, jadwal: null };
     expect(
       langkahKesiapan({ ...dasar, karyawan: { posisi: null, staf: true, hanyaOwner: false }, absensi: sebagian }).map((l) => l.kunci),
     ).toEqual(["produk", "karyawan", "shift", "sesi-booking"]);
@@ -122,5 +123,59 @@ describe("rentangJadwalKesiapan (KS11a)", () => {
   it("62 hari yang berakhir di akhir minggu depan, lintas bulan dan tahun", () => {
     expect(rentangJadwalKesiapan("2026-12-06")).toEqual({ startDate: "2026-10-06", endDate: "2026-12-06" });
     expect(rentangJadwalKesiapan("2027-01-03")).toEqual({ startDate: "2026-11-03", endDate: "2027-01-03" });
+  });
+});
+
+describe("staf per ruang dan bidang gudang (PW20, KS14a sampai KS16a)", () => {
+  const dasar = {
+    produk: { total: 2, dapatDijual: 2 },
+    fitur: [{ fitur: "wms" as const, selesai: true }],
+    karyawan: { posisi: true, staf: true, hanyaOwner: false },
+  };
+  const kosong = { staf: false, shiftAktif: false, pola: false, jadwal: false };
+  // Langkah gudang hanya ada sesudah Setup Gudang selesai, sehingga rute gudang terbuka.
+  const gudangSiap: AksesTautan = { permissions: SEMUA_IZIN, plan: "pro", fiturSiap: { wms: true } };
+
+  it("petugas gudang saja: tanpa langkah absensi outlet, absensi gudang sesudah barang gudang di akhir", () => {
+    const daftar = langkahKesiapan({
+      ...dasar,
+      absensi: kosong,
+      gudang: { barang: false, absensi: { ...kosong, staf: true } },
+    });
+    expect(daftar.map((l) => l.kunci)).toEqual([
+      "produk", "posisi", "karyawan", "wms", "barang-gudang", "shift-gudang", "pola-gudang", "jadwal-gudang",
+    ]);
+    const p = kartu({ ...dasar, absensi: kosong, gudang: { barang: false, absensi: { ...kosong, staf: true } } }, gudangSiap);
+    expect(p).toMatchObject({ tingkat: "tindakan", judul: "Siapkan toko (langkah 5 dari 8)" });
+    expect(p?.isi).toContain("Masukkan barang gudang. Gudang baru mulai kosong");
+    expect(p?.tautan).toEqual([{ href: "/dashboard/gudang/inventaris", label: "Masukkan barang" }]);
+  });
+
+  it("langkah absensi gudang bertaut ke halaman gudang", () => {
+    const p = kartu({ ...dasar, absensi: kosong, gudang: { barang: true, absensi: { ...kosong, staf: true } } }, gudangSiap);
+    expect(p).toMatchObject({ judul: "Siapkan toko (langkah 6 dari 8)" });
+    expect(p?.isi).toContain("Buat Master Shift gudang.");
+    expect(p?.tautan).toEqual([{ href: "/dashboard/gudang/shift", label: "Buat shift" }]);
+  });
+
+  it("staf outlet dan gudang: absensi outlet sebelum fitur plan, absensi gudang sesudah barang", () => {
+    const keduanya = { ...kosong, staf: true };
+    expect(
+      langkahKesiapan({ ...dasar, absensi: keduanya, gudang: { barang: true, absensi: keduanya } }).map((l) => l.kunci),
+    ).toEqual([
+      "produk", "posisi", "karyawan", "shift", "pola", "jadwal", "wms",
+      "barang-gudang", "shift-gudang", "pola-gudang", "jadwal-gudang",
+    ]);
+  });
+
+  it("tanpa lokasi gudang tidak ada bidang gudang; Toko ini hanya saya tetap menghitung barang gudang", () => {
+    expect(langkahKesiapan({ ...dasar, absensi: kosong }).map((l) => l.kunci)).not.toContain("barang-gudang");
+    const solo = {
+      ...dasar,
+      karyawan: { posisi: false, staf: false, hanyaOwner: true },
+      absensi: kosong,
+      gudang: { barang: false, absensi: kosong },
+    };
+    expect(langkahKesiapan(solo).map((l) => l.kunci)).toEqual(["produk", "wms", "barang-gudang"]);
   });
 });

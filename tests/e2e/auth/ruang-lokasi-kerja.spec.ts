@@ -46,8 +46,15 @@ test.describe("Ruang mengikuti lokasi kerja", () => {
     page.on("request", (r) => {
       if (SUMBER_OUTLET.test(r.url())) permintaanOutlet.push(r.url());
     });
-    page.on("response", (r) => {
+    // Jadwal lokasi gudang adalah sumber gudang sejak PW20 (KS15a, absensi
+    // gudang di kartu kesiapan); id gudang dibaca dari GET /location halaman.
+    const idGudang = new Set<string>();
+    page.on("response", async (r) => {
       if (/\/api\//.test(r.url()) && r.status() === 403) ditolak.push(`${r.request().method()} ${r.url()}`);
+      if (r.request().method() === "GET" && /\/api\/location(\?|$)/.test(r.url()) && r.ok()) {
+        const isi = (await r.json().catch(() => null)) as { data?: { _id?: string; id?: string; tipe?: string }[] } | null;
+        for (const l of isi?.data ?? []) if (l.tipe === "Gudang") idGudang.add(String(l.id ?? l._id));
+      }
     });
     // Staf gudang pemegang izin dashboard outlet beralih ke ringkasan gudang.
     const tRingkasanGudang = page.waitForResponse(
@@ -57,7 +64,10 @@ test.describe("Ruang mengikuti lokasi kerja", () => {
     await expect(page.getByText("Gudang Ops.")).toBeVisible({ timeout: 15_000 });
     expect((await tRingkasanGudang).status()).toBe(200);
     await page.waitForLoadState("networkidle");
-    expect(permintaanOutlet, "lonceng tidak meminta sumber outlet").toEqual([]);
+    const jadwalGudang = (u: string) =>
+      /\/api\/jadwalshift\?/.test(u) && idGudang.has(new URL(u).searchParams.get("locationID") ?? "");
+    expect(idGudang.size, "id gudang terbaca dari /location").toBeGreaterThan(0);
+    expect(permintaanOutlet.filter((u) => !jadwalGudang(u)), "lonceng tidak meminta sumber outlet").toEqual([]);
     expect(ditolak, "tidak ada permintaan yang ditolak").toEqual([]);
   });
 

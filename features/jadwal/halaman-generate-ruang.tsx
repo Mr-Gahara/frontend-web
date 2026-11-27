@@ -108,8 +108,8 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
         </div>
       )}
 
-      {/* Langkah kesiapan toko (PW18, KS13a), dihitung dari ruang outlet. */}
-      {ruang === "outlet" && <KotakKesiapan langkah={["jadwal"]} className="mx-auto mb-6 max-w-5xl" />}
+      {/* Langkah kesiapan toko per ruang (PW18 KS13a, PW20 KS15a). */}
+      <KotakKesiapan langkah={[ruang === "outlet" ? "jadwal" : "jadwal-gudang"]} className="mx-auto mb-6 max-w-5xl" />
 
       {/* Catatan syarat (KS12a): seluruh data sudah termuat di titik ini. */}
       {(langkah === 1 || !params) && (pola.data.length === 0 || karyawanList.length <= 1) && (

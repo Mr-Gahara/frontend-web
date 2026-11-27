@@ -11,9 +11,21 @@ import { URL_BUAT_PRODUK, type HitunganProduk } from "./sumber-stok-produk";
  * langsung siap.
  *
  * Urutan bidang (KS1a): produk, karyawan, absensi, lalu fitur plan.
- * Karyawan dan absensi (PW18, KS10a dan KS11a) dihitung dari ruang outlet.
+ * Karyawan dan absensi (PW18, KS10a dan KS11a) dihitung dari ruang outlet,
+ * lalu bidang gudang di akhir (PW20, KS14a sampai KS16a).
  */
-export type KunciLangkahKesiapan = "produk" | "posisi" | "karyawan" | "shift" | "pola" | "jadwal" | FiturPlan;
+export type KunciLangkahKesiapan =
+  | "produk"
+  | "posisi"
+  | "karyawan"
+  | "shift"
+  | "pola"
+  | "jadwal"
+  | FiturPlan
+  | "barang-gudang"
+  | "shift-gudang"
+  | "pola-gudang"
+  | "jadwal-gudang";
 
 export interface LangkahKesiapan {
   kunci: KunciLangkahKesiapan;
@@ -41,17 +53,27 @@ export interface DataKesiapan {
   karyawan?: {
     /** Ada posisi (role) di bawah level Owner yang dapat diberikan ke staf. */
     posisi: boolean | null;
-    /** Ada staf selain Owner (pengguna lebih dari satu, KS8a). */
+    /** Ada staf selain Owner di ruang mana pun (pengguna toko lebih dari satu). */
     staf: boolean | null;
     /** Owner menyatakan toko dijalankan sendiri di perangkat ini (KS10a). */
     hanyaOwner: boolean;
   };
-  absensi?: {
-    shiftAktif: boolean | null;
-    pola: boolean | null;
-    /** Ada jadwal outlet dalam 62 hari sampai akhir minggu depan (KS11a). */
-    jadwal: boolean | null;
-  };
+  /** Absensi ruang outlet (KS11a), dihitung bila ada staf ruang outlet (KS15a). */
+  absensi?: DataAbsensiRuang;
+  /**
+   * Bidang gudang (PW20, KS14a sampai KS16a), hanya bila toko punya lokasi
+   * gudang: barang gudang pertama, lalu absensi gudang bila ada staf gudang.
+   */
+  gudang?: { barang: boolean | null; absensi: DataAbsensiRuang };
+}
+
+export interface DataAbsensiRuang {
+  /** Ada staf ruang ini selain Owner (GET /pengguna?workspace=, KS15a). */
+  staf: boolean | null;
+  shiftAktif: boolean | null;
+  pola: boolean | null;
+  /** Ada jadwal ruang dalam 62 hari sampai akhir minggu depan (KS11a). */
+  jadwal: boolean | null;
 }
 
 export const URL_POSISI = "/dashboard/outlet/pengaturan/roles";
@@ -59,19 +81,21 @@ export const URL_PENGGUNA_OUTLET = "/dashboard/outlet/pengguna";
 export const URL_SHIFT_OUTLET = "/dashboard/outlet/shift";
 export const URL_POLA_OUTLET = "/dashboard/outlet/pola-roster";
 export const URL_GENERATE_OUTLET = "/dashboard/outlet/jadwal/generate";
+export const URL_INVENTARIS_GUDANG = "/dashboard/gudang/inventaris";
 
 const SOLO = " Lewati bila toko dijalankan Owner sendiri.";
 
+/** Karyawan tidak perlu disiapkan: Owner menyatakan toko dijalankan sendiri dan belum ada staf (KS10a). */
+const lewatiKaryawan = (data: DataKesiapan) => !!data.karyawan && data.karyawan.staf === false && data.karyawan.hanyaOwner;
+
 /**
- * Langkah karyawan (opsional, Info) lalu absensi (Perlu tindakan, hanya bila
- * ada staf), KS10a dan KS11a. Toko yang menyatakan hanya Owner melewati
- * keduanya selama belum ada staf; begitu ada staf, langkah absensi muncul.
+ * Langkah karyawan (opsional, Info), KS10a: Buat posisi lalu Tambah
+ * karyawan, dihitung se-toko (staf di ruang mana pun).
  */
-function langkahKaryawanAbsensi(data: DataKesiapan): LangkahKesiapan[] {
+function langkahKaryawan(data: DataKesiapan): LangkahKesiapan[] {
   const k = data.karyawan;
-  if (!k || k.staf === null) return [];
+  if (!k || k.staf === null || lewatiKaryawan(data)) return [];
   const daftar: LangkahKesiapan[] = [];
-  if (!k.staf && k.hanyaOwner) return daftar;
   if (k.posisi !== null) {
     daftar.push({
       kunci: "posisi",
@@ -94,17 +118,52 @@ function langkahKaryawanAbsensi(data: DataKesiapan): LangkahKesiapan[] {
     selesai: k.staf,
     bolehHanyaOwner: true,
   });
-  const a = data.absensi;
-  if (!k.staf || !a) return daftar;
+  return daftar;
+}
+
+/**
+ * Langkah absensi satu ruang (Perlu tindakan), KS11a dan KS15a: hanya bila
+ * ruang itu punya staf selain Owner. Langkah yang datanya belum diketahui
+ * tidak dihitung.
+ */
+function langkahAbsensi(ruang: "outlet" | "gudang", a: DataAbsensiRuang | undefined): LangkahKesiapan[] {
+  if (!a || a.staf !== true) return [];
+  const g = ruang === "gudang";
+  const di = g ? " gudang" : "";
+  const akhiran = (k: "shift" | "pola" | "jadwal") => (g ? (`${k}-gudang` as const) : k);
   const absensi: [KunciLangkahKesiapan, boolean | null, string, string, string, string][] = [
-    ["shift", a.shiftAktif, "Buat Master Shift", "Absensi karyawan memakai shift: jam masuk, jam pulang, dan toleransi terlambat.", URL_SHIFT_OUTLET, "Buat shift"],
-    ["pola", a.pola, "Buat Pola Roster", "Pola roster adalah siklus hari kerja dan libur yang menjadi template jadwal.", URL_POLA_OUTLET, "Buat pola roster"],
-    ["jadwal", a.jadwal, "Generate jadwal", "Buat jadwal karyawan dari pola roster agar absensi tercatat sesuai shift.", URL_GENERATE_OUTLET, "Generate jadwal"],
+    [akhiran("shift"), a.shiftAktif, `Buat Master Shift${di}`, `Absensi karyawan${di} memakai shift: jam masuk, jam pulang, dan toleransi terlambat.`, `/dashboard/${ruang}/shift`, "Buat shift"],
+    [akhiran("pola"), a.pola, `Buat Pola Roster${di}`, "Pola roster adalah siklus hari kerja dan libur yang menjadi template jadwal.", `/dashboard/${ruang}/pola-roster`, "Buat pola roster"],
+    [akhiran("jadwal"), a.jadwal, `Generate jadwal${di}`, `Buat jadwal karyawan${di} dari pola roster agar absensi tercatat sesuai shift.`, `/dashboard/${ruang}/jadwal/generate`, "Generate jadwal"],
   ];
+  const daftar: LangkahKesiapan[] = [];
   for (const [kunci, selesai, judul, penjelasan, href, labelTautan] of absensi) {
     if (selesai === null) continue;
     daftar.push({ kunci, judul, penjelasan, tingkat: "tindakan", href, labelTautan, selesai });
   }
+  return daftar;
+}
+
+/**
+ * Bidang gudang (PW20): barang gudang pertama (KS16a; sekali punya tetap
+ * siap, seperti KS5a), lalu absensi gudang bila ada staf gudang.
+ */
+function langkahGudang(data: DataKesiapan): LangkahKesiapan[] {
+  const g = data.gudang;
+  if (!g) return [];
+  const daftar: LangkahKesiapan[] = [];
+  if (g.barang !== null) {
+    daftar.push({
+      kunci: "barang-gudang",
+      judul: "Masukkan barang gudang",
+      penjelasan: "Gudang baru mulai kosong: masukkan barang dari master data toko agar stok gudang dapat dikelola.",
+      tingkat: "tindakan",
+      href: URL_INVENTARIS_GUDANG,
+      labelTautan: "Masukkan barang",
+      selesai: g.barang,
+    });
+  }
+  if (!lewatiKaryawan(data)) daftar.push(...langkahAbsensi("gudang", g.absensi));
   return daftar;
 }
 
@@ -139,8 +198,11 @@ export function langkahKesiapan(data: DataKesiapan): LangkahKesiapan[] {
       selesai: data.produk.total > 0,
     });
   }
-  daftar.push(...langkahKaryawanAbsensi(data));
+  daftar.push(...langkahKaryawan(data));
+  if (!lewatiKaryawan(data)) daftar.push(...langkahAbsensi("outlet", data.absensi));
   for (const f of data.fitur) daftar.push(langkahFitur(f.fitur, f.selesai));
+  // Bidang gudang di akhir, sesudah fitur plan (KS14a).
+  daftar.push(...langkahGudang(data));
   return daftar;
 }
 

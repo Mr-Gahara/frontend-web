@@ -149,6 +149,7 @@ export function useKesiapanToko() {
         fitur,
         karyawan: { ...karyawanAbsensi.karyawan, hanyaOwner },
         absensi: karyawanAbsensi.absensi,
+        gudang: karyawanAbsensi.gudang,
       }),
     );
     return {
@@ -161,19 +162,74 @@ export function useKesiapanToko() {
 }
 
 /**
- * Data bidang karyawan dan absensi outlet kartu kesiapan (PW18, KS10a dan
- * KS11a). Pengguna, shift, dan pola roster memakai kunci yang sama dengan
+ * Data absensi satu ruang kartu kesiapan (KS11a, KS15a): staf ruang
+ * (GET /pengguna?workspace=, selalu memuat Owner), shift aktif, pola roster,
+ * dan jadwal 62 hari sampai akhir minggu depan. Kunci outlet sama dengan
  * penahan KS8a, sehingga tidak ada permintaan ganda. Data yang tidak
  * berizin atau belum termuat bernilai null (langkahnya tidak dihitung).
+ */
+function useAbsensiRuangKesiapan(ruang: "outlet" | "gudang", aktif: boolean, lokasiId: string) {
+  const { permissions } = useSession();
+  const punya = (i: string) => permissions.includes(i);
+  const kini = useJamBerjalan(60_000);
+  const boleh = aktif && punya(IZIN.pengguna);
+  const staf = useQuery({
+    queryKey: queryKeys.notifikasi.penggunaRuang(ruang),
+    queryFn: () => penggunaApi.daftar(ruang),
+    enabled: boleh,
+    ...OPSI_SEGAR,
+  });
+  const shift = useQuery({
+    queryKey: queryKeys.notifikasi.shift(lokasiId),
+    queryFn: () => shiftApi.daftar({ locationID: lokasiId }),
+    enabled: boleh && punya(IZIN.shift) && !!lokasiId,
+    ...OPSI_SEGAR,
+  });
+  const pola = useQuery({
+    queryKey: queryKeys.notifikasi.polaRoster(lokasiId),
+    queryFn: () => polaRosterApi.daftar({ locationID: lokasiId }),
+    enabled: boleh && punya(IZIN.polaRoster) && !!lokasiId,
+    ...OPSI_SEGAR,
+  });
+  const rentang = rentangJadwalKesiapan(rentangMingguDepan(kini).endDate);
+  const jadwal = useQuery({
+    queryKey: queryKeys.notifikasi.jadwal(rentang.startDate, rentang.endDate, lokasiId),
+    queryFn: () => jadwalApi.daftar({ ...rentang, locationID: lokasiId }),
+    enabled: boleh && punya(IZIN.jadwalShift) && !!lokasiId,
+    ...OPSI_SEGAR,
+  });
+  const [dStaf, dShift, dPola, dJadwal] = [staf.data, shift.data, pola.data, jadwal.data];
+  return useMemo(
+    () => ({
+      data: {
+        staf: dStaf ? dStaf.length > 1 : null,
+        shiftAktif: dShift ? dShift.some((s) => s.status === "Aktif") : null,
+        pola: dPola ? dPola.length > 0 : null,
+        jadwal: dJadwal ? dJadwal.length > 0 : null,
+      },
+      sumber: [staf, shift, pola, jadwal] as UseQueryResult<unknown>[],
+    }),
+    // Objek kueri berganti setiap render; cukup data yang dipakai.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dStaf, dShift, dPola, dJadwal],
+  );
+}
+
+/**
+ * Data bidang karyawan (se-toko), absensi outlet, dan gudang kartu kesiapan
+ * (PW18 dan PW20, KS10a sampai KS16a). Bidang gudang hanya bila ruang
+ * gudang dapat dimasuki dan toko punya lokasi gudang.
  */
 function useKaryawanAbsensiKesiapan() {
   const { sudahMasuk, permissions } = useSession();
   const muat = useMuatRuang();
   const punya = (i: string) => permissions.includes(i);
-  const kini = useJamBerjalan(60_000);
   const ruangOutlet = sudahMasuk && muat("outlet");
+  const ruangGudang = sudahMasuk && muat("gudang");
   const outlet = useLokasiRuang("outlet", { aktif: ruangOutlet && punya(IZIN.location) });
+  const gudang = useLokasiRuang("gudang", { aktif: ruangGudang && punya(IZIN.location) });
   const idOutlet = outlet.lokasiId ?? "";
+  const idGudang = gudang.lokasiId ?? "";
   const bolehPengguna = ruangOutlet && punya(IZIN.pengguna);
   const peran = useQuery({
     queryKey: queryKeys.notifikasi.role(),
@@ -187,47 +243,29 @@ function useKaryawanAbsensiKesiapan() {
     enabled: bolehPengguna,
     ...OPSI_SEGAR,
   });
-  const shiftOutlet = useQuery({
-    queryKey: queryKeys.notifikasi.shift(idOutlet),
-    queryFn: () => shiftApi.daftar({ locationID: idOutlet }),
-    enabled: bolehPengguna && punya(IZIN.shift) && !!idOutlet,
+  const absensiOutlet = useAbsensiRuangKesiapan("outlet", ruangOutlet, idOutlet);
+  const absensiGudang = useAbsensiRuangKesiapan("gudang", ruangGudang && !!idGudang, idGudang);
+  const barangGudang = useQuery({
+    queryKey: queryKeys.notifikasi.barangGudang(idGudang),
+    queryFn: () => notifikasiApi.jumlahBarangLokasi(idGudang),
+    enabled: ruangGudang && !!idGudang && IZIN_MUAT.inventory.some(punya),
     ...OPSI_SEGAR,
   });
-  const polaOutlet = useQuery({
-    queryKey: queryKeys.notifikasi.polaRoster(idOutlet),
-    queryFn: () => polaRosterApi.daftar({ locationID: idOutlet }),
-    enabled: bolehPengguna && punya(IZIN.polaRoster) && !!idOutlet,
-    ...OPSI_SEGAR,
-  });
-  const rentang = rentangJadwalKesiapan(rentangMingguDepan(kini).endDate);
-  const jadwalOutlet = useQuery({
-    queryKey: queryKeys.notifikasi.jadwal(rentang.startDate, rentang.endDate, idOutlet),
-    queryFn: () => jadwalApi.daftar({ ...rentang, locationID: idOutlet }),
-    enabled: bolehPengguna && punya(IZIN.jadwalShift) && !!idOutlet,
-    ...OPSI_SEGAR,
-  });
-  const dataPeran = peran.data;
-  const dataPengguna = penggunaToko.data;
-  const dataShift = shiftOutlet.data;
-  const dataPola = polaOutlet.data;
-  const dataJadwal = jadwalOutlet.data;
+  const [dPeran, dPengguna, dBarang] = [peran.data, penggunaToko.data, barangGudang.data];
   return useMemo(
     () => ({
       karyawan: {
         // Role Owner berlevel 100 (OWNER_LEVEL backend); posisi staf di bawahnya.
-        posisi: dataPeran ? dataPeran.some((r) => r.level < 100) : null,
-        staf: dataPengguna ? dataPengguna.length > 1 : null,
+        posisi: dPeran ? dPeran.some((r) => r.level < 100) : null,
+        staf: dPengguna ? dPengguna.length > 1 : null,
       },
-      absensi: {
-        shiftAktif: dataShift ? dataShift.some((s) => s.status === "Aktif") : null,
-        pola: dataPola ? dataPola.length > 0 : null,
-        jadwal: dataJadwal ? dataJadwal.length > 0 : null,
-      },
-      sumber: [peran, penggunaToko, shiftOutlet, polaOutlet, jadwalOutlet] as UseQueryResult<unknown>[],
+      absensi: absensiOutlet.data,
+      gudang: idGudang ? { barang: dBarang === undefined ? null : dBarang > 0, absensi: absensiGudang.data } : undefined,
+      sumber: [peran, penggunaToko, barangGudang, ...absensiOutlet.sumber, ...absensiGudang.sumber] as UseQueryResult<unknown>[],
     }),
     // Objek kueri berganti setiap render; cukup data yang dipakai.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataPeran, dataPengguna, dataShift, dataPola, dataJadwal],
+    [dPeran, dPengguna, dBarang, absensiOutlet, absensiGudang, idGudang],
   );
 }
 
@@ -373,9 +411,10 @@ function useStafLonceng(akses: AksesTautan) {
   // Penahan pengingat absensi (KS8a): staf selain Owner, shift aktif, dan pola roster outlet.
   const bolehPenahan =
     (bolehKehadiran || bolehJadwalDepan) && punya(IZIN.pengguna) && punya(IZIN.shift) && punya(IZIN.polaRoster);
+  // Staf ruang outlet (KS15a, PW20): Owner selalu ada di daftar ruang.
   const penggunaToko = useQuery({
-    queryKey: queryKeys.notifikasi.pengguna(),
-    queryFn: () => penggunaApi.daftarSemua(),
+    queryKey: queryKeys.notifikasi.penggunaRuang("outlet"),
+    queryFn: () => penggunaApi.daftar("outlet"),
     enabled: bolehPenahan,
     ...OPSI_SEGAR,
   });

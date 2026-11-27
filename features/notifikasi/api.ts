@@ -59,6 +59,8 @@ export const notifikasiApi = {
     hitung(EP.stockOpname.list, { status: "SUBMITTED", tipeLokasi }),
   /** Bahan di gudang yang mencapai stok minimum (stokKritis disaring server). */
   stokKritisLokasi: (locationID: string) => hitung(EP.inventory.list, { locationID, stokKritis: "true" }),
+  /** Jumlah barang di inventaris satu lokasi (langkah barang gudang, KS16a). */
+  jumlahBarangLokasi: (locationID: string) => hitung(EP.inventory.list, { locationID }),
   /** Sesi kasir yang masih terbuka, terbaru lebih dulu (paginasi wajib backend). */
   sesiKasirBuka: async () => (await api.get<SesiKasir[]>(EP.sesiKasir.list, { status: "BUKA", page: "1", limit: "20" })).data,
   /** Booking yang dimulai pada tanggal lokal YYYY-MM-DD. */

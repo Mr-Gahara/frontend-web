@@ -3,6 +3,7 @@ import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
 import { akunBaru, isiTokoDanOwner, langkahAktif as langkahAktifWizard, tunggu } from "../../helpers/setup-uji";
 import { idLokasiRuang } from "../../helpers/jadwal-uji";
+import { siapkanFixtureBooking } from "../../helpers/reservasi-uji";
 import { balonPanduan } from "../../helpers/panduan-uji";
 import { loginAplikasi } from "../../helpers/sesi-kasir-uji";
 import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
@@ -488,6 +489,130 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
         // skenario Pro tests/e2e/setup/setup.spec.ts.
         await expect(langkahAktifWizard(page)).toContainText("Jam buka toko", { timeout: 15_000 });
         await expect(page.getByRole("status").filter({ hasText: "Siapkan toko" })).toHaveCount(0);
+      });
+    } finally {
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
+  });
+});
+
+test.describe("kesiapan ruang gudang (PW20, akun Pro sekali pakai)", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+  test.use({ geolocation: { latitude: -0.02633, longitude: 109.342503 }, permissions: ["geolocation"] });
+  test.describe.configure({ timeout: 180_000 });
+
+  test("staf per ruang: petugas gudang saja tidak membuka absensi outlet; barang gudang lalu absensi gudang di akhir", async ({
+    page,
+  }) => {
+    const { id } = await akunBaru(page, "kesiapan-gudang", { plan: "pro", durasiBulan: 1 });
+    try {
+      await isiTokoDanOwner(page);
+      await page.getByLabel("Nama outlet").fill("Outlet Gudang E2E");
+      await page.getByLabel("Alamat").fill("Jl. Gajah Mada No. 12, Pontianak");
+      await page.getByRole("button", { name: "Ambil koordinat dari perangkat ini" }).click();
+      await expect(page.getByLabel("Latitude")).toHaveValue("-0.02633");
+      await page.getByLabel("Radius absen (meter)").fill("30");
+      await page.getByRole("button", { name: /^Simpan dan lanjut$/ }).click();
+      const tLokasi = tunggu(page, "POST", /\/api\/location$/);
+      await page
+        .getByRole("alertdialog", { name: "Yakin Anda sedang di outlet?" })
+        .getByRole("button", { name: "Ya, saya di outlet" })
+        .click();
+      expect((await tLokasi).status(), "POST /location outlet").toBe(201);
+
+      // Data milik modul lain disiapkan lewat API (keputusan rancangan butir 23):
+      // gudang (Setup Gudang selesai bila ada lokasi gudang), produk, data
+      // booking (Setup Sesi Booking), posisi gudang, dan satu petugas gudang.
+      type Mentah = { id?: string; _id?: string; nama?: string; namaRole?: string; permissions?: Mentah[] };
+      const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
+      const auth = await bukaDenganAuth(page, URL_DASHBOARD);
+      const gudang = await api<Mentah>(page, auth, "POST", "/location", {
+        nama: "Gudang Kesiapan E2E",
+        alamat: "Jl. Gajah Mada No. 14, Pontianak",
+        tipe: "Gudang",
+        latitude: -0.02633,
+        longitude: 109.342503,
+        radiusAbsen: 30,
+      });
+      expect(gudang.status, `POST /location gudang: ${gudang.pesan}`).toBe(201);
+      const outletId = await idLokasiRuang(page, auth);
+      const kategori = await api<Mentah>(page, auth, "POST", "/kategori", {
+        namaKategori: "Kopi Gudang",
+        kodeKategori: "KGD",
+        keterangan: "Kategori uji kesiapan gudang",
+      });
+      expect(kategori.status, `POST /kategori: ${kategori.pesan}`).toBe(201);
+      const produk = await api(page, auth, "POST", "/produk", {
+        namaProduk: "Kopi Gudang E2E",
+        hargaJual: 10000,
+        hargaDasar: 5000,
+        kategoriID: idMilik(kategori.data),
+        isUnlimitedStok: true,
+      });
+      expect(produk.status, `POST /produk: ${produk.pesan}`).toBe(201);
+      await siapkanFixtureBooking(page, auth);
+      const daftarPeran = await api<Mentah[]>(page, auth, "GET", "/role");
+      const owner = daftarPeran.data.find((r) => /^owner$/i.test(r.namaRole ?? ""));
+      const izinGudang = owner?.permissions?.find((i) => i.nama === "read-dashboard-gudang");
+      expect(izinGudang, "izin read-dashboard-gudang di role Owner").toBeTruthy();
+      const peran = await api<Mentah>(page, auth, "POST", "/role", {
+        namaRole: "Petugas Gudang Kesiapan E2E",
+        deskripsi: "Peran uji kesiapan gudang",
+        level: 10,
+        permissions: [idMilik(izinGudang)],
+      });
+      expect(peran.status, `POST /role: ${peran.pesan}`).toBe(201);
+      const staf = await api(page, auth, "POST", "/pengguna/register-pengguna", {
+        nama: "Petugas Gudang E2E",
+        pin: "246810",
+        roleID: idMilik(peran.data),
+        aksesType: ["app"],
+      });
+      expect(staf.status, `register-pengguna: ${staf.pesan}`).toBe(201);
+      const bahan = await api<Mentah>(page, auth, "POST", "/bahanbaku", {
+        namaBahan: "Gula Gudang E2E",
+        satuan: "pcs",
+        stok: 0,
+        stokMinimum: 0,
+        locationID: outletId,
+      });
+      expect(bahan.status, `POST /bahanbaku: ${bahan.pesan}`).toBeLessThan(300);
+
+      await test.step("langkah barang gudang sesudah fitur plan, tanpa langkah absensi outlet (KS14a, KS15a)", async () => {
+        await page.goto(URL_DASHBOARD);
+        await page.waitForLoadState("networkidle");
+        await lonceng(page).click();
+        const siapkan = kartu(page, "kesiapan-toko");
+        // Produk, posisi, karyawan, Sesi Booking, Gudang selesai; barang
+        // gudang, lalu shift, pola, dan jadwal gudang.
+        await expect(siapkan).toContainText("Siapkan toko (langkah 6 dari 9)", { timeout: 15_000 });
+        await expect(siapkan).toHaveAttribute("data-tingkat", "tindakan");
+        await expect(siapkan).toContainText("Masukkan barang gudang.");
+        await expect(siapkan).toContainText("Sesudahnya: Buat Master Shift gudang.");
+        await siapkan.getByRole("link", { name: "Masukkan barang" }).click();
+        await page.waitForURL("**/dashboard/gudang/inventaris");
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 6 dari 9)" })).toBeVisible({
+          timeout: 15_000,
+        });
+      });
+
+      await test.step("barang gudang lewat Masukkan Master Data: langkah berikutnya Master Shift gudang (KS16a)", async () => {
+        await page.getByRole("button", { name: /masukkan master data/i }).click();
+        const dialog = page.getByRole("dialog");
+        await dialog.getByText("Pilih bahan baku...").click();
+        await page.getByRole("option", { name: /Gula Gudang E2E/ }).click();
+        await dialog.getByPlaceholder("0").nth(0).fill("3");
+        await dialog.getByPlaceholder("0").nth(1).fill("1");
+        const tPost = page.waitForResponse((r) => r.request().method() === "POST" && /\/api\/inventory(\?|$)/.test(r.url()));
+        await dialog.getByRole("button", { name: /simpan|tambah|masukkan/i }).last().click();
+        expect((await tPost).status(), "POST /inventory gudang").toBeLessThan(300);
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko" })).toHaveCount(0, { timeout: 15_000 });
+
+        await page.goto("/dashboard/gudang/shift");
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 7 dari 9)" });
+        await expect(kotak).toBeVisible({ timeout: 15_000 });
+        await expect(kotak).toContainText("Buat Master Shift gudang.");
+        await expect(kotak.getByRole("link")).toHaveCount(0);
       });
     } finally {
       await hapusAkunKlienUji(id, wajibAdmin());

@@ -1,5 +1,6 @@
 "use client";
 
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
 import { useState, useMemo, Suspense } from "react";
 import { useTabUrl } from "@/hooks/use-tab-url";
 import { SLUG_TAB_STOK, TAB_STOK } from "@/features/inventaris/tab-stok";
@@ -339,6 +340,9 @@ function IsiGudangInventoryPage() {
           )}
         </div>
       </div>
+
+      {/* Langkah kesiapan toko (PW20, KS16a). */}
+      <KotakKesiapan langkah={["barang-gudang"]} />
 
       {/* QUICK TABS */}
       <div className="flex flex-wrap items-center gap-2 border-b border-navy/10 pb-4">
