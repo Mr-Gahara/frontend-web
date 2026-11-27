@@ -62,7 +62,11 @@ dokumen tetap menjaganya:
 
 - Commit yang hanya mengubah dokumentasi tidak menjalankan vitest penuh
   maupun spec e2e (langkah 5 Alur setiap perubahan); gerbangnya
-  `npm run docs:periksa` (28 September 2026).
+  `npm run docs:periksa` (28 September 2026). Gerbangnya kode keluar,
+  bukan keluaran yang dipipa: `npm run --silent docs:periksa | tail`
+  selalu lolos sehingga `&& git commit` tetap jalan (`1fa456b`
+  ter-push dengan dua temuan, 27 November 2026). Jalankan tanpa pipa,
+  atau `docs:periksa || exit 1`, sebelum commit.
 
 ## Atribusi commit
 
