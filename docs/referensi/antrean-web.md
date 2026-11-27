@@ -228,22 +228,23 @@ hanya PW15, label usulan dibuang dari Kriteria selesai MVP di
 
 ### PW18: panduan menyiapkan absensi
 
-Dari laporan pemilik proyek 27 November 2026. Awalnya lonceng: akun
-baru mendapat "Jadwal minggu depan belum dibuat" (LN4a,
-`pemberitahuanJadwalMingguDepan` di `features/notifikasi/sumber-staf.ts`,
-Kamis sampai Minggu bila jadwal minggu depan kosong) dengan tautan Buat
-jadwal ke Generate Jadwal, tanpa memeriksa apakah shift dan pola roster
-sudah ada. Pemilik proyek mengikutinya, sadar pola roster belum ada, lalu
-membuat pola. Di toko baru (outlet ampera, tanpa shift) dialog Buat Pola Roster hanya menawarkan "Libur /
-Off" tanpa penjelasan, sehingga tersimpan pola "reguler 5-2" yang ketujuh
-harinya libur. Diperiksa: form dan backend menerima banyak hari libur
-(dibuktikan Playwright di outlet dan gudang, 1280 dan 390 px); yang
-kurang adalah panduan. Urutan menyiapkan absensi, Karyawan, Master Shift,
-Pola Roster, Generate Jadwal, lalu absen lewat aplikasi, tidak tertulis
-di aplikasi: titik tur dashboard "Atur jadwal kerja" tidak menyebut
-urutan, wizard setup tidak punya langkah shift maupun jadwal, dan
-halaman Pola Roster, Jadwal, dan Generate Jadwal tidak memberi catatan
-saat syaratnya belum ada.
+Dari laporan pemilik proyek 27 November 2026. Awalnya lonceng: akun baru
+mendapat "Jadwal minggu depan belum dibuat" (LN4a,
+`pemberitahuanJadwalMingguDepan` di
+`features/notifikasi/sumber-staf.ts`, Kamis sampai Minggu bila jadwal
+minggu depan kosong) dengan tautan Buat jadwal ke Generate Jadwal, tanpa
+memeriksa apakah shift dan pola roster sudah ada. Pemilik proyek
+mengikutinya, sadar pola roster belum ada, lalu membuat pola. Di toko
+baru (outlet ampera, tanpa shift) dialog Buat Pola Roster hanya
+menawarkan "Libur / Off" tanpa penjelasan, sehingga tersimpan pola
+"reguler 5-2" yang ketujuh harinya libur. Diperiksa: form dan backend
+menerima banyak hari libur (dibuktikan Playwright di outlet dan gudang,
+1280 dan 390 px); yang kurang adalah panduan. Urutan menyiapkan absensi,
+Karyawan, Master Shift, Pola Roster, Generate Jadwal, lalu absen lewat
+aplikasi, tidak tertulis di aplikasi: titik tur dashboard "Atur jadwal
+kerja" tidak menyebut urutan, wizard setup tidak punya langkah shift
+maupun jadwal, dan halaman Pola Roster, Jadwal, dan Generate Jadwal
+tidak memberi catatan saat syaratnya belum ada.
 
 Sebelum dialog, periksa keadaan kosong setiap halaman (Generate Jadwal
 tanpa pola atau karyawan, Jadwal tanpa shift, Rekap Absensi tanpa
@@ -253,12 +254,13 @@ melainkan pemberitahuan "absensi belum disiapkan" yang mengajak
 menyiapkannya; mengkliknya membuka langkah berurutan yang mengarahkan ke
 halaman pertama, lalu halaman berikutnya, sampai absensi aktif.
 Pertanyaan untuk pemilik proyek: (0) syarat "absensi siap" (karyawan,
-shift aktif, pola roster, jadwal) dan bentuk langkahnya (halaman
-panduan tersendiri, tur sorotan, atau daftar periksa); (1) catatan syarat di halaman beserta tautan ke halaman yang dibutuhkan;
-(2) tombol Simpan pola dimatikan atau tetap aktif selama ruang belum
-punya shift aktif (backend menerima pola libur semua); (3) titik tur
-dashboard menyebut urutan empat langkah; (4) daftar periksa "Siapkan
-absensi" di dashboard, cakupan lebih besar.
+shift aktif, pola roster, jadwal) dan bentuk langkahnya (halaman panduan
+tersendiri, tur sorotan, atau daftar periksa); (1) catatan syarat di
+halaman beserta tautan ke halaman yang dibutuhkan; (2) tombol Simpan
+pola dimatikan atau tetap aktif selama ruang belum punya shift aktif
+(backend menerima pola libur semua); (3) titik tur dashboard menyebut
+urutan empat langkah; (4) daftar periksa "Siapkan absensi" di dashboard,
+cakupan lebih besar.
 
 ## Perubahan backend tanpa pekerjaan web
 
