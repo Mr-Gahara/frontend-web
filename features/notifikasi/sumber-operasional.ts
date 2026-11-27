@@ -1,4 +1,3 @@
-import { NAMA_FITUR, type FiturPlan } from "@/lib/auth/fitur-plan";
 import { formatTanggalPendek } from "@/lib/format";
 import type { SesiBookingResponse } from "@/types/sesiBooking";
 import type { SesiKasir } from "@/types/sesiKasir";
@@ -6,7 +5,6 @@ import { bolehTautan, type AksesTautan } from "./akses";
 import type { Pemberitahuan, TautanPemberitahuan } from "./jenis";
 
 export const URL_MESIN_KASIR = "/dashboard/outlet/keuangan/mesinKasir";
-const URL_SETUP = "/setup";
 const URL_PENJUALAN = "/dashboard/outlet/penjualan";
 const POLA_DETAIL_PENJUALAN = "/dashboard/outlet/penjualan/[id]";
 /** Tautan detail penjualan yang disebut kartu booking; sisanya diringkas. */
@@ -33,19 +31,6 @@ export function pemberitahuanKasirLupa(sesiBuka: readonly SesiKasir[] | null, ki
     judul: "Kasir lupa ditutup",
     isi: `${lupa.length} sesi kasir masih terbuka sejak hari sebelumnya: ${sebut}${sisa}. Tutup kasir agar setoran hari itu tercatat.`,
     tautan: bolehTautan(akses, URL_MESIN_KASIR) ? [{ href: URL_MESIN_KASIR, label: "Buka Mesin Kasir" }] : [],
-  };
-}
-
-/** Setup fitur plan belum selesai (LN4a, info): fitur dari fiturPerluSetup (banner dashboard yang sama). */
-export function pemberitahuanSetupFitur(fitur: readonly FiturPlan[]): Pemberitahuan | null {
-  if (fitur.length === 0) return null;
-  return {
-    id: "setup-fitur",
-    tingkat: "info",
-    judul: "Setup fitur belum selesai",
-    isi: `Setup ${fitur.map((f) => NAMA_FITUR[f]).join(" dan ")} belum selesai, sehingga fiturnya masih terkunci.`,
-    // /setup tidak bergerbang IZIN_HALAMAN; fiturPerluSetup sudah memeriksa izin buat datanya.
-    tautan: [{ href: URL_SETUP, label: "Lengkapi setup" }],
   };
 }
 

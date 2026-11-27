@@ -14,6 +14,8 @@ export type Workspace = "outlet" | "gudang";
 export const penggunaApi = {
   daftar: (workspace: Workspace) =>
     apiData.get<PenggunaItem[]>(EP.pengguna.list, { workspace }),
+  /** Seluruh pengguna toko tanpa saringan ruang (penahan pengingat absensi lonceng, KS8a). */
+  daftarSemua: () => apiData.get<PenggunaItem[]>(EP.pengguna.list),
   buat: (payload: PenggunaRequest) =>
     apiData.post<PenggunaItem>(EP.pengguna.register, payload),
   perbarui: (id: string, payload: PenggunaRequest) =>

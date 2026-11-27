@@ -74,7 +74,9 @@ export const RUANG_KARTU: Readonly<Record<string, RuangSumber>> = {
   "izin-cuti": "toko",
   // Disetujui lewat aplikasi, tanpa halaman web (PW08).
   "perangkat-menunggu": "toko",
-  "setup-fitur": "toko",
+  // Kesiapan toko (PW19) menggantikan kartu setup fitur; langkah produk hanya
+  // terhitung bila ringkasan outlet dimuat, yaitu bila ruang outlet dapat dimasuki.
+  "kesiapan-toko": "toko",
 };
 
 /**

@@ -9,6 +9,7 @@ import {
   pemberitahuanJadwalMingguDepan,
   pemberitahuanKehadiran,
   rentangMingguDepan,
+  tahanPengingatAbsensi,
   waktunyaCekJadwal,
 } from "@/features/notifikasi/sumber-staf";
 import type { JadwalItem } from "@/features/jadwal/tipe";
@@ -143,5 +144,36 @@ describe("pemberitahuanPerangkatMenunggu (PW08, B381)", () => {
   it("satu pengguna dengan dua perangkat disebut sekali; pengguna tanpa data menjadi staf", () => {
     const p = pemberitahuanPerangkatMenunggu([perangkat("Sari"), perangkat("Sari"), perangkat(null)]);
     expect(p?.isi).toBe("3 perangkat menunggu izin (Sari, staf). Setujui lewat aplikasi.");
+  });
+});
+
+describe("tahanPengingatAbsensi (PW19, KS8a)", () => {
+  const siap = {
+    berizin: true,
+    gagal: false,
+    pengguna: [{}, {}],
+    shift: [{ status: "Non-Aktif" }, { status: "Aktif" }],
+    pola: [{}],
+  };
+
+  it("tidak ditahan bila ada staf selain Owner, shift aktif, dan pola roster", () => {
+    expect(tahanPengingatAbsensi(siap)).toBe(false);
+  });
+
+  it("ditahan bila hanya Owner, tanpa shift aktif, atau tanpa pola roster (kasus toko baru)", () => {
+    expect(tahanPengingatAbsensi({ ...siap, pengguna: [{}] })).toBe(true);
+    expect(tahanPengingatAbsensi({ ...siap, shift: [{ status: "Non-Aktif" }] })).toBe(true);
+    expect(tahanPengingatAbsensi({ ...siap, shift: [] })).toBe(true);
+    expect(tahanPengingatAbsensi({ ...siap, pola: [] })).toBe(true);
+  });
+
+  it("ditahan selama data belum termuat, agar pengingat tidak muncul lalu hilang", () => {
+    expect(tahanPengingatAbsensi({ ...siap, pengguna: null })).toBe(true);
+    expect(tahanPengingatAbsensi({ ...siap, pola: null })).toBe(true);
+  });
+
+  it("tidak berlaku tanpa izin membaca datanya atau bila permintaan gagal (perilaku sebelum PW19)", () => {
+    expect(tahanPengingatAbsensi({ ...siap, berizin: false, pengguna: [{}] })).toBe(false);
+    expect(tahanPengingatAbsensi({ ...siap, gagal: true, pengguna: null })).toBe(false);
   });
 });

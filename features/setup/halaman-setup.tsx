@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { tujuanGuardSetup } from "@/lib/auth/tujuan";
 import { useSession } from "@/lib/auth/useSession";
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
 import { KerangkaSetup } from "./kerangka-setup";
 import { useBuatToko, useDaftarOwner, useNamaToko, useStatusSetup } from "./hooks";
 import { LangkahNamaToko, LangkahOwner } from "./langkah-akun";
@@ -192,6 +193,8 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
       selesaiLangkah={selesai}
       namaToko={namaToko.data ?? ""}
     >
+      {/* Langkah kesiapan toko (PW19, KS9a) bila kartu lonceng mengarah ke setup fitur. */}
+      <KotakKesiapan langkah={["sesi-booking", "wms"]} />
       {isi}
     </KerangkaSetup>
   );

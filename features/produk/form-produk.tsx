@@ -1,5 +1,6 @@
 "use client";
 
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -281,6 +282,9 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
           </p>
         </div>
       </div>
+
+      {/* Langkah kesiapan toko (PW19, KS9a): hanya saat membuat produk. */}
+      {!produk && <KotakKesiapan langkah={["produk"]} />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {/* GRID UTAMA: Info Produk & Harga */}

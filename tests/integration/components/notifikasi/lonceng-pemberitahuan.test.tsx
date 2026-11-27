@@ -13,7 +13,10 @@ const DAFTAR: Pemberitahuan[] = [
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/dashboard/outlet/pelanggan" }));
 vi.mock("@/lib/auth/useSession", () => ({ useSession: () => ({ pengguna: { id: "u1" } }) }));
-vi.mock("@/features/notifikasi/hooks", () => ({ usePemberitahuan: () => ({ daftar: DAFTAR, segarkan: vi.fn() }) }));
+vi.mock("@/features/notifikasi/hooks", () => ({
+  usePemberitahuan: () => ({ daftar: DAFTAR, segarkan: vi.fn() }),
+  useStokProdukLonceng: () => ({ pemicu: null, pemberitahuan: null }),
+}));
 
 const { LoncengPemberitahuan } = await import("@/features/notifikasi/lonceng-pemberitahuan");
 

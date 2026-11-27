@@ -10,7 +10,7 @@ import { ringkasLangganan } from "@/features/langganan/data";
 import { useLanggananToko } from "@/features/langganan/hooks";
 import { pengingatLangganan } from "@/features/langganan/pengingat";
 import { useStatusSetup } from "@/features/setup/hooks";
-import { fiturPerluSetup } from "@/features/setup/status";
+import { fiturSetupPengguna } from "@/features/setup/status";
 import { keTanggalLokal } from "@/lib/waktu";
 import { dashboardGudangApi } from "@/features/dashboard-gudang/api";
 import { lokasiApi } from "@/features/inventaris/api";
@@ -20,11 +20,15 @@ import { aksesRuang } from "@/features/pengguna/lokasi-kerja";
 import { absensiApi } from "@/features/absensi/api";
 import { izinCutiApi } from "@/features/izin-cuti/api";
 import { jadwalApi } from "@/features/jadwal/api";
+import { penggunaApi } from "@/features/pengguna/api";
+import { polaRosterApi } from "@/features/pola-roster/api";
+import { shiftApi } from "@/features/shift/api";
 import { bolehTinjauOpname } from "@/features/stock-opname/izin";
 import { fiturAktif, type AksesTautan } from "./akses";
 import { notifikasiApi } from "./api";
 import { muatRuang, ringkasanDimuat, saringKartuRuang, type AksesRuangSesi, type RuangSumber } from "./ruang";
 import { urutkanPemberitahuan, type Pemberitahuan } from "./jenis";
+import { keadaanKesiapan, langkahKesiapan, pemberitahuanKesiapan } from "./kesiapan";
 import { IZIN_MUAT, pemberitahuanInventaris, type DataInventaris } from "./sumber-inventaris";
 import { pemberitahuanLangganan } from "./sumber-langganan";
 import { pemberitahuanDiskonBerakhir, pemberitahuanMembershipBerakhir, pemberitahuanPenjualanBelumLunas } from "./sumber-penjualan";
@@ -36,9 +40,10 @@ import {
   pemberitahuanJadwalMingguDepan,
   pemberitahuanKehadiran,
   rentangMingguDepan,
+  tahanPengingatAbsensi,
   waktunyaCekJadwal,
 } from "./sumber-staf";
-import { pemberitahuanBookingBelumLunas, pemberitahuanKasirLupa, pemberitahuanSetupFitur } from "./sumber-operasional";
+import { pemberitahuanBookingBelumLunas, pemberitahuanKasirLupa } from "./sumber-operasional";
 import { pemberitahuanProdukMinimum, pemberitahuanStokProduk, pemicuStokProduk } from "./sumber-stok-produk";
 
 /** Berkala tiap 5 menit selama tab aktif (LN6a). */
@@ -120,6 +125,26 @@ function useRingkasanOutletLonceng(aktif: boolean) {
 }
 
 /**
+ * Kesiapan toko (PW19, KS1a sampai KS9a), dipakai lonceng dan kotak langkah
+ * di halaman tujuan. Hitungan produk dari ringkasan dashboard outlet (kunci
+ * yang sama dengan sumber inventaris, tanpa permintaan tambahan) dan fitur
+ * plan dari status setup; keduanya dihitung ulang setiap penyegaran (KS4a).
+ */
+export function useKesiapanToko() {
+  const akses = useAksesTautan();
+  const { adaTokenAkun, sudahMasuk, permissions } = useSession();
+  const status = useStatusSetup(adaTokenAkun && sudahMasuk);
+  const muat = useMuatRuang();
+  const ringkasan = useRingkasanOutletLonceng(ringkasanDimuat((r) => sudahMasuk && muat(r)).outlet);
+  const produk = ringkasan.data?.produk;
+  return useMemo(() => {
+    const fitur = status.data ? fiturSetupPengguna(status.data, permissions) : [];
+    const keadaan = keadaanKesiapan(langkahKesiapan({ produk, fitur }));
+    return { keadaan, pemberitahuan: pemberitahuanKesiapan(keadaan, akses), sumber: status };
+  }, [produk, status, permissions, akses]);
+}
+
+/**
  * Sumber inventaris dan gudang (LN4a). Ringkasan outlet bagi pemegang izin
  * dashboard outlet; ringkasan gudang hanya bagi yang tidak memegangnya
  * (LN17a), atau bagi staf gudang yang ruang outletnya tertutup (LN20a).
@@ -181,12 +206,11 @@ function useInventarisLonceng(akses: AksesTautan) {
   return { data, sumber };
 }
 
-/** Sumber operasional (LN4a): kasir lupa ditutup, setup fitur, dan booking lewat jam belum lunas. */
+/** Sumber operasional (LN4a): kasir lupa ditutup dan booking lewat jam belum lunas; setup fitur pindah ke kesiapan toko (KS6a). */
 function useOperasionalLonceng(akses: AksesTautan) {
-  const { adaTokenAkun, sudahMasuk, permissions } = useSession();
+  const { sudahMasuk, permissions } = useSession();
   const kini = useJamBerjalan(60_000);
   const tanggal = keTanggalLokal(kini);
-  const status = useStatusSetup(adaTokenAkun && sudahMasuk);
   const muat = useMuatRuang();
   const sesiKasir = useQuery({
     queryKey: queryKeys.notifikasi.sesiKasirBuka(),
@@ -203,12 +227,11 @@ function useOperasionalLonceng(akses: AksesTautan) {
   const daftar = useMemo(
     () => [
       pemberitahuanKasirLupa(sesiKasir.data ?? null, kini, akses),
-      pemberitahuanSetupFitur(status.data ? fiturPerluSetup(status.data, permissions) : []),
       pemberitahuanBookingBelumLunas(booking.data ?? null, kini, akses),
     ],
-    [sesiKasir.data, booking.data, status.data, permissions, kini, akses],
+    [sesiKasir.data, booking.data, kini, akses],
   );
-  const sumber: UseQueryResult<unknown>[] = [sesiKasir, booking, status];
+  const sumber: UseQueryResult<unknown>[] = [sesiKasir, booking];
   return { daftar, sumber };
 }
 
@@ -260,6 +283,34 @@ function useStafLonceng(akses: AksesTautan) {
     enabled: bolehJadwalDepan && !!idOutlet,
     ...OPSI_SEGAR,
   });
+  // Penahan pengingat absensi (KS8a): staf selain Owner, shift aktif, dan pola roster outlet.
+  const bolehPenahan =
+    (bolehKehadiran || bolehJadwalDepan) && punya(IZIN.pengguna) && punya(IZIN.shift) && punya(IZIN.polaRoster);
+  const penggunaToko = useQuery({
+    queryKey: queryKeys.notifikasi.pengguna(),
+    queryFn: () => penggunaApi.daftarSemua(),
+    enabled: bolehPenahan,
+    ...OPSI_SEGAR,
+  });
+  const shiftOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.shift(idOutlet),
+    queryFn: () => shiftApi.daftar({ locationID: idOutlet }),
+    enabled: bolehPenahan && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const polaOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.polaRoster(idOutlet),
+    queryFn: () => polaRosterApi.daftar({ locationID: idOutlet }),
+    enabled: bolehPenahan && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const tahan = tahanPengingatAbsensi({
+    berizin: bolehPenahan && punya(IZIN.location),
+    gagal: penggunaToko.isError || shiftOutlet.isError || polaOutlet.isError,
+    pengguna: penggunaToko.data ?? null,
+    shift: shiftOutlet.data ?? null,
+    pola: polaOutlet.data ?? null,
+  });
   const pengajuan = useQuery({
     queryKey: queryKeys.notifikasi.pengajuanDiputuskan(),
     queryFn: notifikasiApi.pengajuanDiputuskan,
@@ -273,13 +324,23 @@ function useStafLonceng(akses: AksesTautan) {
     () => [
       pemberitahuanIzinCuti(izinCuti.data ?? null),
       pemberitahuanPerangkatMenunggu(perangkat.data ?? null),
-      pemberitahuanKehadiran(monitoring.data?.daftar ?? null, jadwalHariIni.data ?? null, kini, akses),
-      pemberitahuanJadwalMingguDepan(jadwalDepan.data ?? null, kini, akses),
+      tahan ? null : pemberitahuanKehadiran(monitoring.data?.daftar ?? null, jadwalHariIni.data ?? null, kini, akses),
+      tahan ? null : pemberitahuanJadwalMingguDepan(jadwalDepan.data ?? null, kini, akses),
       pemberitahuanHasilPengajuan(pengajuan.data ?? null, idSaya, kini, akses),
     ],
-    [izinCuti.data, perangkat.data, monitoring.data, jadwalHariIni.data, jadwalDepan.data, pengajuan.data, idSaya, kini, akses],
+    [izinCuti.data, perangkat.data, monitoring.data, jadwalHariIni.data, jadwalDepan.data, pengajuan.data, idSaya, kini, akses, tahan],
   );
-  const sumber: UseQueryResult<unknown>[] = [izinCuti, perangkat, monitoring, jadwalHariIni, jadwalDepan, pengajuan];
+  const sumber: UseQueryResult<unknown>[] = [
+    izinCuti,
+    perangkat,
+    monitoring,
+    jadwalHariIni,
+    jadwalDepan,
+    penggunaToko,
+    shiftOutlet,
+    polaOutlet,
+    pengajuan,
+  ];
   return { daftar, sumber };
 }
 
@@ -356,10 +417,14 @@ export function usePemberitahuan() {
   const operasional = useOperasionalLonceng(akses);
   const staf = useStafLonceng(akses);
   const penjualan = usePenjualanLonceng(akses);
+  const kesiapan = useKesiapanToko();
 
   const daftar = useMemo<Pemberitahuan[]>(() => {
+    const pemicu = pemicuStokProduk(dataInventaris.ringkasanOutlet?.produk);
     const semua = [
-      pemberitahuanStokProduk(pemicuStokProduk(dataInventaris.ringkasanOutlet?.produk), akses),
+      kesiapan.pemberitahuan,
+      // Toko belum punya produk menjadi langkah kesiapan (KS5a); kehabisan stok tetap kartu ini (LN22a).
+      pemicu?.jenis === "tak-terjual" ? pemberitahuanStokProduk(pemicu, akses) : null,
       pemberitahuanLangganan(langganan.pengingat, akses),
       pemberitahuanProdukMinimum(dataInventaris.ringkasanOutlet?.produk.stokKritis, akses),
       ...pemberitahuanInventaris(dataInventaris, akses),
@@ -369,10 +434,17 @@ export function usePemberitahuan() {
     ];
     const ada = semua.filter((p): p is Pemberitahuan => p !== null);
     return urutkanPemberitahuan(saringKartuRuang(ada, aksesRuangSesi));
-  }, [langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
+  }, [kesiapan.pemberitahuan, langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
 
   // Hanya sumber yang aktif (pernah dimuat) yang disegarkan.
-  const sumber: UseQueryResult<unknown>[] = [langganan.query, ...inventaris.sumber, ...operasional.sumber, ...staf.sumber, ...penjualan.sumber];
+  const sumber: UseQueryResult<unknown>[] = [
+    langganan.query,
+    kesiapan.sumber,
+    ...inventaris.sumber,
+    ...operasional.sumber,
+    ...staf.sumber,
+    ...penjualan.sumber,
+  ];
   const segarkan = () => {
     for (const q of sumber) if (q.isFetched) void q.refetch();
   };

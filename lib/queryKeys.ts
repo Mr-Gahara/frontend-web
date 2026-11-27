@@ -270,6 +270,11 @@ export const queryKeys = {
     booking: (tanggal: string) => ["sesiBooking", "lonceng", tanggal] as const,
     izinCuti: () => ["izinCuti", "lonceng"] as const,
     perangkatMenunggu: () => ["notifikasi", "perangkatMenunggu"] as const,
+    // Penahan pengingat absensi (KS8a), di bawah akar domainnya agar tambah
+    // pengguna, shift, dan pola roster ikut memperbaruinya.
+    pengguna: () => ["pengguna", "lonceng"] as const,
+    shift: (lokasiId: string) => ["shift", "lonceng", lokasiId] as const,
+    polaRoster: (lokasiId: string) => ["polaRoster", "lonceng", lokasiId] as const,
     monitoring: (tanggal: string, lokasiId: string) => ["absensi", "lonceng", tanggal, lokasiId] as const,
     jadwal: (startDate: string, endDate: string, lokasiId: string) =>
       ["jadwalShift", "lonceng", startDate, endDate, lokasiId] as const,

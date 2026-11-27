@@ -1,7 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
-import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
+import { akunBaru, isiTokoDanOwner, tunggu } from "../../helpers/setup-uji";
+import { idLokasiRuang } from "../../helpers/jadwal-uji";
 import { balonPanduan } from "../../helpers/panduan-uji";
 import { loginAplikasi } from "../../helpers/sesi-kasir-uji";
 import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
@@ -54,7 +55,8 @@ for (const { nama, lebar } of [
     // operasional, staf, penjualan) diuji per sumber di unit test, dan di
     // sini cukup terhitung sama antara lencana dan kartu.
     const harapan: Record<string, boolean> = {
-      "stok-produk": pemicuStokProduk(ringkasan.data.produk) !== null,
+      // Toko tanpa produk menjadi kartu kesiapan toko (PW19, KS5a); kartu ini tinggal kehabisan stok.
+      "stok-produk": pemicuStokProduk(ringkasan.data.produk)?.jenis === "tak-terjual",
       langganan: pengingat !== null,
       "produk-minimum": ringkasan.data.produk.stokKritis > 0,
     };
@@ -214,17 +216,20 @@ test.describe("toko tanpa produk (akun klien sekali pakai)", () => {
         await expect(balonPanduan(page)).toHaveCount(0);
       });
 
-      await test.step("dimuat ulang: panel terbuka sendiri dengan kartu penting dan lencana rose", async () => {
+      await test.step("dimuat ulang: panel terbuka sendiri dengan kartu kesiapan penting dan lencana rose", async () => {
         await page.reload();
         await expect(panel(page)).toBeVisible({ timeout: 15_000 });
-        const stok = kartu(page, "stok-produk");
-        await expect(stok).toHaveAttribute("data-tingkat", "penting");
-        await expect(stok).toContainText("Toko belum punya produk");
+        // Toko tanpa produk adalah langkah kesiapan toko (PW19, KS5a); panel
+        // tetap terbuka sendiri karena pemicu LN1a berlaku (LN13a).
+        const siapkan = kartu(page, "kesiapan-toko");
+        await expect(siapkan).toHaveAttribute("data-tingkat", "penting");
+        await expect(siapkan).toContainText("Toko belum punya produk");
+        await expect(kartu(page, "stok-produk")).toHaveCount(0);
         await expect(page.getByTestId("lencana-pemberitahuan")).toHaveAttribute("data-tingkat", "penting");
       });
 
       await test.step("halaman lain tidak membuka panel sendiri; Buat Penjualan memuat pesan yang sama", async () => {
-        await kartu(page, "stok-produk").getByRole("link", { name: "Buat Produk" }).click();
+        await kartu(page, "kesiapan-toko").getByRole("link", { name: "Buat Produk" }).click();
         await page.waitForURL("**/inventaris/produk/buatProduk");
         await expect(panel(page)).toHaveCount(0);
         await page.goto("/dashboard/outlet/penjualan/buatPenjualan");
@@ -232,6 +237,164 @@ test.describe("toko tanpa produk (akun klien sekali pakai)", () => {
         await page.waitForTimeout(1_000);
         await expect(panel(page)).toHaveCount(0);
         await expect(page.getByRole("status").filter({ hasText: "Toko belum punya produk" })).toBeVisible();
+      });
+    } finally {
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
+  });
+});
+
+test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+  test.use({ geolocation: { latitude: -0.02633, longitude: 109.342503 }, permissions: ["geolocation"] });
+  test.describe.configure({ timeout: 180_000 });
+
+  test("satu kartu Siapkan toko berlangkah, kotak langkah di halaman tujuan, dan pengingat jadwal ditahan selama absensi belum siap", async ({
+    page,
+  }) => {
+    // Pengingat jadwal minggu depan hanya dicek Kamis sampai Minggu (LN4a);
+    // jam frontend dipatok ke hari itu agar penahan teruji di hari apa pun.
+    const kini = new Date();
+    const keKamis = (4 - kini.getDay() + 7) % 7;
+    const hari = kini.getDay() === 0 || kini.getDay() >= 4 ? kini : new Date(kini.getTime() + keKamis * 86_400_000);
+    await page.clock.install({ time: hari });
+    const diminta: string[] = [];
+    page.on("request", (r) => {
+      if (r.method() === "GET") diminta.push(new URL(r.url()).pathname + new URL(r.url()).search);
+    });
+
+    const { id } = await akunBaru(page, "kesiapan-toko", { plan: "advanced", durasiBulan: 1 });
+    try {
+      await isiTokoDanOwner(page);
+      // Outlet lewat langkah wizard, agar sumber jadwal outlet ikut dimuat.
+      await page.getByLabel("Nama outlet").fill("Outlet Kesiapan E2E");
+      await page.getByLabel("Alamat").fill("Jl. Gajah Mada No. 12, Pontianak");
+      await page.getByRole("button", { name: "Ambil koordinat dari perangkat ini" }).click();
+      await expect(page.getByLabel("Latitude")).toHaveValue("-0.02633");
+      await page.getByLabel("Radius absen (meter)").fill("30");
+      await page.getByRole("button", { name: /^Simpan dan lanjut$/ }).click();
+      const tLokasi = tunggu(page, "POST", /\/api\/location$/);
+      await page
+        .getByRole("alertdialog", { name: "Yakin Anda sedang di outlet?" })
+        .getByRole("button", { name: "Ya, saya di outlet" })
+        .click();
+      expect((await tLokasi).status(), "POST /location outlet").toBe(201);
+
+      const auth = await bukaDenganAuth(page, URL_DASHBOARD);
+      await page.waitForLoadState("networkidle");
+
+      await test.step("toko tanpa produk dan tanpa staf: langkah 1 produk, tanpa kartu lama, pengingat jadwal ditahan", async () => {
+        await lonceng(page).click();
+        const siapkan = kartu(page, "kesiapan-toko");
+        await expect(siapkan).toHaveAttribute("data-tingkat", "penting");
+        await expect(siapkan).toContainText("Siapkan toko (langkah 1 dari 2)");
+        await expect(siapkan).toContainText("Sesudahnya: Setup Sesi Booking.");
+        await expect(siapkan.getByRole("link", { name: "Buat Produk" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/inventaris/produk/buatProduk",
+        );
+        // Kartu pertama di panel, dan kartu yang digantikan tidak tampil (KS2a, KS6a).
+        await expect(panel(page).locator("article[data-pemberitahuan]").first()).toHaveAttribute(
+          "data-pemberitahuan",
+          "kesiapan-toko",
+        );
+        await expect(kartu(page, "stok-produk")).toHaveCount(0);
+        await expect(kartu(page, "setup-fitur")).toHaveCount(0);
+        // Jadwal minggu depan kosong dan dibaca lonceng, tetapi pengingatnya
+        // ditahan karena toko hanya punya Owner (KS8a).
+        expect(diminta.some((u) => u.startsWith("/api/jadwalshift?")), "lonceng membaca jadwal minggu depan").toBe(true);
+        expect(diminta.some((u) => u === "/api/pengguna"), "penahan membaca pengguna toko").toBe(true);
+        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(0);
+      });
+
+      await test.step("Buat Produk memuat kotak langkah yang sama tanpa tautan ke dirinya", async () => {
+        await kartu(page, "kesiapan-toko").getByRole("link", { name: "Buat Produk" }).click();
+        await page.waitForURL("**/inventaris/produk/buatProduk");
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 1 dari 2)" });
+        await expect(kotak).toBeVisible({ timeout: 15_000 });
+        await expect(kotak).toContainText("Toko belum punya produk");
+        await expect(kotak.getByRole("link")).toHaveCount(0);
+      });
+
+      await test.step("sesudah ada staf, shift aktif, dan pola roster, pengingat jadwal minggu depan tampil", async () => {
+        // Data milik modul lain disiapkan lewat API (keputusan rancangan butir 23).
+        // Izin diambil dari role Owner toko ini, seperti helper peran uji (terkunci-uji).
+        type Mentah = { id?: string; _id?: string; nama?: string; namaRole?: string; permissions?: Mentah[] };
+        const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
+        const daftarPeran = await api<Mentah[]>(page, auth, "GET", "/role");
+        expect(daftarPeran.status, daftarPeran.pesan).toBe(200);
+        const owner = daftarPeran.data.find((r) => /^owner$/i.test(r.namaRole ?? ""));
+        const dashboardOutlet = owner?.permissions?.find((i) => i.nama === "read-dashboard-outlet");
+        expect(dashboardOutlet, "izin read-dashboard-outlet di role Owner").toBeTruthy();
+        const peran = await api<Mentah>(page, auth, "POST", "/role", {
+          namaRole: "Kasir Kesiapan E2E",
+          deskripsi: "Peran uji kesiapan toko",
+          level: 10,
+          permissions: [idMilik(dashboardOutlet)],
+        });
+        expect(peran.status, `POST /role: ${peran.pesan}`).toBe(201);
+        const staf = await api(page, auth, "POST", "/pengguna/register-pengguna", {
+          nama: "Staf Kesiapan E2E",
+          pin: "246810",
+          roleID: idMilik(peran.data),
+          aksesType: ["app"],
+        });
+        expect(staf.status, `register-pengguna: ${staf.pesan}`).toBe(201);
+        const locationID = await idLokasiRuang(page, auth);
+        const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
+          namaShift: "Pagi Kesiapan E2E",
+          jamMasuk: "07:00",
+          jamPulang: "15:00",
+          isLintasHari: false,
+          toleransiTerlambat: 0,
+          status: "Aktif",
+          locationID,
+        });
+        expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
+        const pola = await api(page, auth, "POST", "/polaroster", {
+          namaPola: "Pola Kesiapan E2E",
+          siklusHari: 1,
+          detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+          locationID,
+        });
+        expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+
+        await page.goto(URL_DASHBOARD);
+        await page.waitForLoadState("networkidle");
+        await lonceng(page).click();
+        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(1, { timeout: 15_000 });
+        await expect(kartu(page, "kesiapan-toko")).toContainText("Siapkan toko (langkah 1 dari 2)");
+        await page.keyboard.press("Escape");
+      });
+
+      await test.step("sesudah ada produk: langkah 2 setup fitur bertingkat info, kotaknya di wizard Setup", async () => {
+        const kategori = await api<{ id?: string; _id?: string }>(page, auth, "POST", "/kategori", {
+          namaKategori: "Kopi Kesiapan",
+          kodeKategori: "KSP",
+          keterangan: "Kategori uji kesiapan toko",
+        });
+        expect(kategori.status, `POST /kategori: ${kategori.pesan}`).toBe(201);
+        const produk = await api(page, auth, "POST", "/produk", {
+          namaProduk: "Kopi Kesiapan E2E",
+          hargaJual: 10000,
+          hargaDasar: 5000,
+          kategoriID: String(kategori.data.id ?? kategori.data._id ?? ""),
+          isUnlimitedStok: true,
+        });
+        expect(produk.status, `POST /produk: ${produk.pesan}`).toBe(201);
+
+        await page.reload();
+        await page.waitForLoadState("networkidle");
+        await lonceng(page).click();
+        const siapkan = kartu(page, "kesiapan-toko");
+        await expect(siapkan).toHaveAttribute("data-tingkat", "info", { timeout: 15_000 });
+        await expect(siapkan).toContainText("Siapkan toko (langkah 2 dari 2)");
+        await expect(siapkan).toContainText("Setup Sesi Booking belum selesai, sehingga fiturnya masih terkunci.");
+        await siapkan.getByRole("link", { name: "Lengkapi setup" }).click();
+        await page.waitForURL("**/setup");
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 2 dari 2)" });
+        await expect(kotak).toBeVisible({ timeout: 15_000 });
+        await expect(kotak.getByRole("link")).toHaveCount(0);
       });
     } finally {
       await hapusAkunKlienUji(id, wajibAdmin());

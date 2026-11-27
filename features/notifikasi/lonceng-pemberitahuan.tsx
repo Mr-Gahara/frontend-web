@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { otomatisDimatikan, penyimpananLokal, sudahDilihat } from "@/lib/panduan";
 import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
-import { usePemberitahuan } from "./hooks";
+import { usePemberitahuan, useStokProdukLonceng } from "./hooks";
 import { namaLonceng, ringkasPanel, teksLencana, tingkatTertinggi, type TingkatPemberitahuan } from "./jenis";
 import { KartuPemberitahuan } from "./kartu-pemberitahuan";
 
@@ -50,7 +50,9 @@ export function LoncengPemberitahuan() {
   // yang ditutup kembali ringkas.
   const [semua, setSemua] = useState(false);
   const tingkat = tingkatTertinggi(daftar);
-  const adaPemicuStok = daftar.some((p) => p.id === "stok-produk");
+  // Pemicu LN1a langsung, bukan id kartu: toko tanpa produk kini tampil
+  // sebagai kartu kesiapan (KS5a), tetapi panel tetap terbuka sendiri (LN13a).
+  const adaPemicuStok = useStokProdukLonceng().pemicu !== null;
 
   // Sekali per kunjungan beranda: pindah halaman lalu kembali membukanya lagi.
   const sudahDibukaSendiri = useRef(false);

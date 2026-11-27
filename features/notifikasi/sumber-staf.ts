@@ -14,6 +14,36 @@ const POLA_DETAIL_PENGAJUAN = "/dashboard/outlet/inventaris/pengajuanStok/[id]";
 const SEHARI_MS = 86_400_000;
 const BATAS_NAMA = 3;
 
+/** Data penahan pengingat absensi (KS8a); null berarti belum termuat. */
+export interface DataPenahanAbsensi {
+  /** Pengguna boleh membaca pengguna, shift, dan pola roster; tanpa itu penahan tidak berlaku. */
+  berizin: boolean;
+  /** Salah satu permintaan gagal; penahan tidak berlaku agar pengingat tidak hilang diam-diam. */
+  gagal: boolean;
+  pengguna: readonly unknown[] | null;
+  shift: readonly { status: string }[] | null;
+  pola: readonly unknown[] | null;
+}
+
+/**
+ * Pengingat jadwal minggu depan dan kehadiran hari ini ditahan selama
+ * absensi belum siap (PW19, KS2a dan KS8a): belum ada staf selain Owner,
+ * belum ada shift aktif, atau belum ada pola roster di outlet. Jadwal tidak
+ * menjadi syarat, karena pengingat jadwal minggu depan itulah yang mengajak
+ * membuatnya. Staf selain Owner dihitung dari jumlah pengguna lebih dari
+ * satu: backend menolak membuat pengguna berrole setingkat pembuatnya
+ * (penggunaCrudService), sehingga Owner satu-satunya pengguna dari setup.
+ * Selama data belum termuat pengingat ikut ditahan, agar tidak muncul lalu
+ * hilang.
+ */
+export function tahanPengingatAbsensi(data: DataPenahanAbsensi): boolean {
+  if (!data.berizin || data.gagal) return false;
+  if (!data.pengguna || !data.shift || !data.pola) return true;
+  const adaStaf = data.pengguna.length > 1;
+  const adaShiftAktif = data.shift.some((s) => s.status === "Aktif");
+  return !(adaStaf && adaShiftAktif && data.pola.length > 0);
+}
+
 function sebut(nama: readonly string[]): string {
   const awal = nama.slice(0, BATAS_NAMA).join(", ");
   return nama.length > BATAS_NAMA ? `${awal}, dan ${nama.length - BATAS_NAMA} lainnya` : awal;

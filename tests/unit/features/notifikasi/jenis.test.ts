@@ -14,6 +14,13 @@ describe("urutan dan lencana (LN11a, LN12a)", () => {
     expect(tingkatTertinggi([])).toBeNull();
   });
 
+  it("kartu utama (kesiapan toko, KS2a) paling atas apa pun tingkatnya; lencana tetap tingkat tertinggi", () => {
+    const utama = { ...p("k", "info"), utama: true };
+    const hasil = urutkanPemberitahuan([p("t1", "tindakan"), p("p1", "penting"), utama]);
+    expect(hasil.map((x) => x.id)).toEqual(["k", "p1", "t1"]);
+    expect(tingkatTertinggi([utama, p("t1", "tindakan")])).toBe("tindakan");
+  });
+
   it("lencana 9+ bila lebih dari sembilan, dan nama lonceng menyebut jumlahnya", () => {
     expect(teksLencana(3)).toBe("3");
     expect(teksLencana(9)).toBe("9");
@@ -38,6 +45,18 @@ describe("ringkasPanel (LN19a)", () => {
     expect(hasil.tampil).toHaveLength(7);
     expect(hasil.tersembunyi).toBe(2);
     expect(ringkasPanel(banyak(5, "info", "i")).tersembunyi).toBe(0);
+  });
+});
+
+describe("ringkasPanel dengan kartu utama (KS2a)", () => {
+  it("kartu utama selalu tampil di samping seluruh kartu penting, lalu sampai lima kartu", () => {
+    const utama = { ...p("k", "info"), utama: true };
+    const banyak = [...Array.from({ length: 6 }, (_, i) => p(`t${i}`, "tindakan")), utama];
+    const { tampil, tersembunyi } = ringkasPanel(banyak);
+    expect(tampil.map((x) => x.id)).toEqual(["k", "t0", "t1", "t2", "t3"]);
+    expect(tersembunyi).toBe(2);
+    const penting = [...Array.from({ length: 5 }, (_, i) => p(`p${i}`, "penting")), utama, p("i", "info")];
+    expect(ringkasPanel(penting).tampil.map((x) => x.id)).toEqual(["k", "p0", "p1", "p2", "p3", "p4"]);
   });
 });
 

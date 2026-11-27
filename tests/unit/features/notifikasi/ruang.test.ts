@@ -103,7 +103,8 @@ describe("saringKartuRuang (LN21a)", () => {
   it("setiap id kartu yang dibuat sumber lonceng tercantum di RUANG_KARTU", () => {
     const dir = join(process.cwd(), "features/notifikasi");
     const ids = new Set<string>();
-    for (const f of readdirSync(dir).filter((n) => n.startsWith("sumber-"))) {
+    // Kartu kesiapan toko (PW19) dibuat kesiapan.ts, bukan berkas sumber-*.
+    for (const f of readdirSync(dir).filter((n) => n.startsWith("sumber-") || n === "kesiapan.ts")) {
       const teks = readFileSync(join(dir, f), "utf8");
       for (const m of teks.matchAll(/\bid: "([a-z-]+)"/g)) ids.add(m[1]);
       for (const m of teks.matchAll(/kartu\(\s*"([a-z-]+)"/g)) ids.add(m[1]);

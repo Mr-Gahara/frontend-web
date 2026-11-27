@@ -119,8 +119,20 @@ const IZIN_SETUP_FITUR: Record<"sesi-booking" | "wms", readonly string[]> = {
  * dilengkapi pengguna ini, untuk banner "Lengkapi setup" di dashboard.
  */
 export function fiturPerluSetup(status: StatusSetup, permissions: readonly string[]): ("sesi-booking" | "wms")[] {
-  return (["sesi-booking", "wms"] as const).filter((f) => {
-    const fitur = status.fitur[f];
-    return fitur.termasukPlan && !fitur.selesai && IZIN_SETUP_FITUR[f].every((i) => permissions.includes(i));
-  });
+  return fiturSetupPengguna(status, permissions)
+    .filter((f) => !f.selesai)
+    .map((f) => f.fitur);
+}
+
+/**
+ * Fitur termasuk plan yang setup-nya dapat dilengkapi pengguna ini, beserta
+ * selesai tidaknya, untuk menghitung langkah kartu kesiapan toko (PW19).
+ */
+export function fiturSetupPengguna(
+  status: StatusSetup,
+  permissions: readonly string[],
+): { fitur: "sesi-booking" | "wms"; selesai: boolean }[] {
+  return (["sesi-booking", "wms"] as const)
+    .filter((f) => status.fitur[f].termasukPlan && IZIN_SETUP_FITUR[f].every((i) => permissions.includes(i)))
+    .map((f) => ({ fitur: f, selesai: status.fitur[f].selesai }));
 }

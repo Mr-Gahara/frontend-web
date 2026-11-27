@@ -23,21 +23,28 @@ export interface Pemberitahuan {
   tautan: TautanPemberitahuan[];
   /** Bilah 0 sampai 100 (kartu langganan, LN12a); null bila tidak ada bilah. */
   persen?: number | null;
+  /**
+   * Kartu kesiapan toko (PW19, KS2a): paling atas di atas tingkat mana pun
+   * dan selalu tampil di panel ringkas, tetapi warnanya tetap menurut tingkat.
+   */
+  utama?: boolean;
 }
 
 const URUTAN: Record<TingkatPemberitahuan, number> = { penting: 0, tindakan: 1, info: 2 };
 
-/** Urut per tingkat; di dalam tingkat urutan sumber dipertahankan. */
+/** Urut per tingkat, kartu utama lebih dulu; di dalam tingkat urutan sumber dipertahankan. */
 export function urutkanPemberitahuan(daftar: readonly Pemberitahuan[]): Pemberitahuan[] {
+  const utama = (p: Pemberitahuan) => (p.utama ? 0 : 1);
   return daftar
     .map((p, i) => ({ p, i }))
-    .sort((a, b) => URUTAN[a.p.tingkat] - URUTAN[b.p.tingkat] || a.i - b.i)
+    .sort((a, b) => utama(a.p) - utama(b.p) || URUTAN[a.p.tingkat] - URUTAN[b.p.tingkat] || a.i - b.i)
     .map(({ p }) => p);
 }
 
 /** Tingkat tertinggi untuk warna lencana; null bila tidak ada pemberitahuan. */
 export function tingkatTertinggi(daftar: readonly Pemberitahuan[]): TingkatPemberitahuan | null {
-  return urutkanPemberitahuan(daftar)[0]?.tingkat ?? null;
+  if (daftar.length === 0) return null;
+  return daftar.reduce((a, p) => (URUTAN[p.tingkat] < URUTAN[a] ? p.tingkat : a), daftar[0].tingkat);
 }
 
 /** Angka lencana lonceng: 9+ bila lebih dari sembilan (LN12a). */
@@ -49,17 +56,19 @@ export function teksLencana(jumlah: number): string {
 export const BATAS_PANEL = 5;
 
 /**
- * Isi panel lonceng (LN19a): seluruh kartu penting selalu tampil, lalu
- * kartu berikutnya menurut urutan tingkat sampai total BATAS_PANEL; sisanya
- * dibentangkan di panel yang sama lewat Lihat semua.
+ * Isi panel lonceng (LN19a): kartu utama (kesiapan toko, KS2a) dan seluruh
+ * kartu penting selalu tampil, lalu kartu berikutnya menurut urutan tingkat
+ * sampai total BATAS_PANEL; sisanya dibentangkan di panel yang sama lewat
+ * Lihat semua.
  */
 export function ringkasPanel(
   daftar: readonly Pemberitahuan[],
   batas = BATAS_PANEL,
 ): { tampil: Pemberitahuan[]; tersembunyi: number } {
   const urut = urutkanPemberitahuan(daftar);
-  const penting = urut.filter((p) => p.tingkat === "penting").length;
-  const tampil = urut.slice(0, Math.max(penting, batas));
+  // Kartu utama di depan, lalu kartu penting: keduanya berurutan di awal daftar.
+  const wajib = urut.filter((p) => p.utama || p.tingkat === "penting").length;
+  const tampil = urut.slice(0, Math.max(wajib, batas));
   return { tampil, tersembunyi: urut.length - tampil.length };
 }
 

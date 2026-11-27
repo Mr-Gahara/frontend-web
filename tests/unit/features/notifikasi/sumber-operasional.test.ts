@@ -4,7 +4,6 @@ import {
   URL_MESIN_KASIR,
   pemberitahuanBookingBelumLunas,
   pemberitahuanKasirLupa,
-  pemberitahuanSetupFitur,
 } from "@/features/notifikasi/sumber-operasional";
 import type { SesiBookingResponse } from "@/types/sesiBooking";
 import type { SesiKasir } from "@/types/sesiKasir";
@@ -32,15 +31,6 @@ describe("pemberitahuanKasirLupa (LN4a, penting)", () => {
   it("tanpa tautan bagi yang tidak boleh membuka Mesin Kasir; null selama belum termuat", () => {
     expect(pemberitahuanKasirLupa([sesi(new Date(2026, 10, 20))], kini, akses([]))?.tautan).toEqual([]);
     expect(pemberitahuanKasirLupa(null, kini, akses())).toBeNull();
-  });
-});
-
-describe("pemberitahuanSetupFitur (LN4a, info)", () => {
-  it("menyebut fitur yang belum disetup, tautan ke /setup", () => {
-    expect(pemberitahuanSetupFitur([])).toBeNull();
-    const p = pemberitahuanSetupFitur(["wms", "sesi-booking"]);
-    expect(p).toMatchObject({ tingkat: "info", isi: "Setup Gudang dan Sesi Booking belum selesai, sehingga fiturnya masih terkunci." });
-    expect(p?.tautan).toEqual([{ href: "/setup", label: "Lengkapi setup" }]);
   });
 });
 
