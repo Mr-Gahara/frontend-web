@@ -38,7 +38,7 @@ tetap `AR`, `B`, dan `P`.
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Selesai | `12ded07` |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Selesai | `c214786` |
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Selesai | `efb5596` |
-| PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
+| PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Selesai | `b9fe4a0` |
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
@@ -120,24 +120,13 @@ pengujian). Kebutuhan lonceng ini dipindah ke `arsip/laporan-backend.md`.
 
 ### PW07: lonceng LN1a dan LN8a dari ringkasan dashboard
 
-Backend B380: `GET /dashboard/outlet` menambah `produk.total` dan
-`produk.dapatDijual` (stok terhitung resep di outlet ringkasan).
-
-Keputusan yang perlu diajukan:
-
-- Gerbang berubah: sumber sekarang `GET /produk` bagi `read-produk` atau
-  `akses-pos` (`features/notifikasi/hooks.ts`), sedangkan ringkasan
-  menuntut izin dashboard outlet. Pemegang produk tanpa izin dashboard
-  tetap memuat seluruh produk, kehilangan pemicu, atau cara lain.
-- Kartu LN14a menyebut sampai tiga nama produk; ringkasan hanya memberi
-  angka. Nama tetap dibaca dari daftar (beban sama) atau kartu cukup
-  angka.
-- Banner dashboard outlet dan pesan halaman LN3a/LN15a memakai sumber
-  yang sama (`features/notifikasi/pesan-stok-produk.tsx`).
-
-Sesudahnya: unit test sumber stok, spec lonceng dan pesan stok, dan
-penunggu `!dariLonceng` di `tests/helpers/lonceng-uji.ts` diperbarui
-bila lonceng berhenti memanggil `GET /produk`.
+Selesai 27 November 2026 (`b9fe4a0`). Pemicu LN1a dibaca dari
+`produk.total` dan `produk.dapatDijual` ringkasan dashboard outlet (B380);
+`GET /produk` dibuang dari lonceng. Kartu tidak ada yang dapat dijual
+cukup angka, "N produk stoknya habis.", dengan tautan Lihat produk dan
+Pembelian Stok (LN22a). Soal izin gugur karena laman pemakai pesan stok
+berada di ruang outlet. B380 dibuktikan e2e terhadap hitungan dari
+daftar produk; laporannya dipindah ke `arsip/laporan-backend.md`.
 
 ### PW08: lonceng, perangkat menunggu izin
 

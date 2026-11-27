@@ -67,7 +67,8 @@ pemegang izin endpoint serta plan fiturnya.
   `GET /dashboard/outlet` dan `GET /dashboard/gudang`. Sumber lain
   memakai endpoint daftarnya dengan limit kecil dan kunci cache sendiri,
   dan penunggu spec yang terdampak diberi syarat query.
-- **LN8a: produk yang dapat dijual.** Lonceng memuat seluruh produk
+- **LN8a: produk yang dapat dijual.** (Selesai: sejak PW07 dari ringkasan,
+  LN22a.) Lonceng memuat seluruh produk
   (`GET /produk` tanpa paginasi, satu-satunya yang mengisi stok
   terhitung produk beresep; kunci cache sendiri) dan menghitung sendiri
   LN1a. Hitungan itu dilaporkan ke backend agar masuk ringkasan
@@ -107,7 +108,7 @@ LN3a:
   (`/dashboard/outlet`), setiap dibuka atau dimuat ulang selama pemicu
   LN1a berlaku; di halaman lain lencana rose tetap terlihat. Ditunda bila
   tur panduan dashboard belum pernah tampil, agar tidak bertumpuk.
-- **LN14a: satu produk berstok langsung ke Ubah Produk, lebih dari satu
+- **LN14a (digantikan LN22a, 27 November 2026): satu produk berstok langsung ke Ubah Produk, lebih dari satu
   ke daftar Produk** ("Lihat produk"). Kartu menyebut jumlah dan sampai
   tiga nama produk.
 - **LN15a: pesan halaman sama dengan kartu lonceng**: kotak rose berisi
@@ -204,6 +205,23 @@ dan gudang LN4a:
   Bukti: `tests/unit/features/notifikasi/ruang.test.ts` dan
   `auth/ruang-lokasi-kerja.spec.ts` (test LN20a, LN21a: lonceng di ruang
   gudang tidak meminta `akun/langganan` maupun pengajuan disetujui).
+
+### Pemicu stok dari ringkasan (27 November 2026)
+
+Diputuskan pemilik proyek lewat dialog PW07, sesudah backend B380:
+
+- **LN22a: pemicu LN1a dari ringkasan, kartu berupa angka.** Lonceng tidak
+  lagi memuat seluruh produk; pemicu dibaca dari `produk.total` dan
+  `produk.dapatDijual` `GET /dashboard/outlet`. Kartu tidak ada yang dapat
+  dijual berjudul "Tidak ada produk yang dapat dijual" dengan isi "N produk
+  stoknya habis." (N jumlah produk, tanpa menyebut nama satu per satu) dan
+  tautan Lihat produk serta Pembelian Stok bagi pemegang izinnya.
+  Menggantikan pemisahan berstok langsung dan beresep LN2a untuk kartu
+  ini, sebutan tiga nama dan tautan Ubah Produk satu produk LN14a, dan
+  Pengajuan ke Gudang di kartu ini. Kartu Toko belum punya produk tetap.
+  Banner dan pesan halaman (LN3a, LN15a) memakai sumber yang sama. Soal
+  izin gugur: seluruh laman pemakai pesan stok berada di ruang outlet yang
+  menuntut izin dashboard outlet (`b9fe4a0`).
 
 ## Catatan
 

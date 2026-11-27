@@ -533,3 +533,27 @@ Modul dashboard dan transfer stok (Yoga).
   teruji di unit test, karena data development tidak punya surat jalan
   pengembalian yang sedang dikirim (pilihan pemilik proyek, 26 November
   2026).
+
+### Kebutuhan: hitungan produk yang dapat dijual di ringkasan dashboard (laporan 25 November 2026)
+
+Modul produk dan dashboard (Yoga).
+
+- **Bukti:** `services/dashboardGudangService.js` `getOutletSummary`
+  hanya menghitung `produk.stokKritis` untuk produk berstok langsung
+  (`"resep.0": { $exists: false }`). Stok terhitung produk beresep hanya
+  diisi `#isiStokTerkini` di `services/produkService.js` `getAll`.
+- **Kenapa penting:** pemicu LN1a ("tidak ada satu pun produk yang dapat
+  dijual", termasuk produk beresep berstok terhitung 0) hanya dapat
+  dihitung web dari `GET /produk` tanpa paginasi, yang dimuat lonceng di
+  setiap halaman dashboard dan berkala tiap 5 menit.
+- **Saran:** tambahkan di `GET /dashboard/outlet` jumlah produk
+  (`produk.total`) dan jumlah produk yang dapat dijual (`produk.dapatDijual`:
+  unlimited, atau stok, termasuk stok terhitung resep, di atas 0).
+- **Penanganan sementara di frontend:** lonceng memuat seluruh produk
+  dengan kunci cache sendiri dan menghitungnya; pindah ke ringkasan
+  begitu field itu ada.
+- **Dibuktikan:** 27 November 2026 (PW07, `b9fe4a0`) terhadap backend
+  `6478d29` (B380): `produk.total` dan `produk.dapatDijual` ringkasan sama
+  dengan hitungan dari `GET /produk` beserta stok terhitung resepnya
+  (`dashboard/lonceng-pemberitahuan`). Lonceng kini membaca pemicu LN1a
+  dari ringkasan dan tidak lagi memuat seluruh produk (LN22a).
