@@ -193,8 +193,10 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
       selesaiLangkah={selesai}
       namaToko={namaToko.data ?? ""}
     >
-      {/* Langkah kesiapan toko (PW19, KS9a) bila kartu lonceng mengarah ke setup fitur. */}
-      <KotakKesiapan langkah={["sesi-booking", "wms"]} />
+      {/* Langkah kesiapan toko (PW19, KS9a) hanya di langkah wizard fitur yang
+          sama dengan langkah kesiapan, bukan selagi setup inti berjalan. */}
+      {kunci === "booking" && <KotakKesiapan langkah={["sesi-booking"]} />}
+      {kunci === "gudang" && <KotakKesiapan langkah={["wms"]} />}
       {isi}
     </KerangkaSetup>
   );

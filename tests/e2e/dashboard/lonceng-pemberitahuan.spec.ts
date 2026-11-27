@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
-import { akunBaru, isiTokoDanOwner, tunggu } from "../../helpers/setup-uji";
+import { akunBaru, isiTokoDanOwner, langkahAktif as langkahAktifWizard, tunggu } from "../../helpers/setup-uji";
 import { idLokasiRuang } from "../../helpers/jadwal-uji";
 import { balonPanduan } from "../../helpers/panduan-uji";
 import { loginAplikasi } from "../../helpers/sesi-kasir-uji";
@@ -367,7 +367,7 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
         await page.keyboard.press("Escape");
       });
 
-      await test.step("sesudah ada produk: langkah 2 setup fitur bertingkat info, kotaknya di wizard Setup", async () => {
+      await test.step("sesudah ada produk: langkah 2 setup fitur bertingkat info; wizard di setup inti tanpa kotak", async () => {
         const kategori = await api<{ id?: string; _id?: string }>(page, auth, "POST", "/kategori", {
           namaKategori: "Kopi Kesiapan",
           kodeKategori: "KSP",
@@ -392,9 +392,11 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
         await expect(siapkan).toContainText("Setup Sesi Booking belum selesai, sehingga fiturnya masih terkunci.");
         await siapkan.getByRole("link", { name: "Lengkapi setup" }).click();
         await page.waitForURL("**/setup");
-        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 2 dari 2)" });
-        await expect(kotak).toBeVisible({ timeout: 15_000 });
-        await expect(kotak.getByRole("link")).toHaveCount(0);
+        // Setup inti akun ini belum selesai (wizard di jam buka), sehingga
+        // kotak langkah fitur tidak tampil (KS9a); kasus tampilnya di
+        // skenario Pro tests/e2e/setup/setup.spec.ts.
+        await expect(langkahAktifWizard(page)).toContainText("Jam buka toko", { timeout: 15_000 });
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko" })).toHaveCount(0);
       });
     } finally {
       await hapusAkunKlienUji(id, wajibAdmin());

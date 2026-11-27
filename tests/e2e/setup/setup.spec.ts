@@ -230,7 +230,15 @@ test.describe("Wizard setup", () => {
       await test.step("wizard dibuka lagi mulai dari sesi booking; pajak dapat ditambah", async () => {
         await page.goto("/setup");
         await expect(langkahAktif(page)).toContainText("Sesi booking", { timeout: 15_000 });
+        // Kotak langkah kesiapan toko (PW19, KS9a) hanya di langkah wizard
+        // fitur yang sama, tanpa tautan ke wizard itu sendiri.
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko" });
+        await expect(kotak).toContainText("Siapkan toko (langkah 2 dari 3)", { timeout: 15_000 });
+        await expect(kotak).toContainText("Setup Sesi Booking belum selesai");
+        await expect(kotak.getByRole("link")).toHaveCount(0);
         await page.getByRole("button", { name: "Kembali" }).click();
+        await expect(langkahAktif(page)).toContainText("Pajak");
+        await expect(kotak, "tidak di langkah setup inti").toHaveCount(0);
         const tersimpan = page.getByRole("region", { name: "Pajak tersimpan" });
         await expect(tersimpan).toContainText("PB1");
         await page.getByLabel("Nama pajak").fill("Pajak minuman");
@@ -266,6 +274,11 @@ test.describe("Wizard setup", () => {
         ).toBeVisible();
         await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
         await page.getByRole("button", { name: "Lanjut", exact: true }).click();
+        await expect(langkahAktif(page)).toContainText("Gudang");
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko" })).toContainText(
+          "Setup Gudang belum selesai",
+          { timeout: 15_000 },
+        );
       });
 
       await isiLokasi(page, "gudang", "Gudang E2E");
