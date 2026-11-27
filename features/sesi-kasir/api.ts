@@ -1,4 +1,5 @@
 import { api, apiData } from "@/lib/api/client";
+import { apiClient } from "@/lib/apiClient";
 import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
 import type {
@@ -14,6 +15,13 @@ import type { PayloadTutupKasir } from "./dialog-tutup-kasir";
 
 export type HalamanSesiKasir = { data: SesiKasir[]; pagination: Paginasi | null };
 export type HalamanPeriodeKasir = { data: PeriodeKasir[]; pagination: Paginasi | null };
+
+/** Format unduhan laporan periode; backend hanya menerima pdf dan xlsx (UNDUHAN_PERIODE). */
+export type FormatUnduhPeriode = "pdf" | "xlsx";
+export const PILIHAN_UNDUH_PERIODE: { format: FormatUnduhPeriode; label: string }[] = [
+  { format: "pdf", label: "PDF" },
+  { format: "xlsx", label: "Excel" },
+];
 
 /**
  * Respons tutup (mapSesiKasirButa): tanpa angka (hitung buta), ditambah periode
@@ -61,4 +69,11 @@ export const sesiKasirApi = {
   },
   /** Detail periode beserta laporan; laporan null selama periode BUKA. */
   detailPeriode: (id: string) => apiData.get<PeriodeKasirDetail>(EP.sesiKasir.periodeById(id)),
+  /**
+   * Unduh laporan periode TUTUP sebagai PDF atau Excel (PW12, keputusan
+   * rancangan butir 37): berkas dibangun backend, hanya read-sesi-kasir;
+   * periode BUKA dijawab 409.
+   */
+  unduhPeriode: (id: string, format: FormatUnduhPeriode) =>
+    apiClient.unduh(EP.sesiKasir.periodeById(id), { format }, `laporan_tutup_kasir_${id}.${format}`, "pengguna"),
 };

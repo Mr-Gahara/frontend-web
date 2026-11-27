@@ -4,7 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, ChevronLeft, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TombolUnduhLaporan } from "@/components/unduh/tombol-unduh-laporan";
 import { isNotFound, pesanError } from "@/lib/api/error";
+import { PILIHAN_UNDUH_PERIODE, sesiKasirApi } from "./api";
 import { useDetailPeriode } from "./hooks";
 import { BadgeStatusPeriode } from "./label";
 import { URL_LAPORAN_TUTUP_KASIR, judulLaporan, subjudulLaporan, waktuBaris } from "./laporan";
@@ -14,8 +16,8 @@ import { StrukLaporan } from "./struk-laporan";
 /**
  * Satu Laporan Tutup Kasir (PW10, desain A): struk di tengah di atas latar
  * krem. Periode yang masih berjalan belum punya laporan (B375), sehingga
- * diganti keterangan. Cetak struk 80 mm dari browser (PW11); unduh menyusul
- * (PW12).
+ * diganti keterangan. Cetak struk 80 mm dari browser (PW11) dan unduh PDF
+ * atau Excel (PW12) hanya untuk periode TUTUP.
  */
 export function HalamanLaporanPeriode({ id }: { id: string }) {
   const detail = useDetailPeriode(id);
@@ -61,14 +63,23 @@ export function HalamanLaporanPeriode({ id }: { id: string }) {
         </div>
         {/* Cetak hanya periode TUTUP, yang laporannya sudah dipotret (keputusan 8, PW11). */}
         {laporan && (
-          <Button
-            type="button"
-            onClick={() => window.print()}
-            className="h-11 w-full bg-navy px-[18px] text-isi font-bold text-gading hover:bg-navy/90 sm:w-auto"
-          >
-            <Printer className="size-4" aria-hidden="true" />
-            Cetak struk
-          </Button>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row">
+            {/* Unduh PDF atau Excel bergaris tepi di samping Cetak struk (papan A, PW12). */}
+            <TombolUnduhLaporan
+              label="Unduh"
+              pilihan={PILIHAN_UNDUH_PERIODE}
+              unduh={(format) => sesiKasirApi.unduhPeriode(periode.id, format)}
+              className="h-11 w-full border border-navy/15 bg-gading px-[18px] text-isi text-navy hover:bg-krem sm:w-auto"
+            />
+            <Button
+              type="button"
+              onClick={() => window.print()}
+              className="h-11 w-full bg-navy px-[18px] text-isi font-bold text-gading hover:bg-navy/90 sm:w-auto"
+            >
+              <Printer className="size-4" aria-hidden="true" />
+              Cetak struk
+            </Button>
+          </div>
         )}
       </div>
 

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import ExcelJS from "exceljs";
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
@@ -137,6 +139,7 @@ test.describe("Laporan Tutup Kasir", () => {
       });
       await expect(page.getByRole("article", { name: "Struk laporan tutup kasir" })).toHaveCount(0);
       await expect(page.getByRole("button", { name: "Cetak struk" }), "periode BUKA tidak dicetak").toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Unduh" }), "periode BUKA tidak diunduh").toHaveCount(0);
 
       // Rincian sesi menautkan ke periodenya.
       await page.goto(`/dashboard/outlet/keuangan/mesinKasir/${sesi.id}`);
@@ -261,6 +264,90 @@ test.describe("Laporan Tutup Kasir", () => {
     const tinggiPt = (Math.ceil(tinggiArea / (96 / 25.4)) * 72) / 25.4;
     expect(Math.abs(kotak[0][1] - tinggiPt), "tinggi kertas setinggi struk").toBeLessThan(1);
     await page.emulateMedia({ media: "screen" });
+  });
+
+  test("unduh PDF dan Excel: berkas dari backend, isi Excel sama dengan laporan (PW12)", async ({ page }) => {
+    await login(page);
+    const tDaftar = tungguDaftar(page);
+    const auth = await bukaDenganAuth(page, URL_LAPORAN_TUTUP_KASIR);
+    const tutup = (await isi<PeriodeKasir[]>(await tDaftar)).find((p) => p.status === "TUTUP");
+    test.skip(!tutup, "belum ada periode tertutup");
+    const lap = (await detailPeriode(page, auth, tutup!.id)).laporan!;
+    await page.goto(`${URL_LAPORAN_TUTUP_KASIR}/${tutup!.id}`);
+    const tombol = page.getByRole("button", { name: "Unduh" });
+    await expect(tombol).toBeVisible({ timeout: 20_000 });
+
+    const unduh = async (label: string, format: string) => {
+      const tRes = page.waitForResponse(
+        (r) =>
+          new globalThis.URL(r.url()).pathname === `/api/sesikasir/periode/${tutup!.id}` &&
+          new globalThis.URL(r.url()).searchParams.get("format") === format,
+      );
+      const tBerkas = page.waitForEvent("download");
+      await tombol.click();
+      await page.getByRole("menuitem", { name: label, exact: true }).click();
+      const res = await tRes;
+      expect(res.status(), `unduh ${label}`).toBe(200);
+      const berkas = await tBerkas;
+      expect(berkas.suggestedFilename()).toBe(`laporan_tutup_kasir_${tutup!.id}.${format}`);
+      return { res, path: await berkas.path() };
+    };
+
+    // Menu hanya PDF dan Excel: backend menolak format lain.
+    await tombol.click();
+    await expect(page.getByRole("menuitem")).toHaveText(["PDF", "Excel"]);
+    await page.keyboard.press("Escape");
+
+    const pdf = await unduh("PDF", "pdf");
+    expect(pdf.res.headers()["content-type"]).toMatch(/application\/pdf/);
+    expect(readFileSync(pdf.path).subarray(0, 5).toString("latin1"), "berkas PDF").toBe("%PDF-");
+
+    const xlsx = await unduh("Excel", "xlsx");
+    expect(xlsx.res.headers()["content-type"]).toMatch(/spreadsheetml/);
+    const buku = new ExcelJS.Workbook();
+    await buku.xlsx.readFile(xlsx.path);
+    const baris: unknown[][] = [];
+    buku.worksheets[0].eachRow({ includeEmpty: false }, (r) => {
+      baris.push((r.values as unknown[]).slice(1).map((v) => (v === undefined ? null : v)));
+    });
+    // Waktu ditulis backend dalam WIB: YYYY-MM-DD HH:mm.
+    const wib = (iso: string) => {
+      const b = Object.fromEntries(
+        new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23",
+        })
+          .formatToParts(new Date(iso))
+          .map((x) => [x.type, x.value]),
+      );
+      return `${b.year}-${b.month}-${b.day} ${b.hour}:${b.minute}`;
+    };
+    expect(baris).toEqual([
+      ["Uraian", "Nilai"],
+      ["Toko", lap.toko.namaToko ?? ""],
+      ["Outlet", lap.outlet?.nama ?? ""],
+      ["Kasir", lap.kasir.join(", ")],
+      ["Buka", wib(lap.dibukaPada)],
+      ["Tutup", wib(lap.ditutupPada)],
+      ["Modal awal", lap.modalAwal],
+      ...lap.penerimaanPerMetode.map((m) => [m.namaMetodePembayaran, m.jumlah]),
+      ["Total penerimaan kasir", lap.totalPenerimaanKasir],
+      ["Total penerimaan invoice", lap.totalPenerimaanInvoice],
+      ["Total penerimaan", lap.totalPenerimaan],
+      ["Saldo akhir", lap.saldoAkhir],
+      ["Transaksi selesai", lap.transaksiSelesai],
+      ["Belum terbayar", lap.transaksiBelumTerbayar],
+      ["Total sistem", lap.totalSistem],
+      ["Tunai aktual", lap.tunaiAktual],
+      ["Selisih", lap.selisih],
+      ...lap.produkTerjual.map((p) => [p.namaProduk, p.jumlah]),
+      ["Total produk terjual", lap.totalProdukTerjual],
+    ]);
   });
 
   test("HP: daftar dan laporan tampil tanpa gulir ke samping", async ({ page }) => {
