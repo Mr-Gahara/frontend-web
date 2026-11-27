@@ -283,15 +283,27 @@ untuk toko yang belum siap beroperasi mendahulukan setup sampai siap
   hari ini ditahan selama belum ada staf selain Owner, belum ada shift
   aktif, atau belum ada pola roster di outlet (`tahanPengingatAbsensi`).
   Jadwal tidak menjadi syarat, karena pengingat itulah yang mengajak
-  membuatnya. Tanpa izin baca pengguna, shift, atau pola roster, atau bila
-  permintaannya gagal, penahan tidak berlaku. Staf selain Owner dihitung
-  dari pengguna lebih dari satu, karena backend menolak membuat pengguna
-  berrole setingkat pembuatnya; selama data dimuat, pengingat ikut
-  ditahan agar tidak muncul lalu hilang.
+  membuatnya. Tanpa izin baca pengguna, shift, atau pola roster, penahan
+  tidak berlaku.
 - **KS9a: kotak langkah di Buat Produk dan wizard Setup**
-  (`KotakKesiapan`), di atas isi halaman, hanya selama langkah yang
-  berjalan milik halaman itu, tanpa tautan ke halamannya sendiri. Pesan
-  stok produk LN3a di empat halaman tidak berubah.
+  (`KotakKesiapan`), di atas isinya, dan hilang sendiri saat langkahnya
+  selesai. Pesan stok produk LN3a di empat halaman tidak berubah.
+
+Rincian penerapan, bukan bagian teks opsi (dapat dibatalkan pemilik
+proyek):
+
+- Penahan KS8a: selama data pengguna, shift, dan pola masih dimuat,
+  pengingat ikut ditahan agar tidak muncul lalu hilang; bila salah satu
+  permintaannya gagal, penahan tidak berlaku; syarat berizin juga menuntut
+  `read-location`, karena outlet dibaca dari `/location/current`. Staf
+  selain Owner dihitung dari pengguna lebih dari satu, karena backend
+  menolak membuat pengguna berrole setingkat pembuatnya.
+- Kotak KS9a: tautan yang menuju halaman itu sendiri tidak ditampilkan;
+  di Buat Produk hanya saat membuat (bukan Ubah Produk); di wizard Setup
+  hanya di langkah wizard yang sama dengan langkah kesiapan (Sesi booking
+  untuk Setup Sesi Booking, Gudang untuk Setup Gudang), tidak selagi
+  setup inti berjalan.
+- Panel terbuka sendiri LN13a membaca pemicu LN1a langsung.
 
 ## Catatan
 

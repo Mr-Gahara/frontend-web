@@ -203,9 +203,10 @@ skip bersyarat data, dan catatan proses.
   hanya teruji di unit test** (`tests/unit/features/notifikasi`).
   Skenario `dashboard/lonceng-pemberitahuan` memakai akun Advanced sekali
   pakai yang dipegang Owner, sehingga penahan selalu berizin, dan
-  langkah setup Gudang (plan Pro) tidak dilalui. Kotak di wizard Setup
-  diuji saat setup inti belum selesai; pada pemakaian nyata langkah
-  fitur baru tampil sesudah setup inti tuntas.
+  langkah setup Gudang (plan Pro) tidak dilalui di lonceng. Kotak di
+  wizard Setup teruji e2e di skenario Pro `setup/setup.spec.ts` (tampil
+  di langkah Sesi booking dan Gudang, tidak di Pajak), dan tidak tampil
+  selagi setup inti berjalan (`dashboard/lonceng-pemberitahuan`).
 
 ## Data uji yang menetap dan data per run
 
