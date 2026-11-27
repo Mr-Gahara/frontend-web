@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useDetailPeriode } from "./hooks";
 import { BadgeStatusPeriode } from "./label";
 import { URL_LAPORAN_TUTUP_KASIR, judulLaporan, subjudulLaporan, waktuBaris } from "./laporan";
+import { AreaCetakStruk } from "./area-cetak-struk";
 import { StrukLaporan } from "./struk-laporan";
 
 /**
  * Satu Laporan Tutup Kasir (PW10, desain A): struk di tengah di atas latar
  * krem. Periode yang masih berjalan belum punya laporan (B375), sehingga
- * diganti keterangan. Cetak dan unduh menyusul (PW11, PW12).
+ * diganti keterangan. Cetak struk 80 mm dari browser (PW11); unduh menyusul
+ * (PW12).
  */
 export function HalamanLaporanPeriode({ id }: { id: string }) {
   const detail = useDetailPeriode(id);
@@ -51,15 +53,31 @@ export function HalamanLaporanPeriode({ id }: { id: string }) {
         Kembali ke Laporan Tutup Kasir
       </Link>
 
-      <div className="flex min-w-0 flex-col gap-2">
-        <BadgeStatusPeriode status={periode.status} className="self-start text-isi" />
-        <h2 className="break-words text-judul font-bold text-navy">{judulLaporan(periode.dibukaPada)}</h2>
-        <p className="text-besar text-navy/70">{subjudulLaporan(periode, laporan?.outlet?.nama)}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-2">
+          <BadgeStatusPeriode status={periode.status} className="self-start text-isi" />
+          <h2 className="break-words text-judul font-bold text-navy">{judulLaporan(periode.dibukaPada)}</h2>
+          <p className="text-besar text-navy/70">{subjudulLaporan(periode, laporan?.outlet?.nama)}</p>
+        </div>
+        {/* Cetak hanya periode TUTUP, yang laporannya sudah dipotret (keputusan 8, PW11). */}
+        {laporan && (
+          <Button
+            type="button"
+            onClick={() => window.print()}
+            className="h-11 w-full bg-navy px-[18px] text-isi font-bold text-gading hover:bg-navy/90 sm:w-auto"
+          >
+            <Printer className="size-4" aria-hidden="true" />
+            Cetak struk
+          </Button>
+        )}
       </div>
 
       <div className="flex justify-center rounded-[20px] border border-navy/10 bg-krem px-4 py-10">
         {laporan ? (
-          <StrukLaporan laporan={laporan} />
+          <>
+            <StrukLaporan laporan={laporan} />
+            <AreaCetakStruk laporan={laporan} />
+          </>
         ) : (
           <div className="flex max-w-md flex-col items-center gap-2 rounded-[14px] border border-dashed border-navy/25 bg-gading p-8 text-center">
             <span className="text-subjudul font-bold text-navy">Laporan tersedia setelah semua mesin kasir di outlet ditutup.</span>

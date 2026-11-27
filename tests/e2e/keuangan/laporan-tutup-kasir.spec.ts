@@ -136,6 +136,7 @@ test.describe("Laporan Tutup Kasir", () => {
         timeout: 20_000,
       });
       await expect(page.getByRole("article", { name: "Struk laporan tutup kasir" })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Cetak struk" }), "periode BUKA tidak dicetak").toHaveCount(0);
 
       // Rincian sesi menautkan ke periodenya.
       await page.goto(`/dashboard/outlet/keuangan/mesinKasir/${sesi.id}`);
@@ -210,6 +211,56 @@ test.describe("Laporan Tutup Kasir", () => {
     await expect(page.getByText("Laporan tutup kasir tidak ditemukan.")).toBeVisible({ timeout: 20_000 });
     await page.getByRole("link", { name: "Kembali ke Laporan Tutup Kasir" }).click();
     await expect(page).toHaveURL(new RegExp(`${URL_LAPORAN_TUTUP_KASIR}$`));
+  });
+
+  test("cetak struk: tombol memanggil cetak browser, dan halaman cetak hanya struk di kertas 80 mm (PW11)", async ({
+    page,
+  }) => {
+    await login(page);
+    const tDaftar = tungguDaftar(page);
+    const auth = await bukaDenganAuth(page, URL_LAPORAN_TUTUP_KASIR);
+    const tutup = (await isi<PeriodeKasir[]>(await tDaftar)).find((p) => p.status === "TUTUP");
+    test.skip(!tutup, "belum ada periode tertutup");
+    const lap = (await detailPeriode(page, auth, tutup!.id)).laporan!;
+
+    await page.goto(`${URL_LAPORAN_TUTUP_KASIR}/${tutup!.id}`);
+    const tombol = page.getByRole("button", { name: "Cetak struk" });
+    await expect(tombol).toBeVisible({ timeout: 20_000 });
+    // Dialog cetak browser tidak dapat dikendalikan Playwright; window.print dicatat.
+    await page.evaluate(() => {
+      (window as unknown as { jumlahCetak: number }).jumlahCetak = 0;
+      window.print = () => {
+        (window as unknown as { jumlahCetak: number }).jumlahCetak += 1;
+      };
+    });
+    await tombol.click();
+    expect(await page.evaluate(() => (window as unknown as { jumlahCetak: number }).jumlahCetak)).toBe(1);
+
+    // Di layar salinan cetak tersembunyi; saat cetak hanya salinan itu yang tampil.
+    const cetak = page.getByRole("article", { name: "Struk cetak laporan tutup kasir" });
+    await expect(cetak).toBeHidden();
+    await page.emulateMedia({ media: "print" });
+    await expect(cetak).toBeVisible();
+    await expect(page.getByRole("article", { name: "Struk laporan tutup kasir" })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Cetak struk" })).toBeHidden();
+    await expect(page.getByRole("heading", { name: "Manajemen Keuangan" })).toBeHidden();
+    const lebarArea = await page.locator("[data-area-cetak]").evaluate((el) => el.getBoundingClientRect().width);
+    expect(Math.abs(lebarArea - (80 / 25.4) * 96), "area cetak selebar 80 mm").toBeLessThan(1);
+    await expect(cetak.getByRole("region", { name: "Transaksi penjualan" })).toContainText(waktuStruk(lap.ditutupPada));
+    await expect(cetak).toContainText(angkaStruk(lap.totalProdukTerjual));
+
+    // Ukuran kertas nyata dari @page: lebar 80 mm (226,77 pt), satu lembar setinggi isi.
+    // page.pdf tidak memicu beforeprint seperti dialog cetak browser, sehingga dipicu di sini.
+    await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+    const tinggiArea = await page.locator("[data-area-cetak]").evaluate((el) => el.getBoundingClientRect().height);
+    const pdf = (await page.pdf({ preferCSSPageSize: true })).toString("latin1");
+    const kotak = [...pdf.matchAll(/\/MediaBox\s*\[\s*0 0 ([\d.]+) ([\d.]+)\s*\]/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    expect(kotak.length, "satu lembar").toBe(1);
+    expect(Math.abs(kotak[0][0] - (80 / 25.4) * 72), "lebar kertas 80 mm").toBeLessThan(1);
+    // Tinggi kertas = tinggi struk dibulatkan ke atas per milimeter (px ke pt: 72/96).
+    const tinggiPt = (Math.ceil(tinggiArea / (96 / 25.4)) * 72) / 25.4;
+    expect(Math.abs(kotak[0][1] - tinggiPt), "tinggi kertas setinggi struk").toBeLessThan(1);
+    await page.emulateMedia({ media: "screen" });
   });
 
   test("HP: daftar dan laporan tampil tanpa gulir ke samping", async ({ page }) => {

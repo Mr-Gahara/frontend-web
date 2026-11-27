@@ -454,3 +454,29 @@ input.no-spinner[type="number"] {
     transform: none !important;
   }
 }
+
+/*
+ * Cetak struk dari browser (PW11, keputusan 8 rencana struk tutup kasir):
+ * kertas 80 mm. Hanya area bertanda data-area-cetak (portal di body,
+ * tersembunyi di layar) yang dicetak; seluruh aplikasi disembunyikan. Tinggi
+ * kertas disetel setinggi struk saat beforeprint (features/sesi-kasir/
+ * area-cetak-struk.tsx), karena "80mm auto" tidak sah dan diabaikan browser
+ * (jatuh ke Letter); 297 mm di bawah hanya cadangan.
+ */
+@media print {
+  @page {
+    size: 80mm 297mm;
+    margin: 0;
+  }
+  html,
+  body {
+    background: var(--permukaan) !important;
+  }
+  body > :not([data-area-cetak]) {
+    display: none !important;
+  }
+  [data-area-cetak] {
+    display: block !important;
+    width: 80mm;
+  }
+}

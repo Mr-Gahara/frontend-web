@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { LaporanPeriodeKasir } from "@/types/sesiKasir";
 import { angkaStruk, waktuStruk } from "./laporan";
 
@@ -40,12 +41,18 @@ function BagianTransaksi({ laporan }: { laporan: LaporanPeriodeKasir }) {
  * langsung lewat variabelnya, karena kelas font-mono jatuh ke tumpukan bawaan
  * Tailwind (ui-monospace sampai Courier New), bukan Geist Mono.
  */
-export function StrukLaporan({ laporan }: { laporan: LaporanPeriodeKasir }) {
+export function StrukLaporan({ laporan, cetak = false }: { laporan: LaporanPeriodeKasir; cetak?: boolean }) {
   const alamat = laporan.outlet?.alamat ?? laporan.toko.alamat;
   return (
     <article
-      aria-label="Struk laporan tutup kasir"
-      className="flex w-full max-w-[400px] flex-col gap-2.5 rounded-[4px] bg-permukaan px-6 py-7 font-[family-name:var(--font-geist-mono)] text-isi leading-relaxed text-navy shadow-[0_1px_2px_color-mix(in_srgb,var(--navy)_8%,transparent),0_8px_24px_color-mix(in_srgb,var(--navy)_8%,transparent)]"
+      aria-label={cetak ? "Struk cetak laporan tutup kasir" : "Struk laporan tutup kasir"}
+      className={cn(
+        "flex w-full flex-col gap-2.5 bg-permukaan font-[family-name:var(--font-geist-mono)] text-isi leading-relaxed text-navy",
+        // Kertas 80 mm (PW11): tanpa bayangan dan sudut, tepi 4 mm agar tidak terpotong printer.
+        cetak
+          ? "px-[4mm] py-[5mm]"
+          : "max-w-[400px] rounded-[4px] px-6 py-7 shadow-[0_1px_2px_color-mix(in_srgb,var(--navy)_8%,transparent),0_8px_24px_color-mix(in_srgb,var(--navy)_8%,transparent)]",
+      )}
     >
       {/* 1. Toko dan outlet, tanpa judul (keputusan 6: tanpa telepon). */}
       <div className="flex flex-col gap-0.5 text-center">

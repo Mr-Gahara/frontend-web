@@ -94,3 +94,44 @@ describe("Integration - StrukLaporan (PW10, Susunan struk)", () => {
     expect(baris(struk).map(([l]) => l)).not.toContain("Tunai");
   });
 });
+
+describe("Integration - struk cetak (PW11)", () => {
+  it("varian cetak bersusunan sama dengan struk di layar", async () => {
+    const { unmount } = render(<StrukLaporan laporan={LAPORAN} />);
+    const layar = baris(screen.getByRole("article", { name: "Struk laporan tutup kasir" }));
+    unmount();
+    render(<StrukLaporan laporan={LAPORAN} cetak />);
+    const cetak = screen.getByRole("article", { name: "Struk cetak laporan tutup kasir" });
+    expect(baris(cetak)).toEqual(layar);
+    expect(cetak.querySelectorAll("hr")).toHaveLength(9);
+    // Kertas 80 mm: tanpa bayangan dan batas lebar layar.
+    expect(cetak.className).not.toMatch(/shadow|max-w-/);
+  });
+
+  it("area cetak dipasang langsung di body dan tersembunyi di layar", async () => {
+    const { AreaCetakStruk } = await import("@/features/sesi-kasir/area-cetak-struk");
+    const { container } = render(
+      <div id="aplikasi">
+        <AreaCetakStruk laporan={LAPORAN} />
+      </div>,
+    );
+    expect(container.querySelector("[data-area-cetak]")).toBeNull();
+    const area = document.body.querySelector(":scope > [data-area-cetak]");
+    expect(area).not.toBeNull();
+    expect(area).toHaveClass("hidden");
+    expect(within(area as HTMLElement).getByRole("article", { name: "Struk cetak laporan tutup kasir" })).toBeInTheDocument();
+  });
+
+  it("beforeprint menyetel kertas 80 mm setinggi struk, dan dibuang saat laman ditinggal", async () => {
+    const { AreaCetakStruk } = await import("@/features/sesi-kasir/area-cetak-struk");
+    const { unmount } = render(<AreaCetakStruk laporan={LAPORAN} />);
+    const area = document.body.querySelector<HTMLElement>(":scope > [data-area-cetak]")!;
+    // jsdom tidak menghitung tata letak; tinggi struk dibuat 500 px (132,3 mm).
+    area.getBoundingClientRect = () => ({ height: 500 }) as DOMRect;
+    window.dispatchEvent(new Event("beforeprint"));
+    expect(document.getElementById("ukuran-kertas-struk")?.textContent).toBe("@page { size: 80mm 133mm; margin: 0; }");
+    expect(area.getAttribute("style"), "gaya ukur sementara dikembalikan").toBeNull();
+    unmount();
+    expect(document.getElementById("ukuran-kertas-struk")).toBeNull();
+  });
+});
