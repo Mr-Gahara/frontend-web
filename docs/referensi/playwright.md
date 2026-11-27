@@ -273,6 +273,9 @@ bersyarat).
   tengah run; kegagalan sesudahnya bukan bukti kode. Begitu notifikasi
   dev server berhenti muncul, hentikan run, nyalakan ulang, periksa
   `curl localhost:3000` 200, lalu ulangi seluruh berkas terdampak.
+  Terjadi dua kali saat vitest penuh (dan ESLint) berjalan bersamaan
+  dengan `next dev` (PW18 dan PW21): jalankan vitest sebelum atau sesudah
+  run e2e, bukan selama run, dan periksa dev server sesudah vitest.
 - Bukti bahwa sebuah aksi tidak mengirim permintaan diambil dari penghitung
   `page.on("request", ...)` yang dilepas dengan `page.off`, bukan hanya dari
   toast. Contoh: langkah pengosongan di spec draft stock opname.

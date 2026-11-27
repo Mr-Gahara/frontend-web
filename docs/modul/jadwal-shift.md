@@ -278,6 +278,25 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   cuti pada bulan yang dipilih." dan keadaan kosong diuji tanpa simulasi
   (PW04, `12ded07`).
 
+### Ruang staf (27 November 2026)
+
+Diputuskan pemilik proyek, dari laporannya bahwa pengguna berakses App
+Kasir saja tidak tampil di daftar karyawan (`7553126`, PW21).
+
+- **RS1a: ruang staf dipilah web.** Lokasi kerja terisi menentukan ruang;
+  tanpa lokasi kerja, izin dashboard role (dibaca dari daftar
+  `GET /pengguna?workspace=` backend, sehingga Owner di kedua ruang); tanpa
+  keduanya, ruang outlet, karena aplikasi kasir dipakai di outlet. Berlaku
+  di halaman Pengguna, Generate Jadwal, kalender Jadwal, Status Staf, dan
+  hitungan staf lonceng (`features/pengguna/ruang-staf.ts`). Backend hanya
+  membaca izin dashboard, sehingga staf berposisi tanpa izin dashboard
+  tidak masuk ruang mana pun (`kontrak/temuan.md` butir 197).
+
+Rincian penerapan, bukan bagian teks opsi: lokasi kerja yang tipenya tidak
+diketahui (tanpa `read-location`) dilewati ke izin dashboard; pengguna
+yang lokasi kerjanya diubah berpindah ruang, sehingga hilang dari daftar
+ruang tempat ia diubah.
+
 ## Catatan
 
 - Sejak PW18 (`041238b`, KS12a di `modul/pemberitahuan.md`): dialog Pola

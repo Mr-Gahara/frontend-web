@@ -52,6 +52,7 @@ tetap `AR`, `B`, dan `P`.
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Selesai | `041238b` |
 | PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Selesai | `f606985` |
 | PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Selesai | `3198f5d` |
+| PW21 | Staf akses aplikasi tampil di daftar ruang (butir 197) | Keputusan | Selesai | `7553126` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -266,6 +267,16 @@ gudang, lalu absensi gudang bila ada petugas gudang; staf dihitung per
 ruang, sehingga toko dengan petugas gudang saja tidak mendapat langkah
 absensi outlet. Kotak langkah di Inventaris, Master Shift, Pola Roster,
 dan Generate Jadwal gudang.
+
+### PW21: staf akses aplikasi tampil di daftar ruang
+
+Selesai 27 November 2026 (`7553126`), dari laporan pemilik proyek:
+pengguna berakses App Kasir saja tidak tampil di daftar karyawan, karena
+backend memilah ruang hanya dari izin dashboard posisi (butir 197). Atas
+keputusan RS1a (`modul/jadwal-shift.md`) web memilah ruang dari lokasi
+kerja, lalu izin dashboard, lalu outlet, di halaman Pengguna, Generate
+Jadwal, kalender Jadwal, Status Staf, dan lonceng. Laporan butir 197 di
+`referensi/laporan-untuk-backend.md`.
 
 ## Perubahan backend tanpa pekerjaan web
 

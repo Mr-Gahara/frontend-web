@@ -39,7 +39,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW20)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW21)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -47,7 +47,8 @@ B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
 backend, dan Ridho menyatakan pekerjaan backend MVP selesai. Pembuktian
 web atas baris `Menunggu verifikasi` di `docs/pengembangan/klien.md`
 backend dan tampilan struk tutup kasir selesai (PW02 sampai PW14); baris
-itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya PW15.
+itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya PW15
+(butir 196) serta butir 197 yang ditangani web lewat RS1a (PW21).
 Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
 `hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW06
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna
@@ -73,16 +74,18 @@ berlangkah dan penahan pengingat absensi (KS1a sampai KS9a,
 (opsional, "Toko ini hanya saya") dan absensi di kartu itu, catatan
 syarat di Tambah Pengguna, Pola Roster, dan Generate Jadwal (KS10a
 sampai KS13a). PW20 selesai (`3198f5d`): bidang ruang gudang dan staf
-per ruang di kartu itu (KS14a sampai KS16a). Vitest kini 1357 lolos dari
-159 berkas. PW14 selesai: suite e2e penuh 27 November 2026 (`81e9214`,
-backend `6478d29`) 837 lolos dari 837, tanpa gagal maupun dilewati,
-termasuk spec ber-OTP (Baseline `inti/pengujian.md`).
+per ruang di kartu itu (KS14a sampai KS16a). PW21 selesai (`7553126`):
+staf akses aplikasi tampil di daftar ruang (RS1a, butir 197). Vitest
+kini 1362 lolos dari 160 berkas. PW14 selesai: suite e2e penuh 27
+November 2026 (`81e9214`, backend `6478d29`) 837 lolos dari 837, tanpa
+gagal maupun dilewati, termasuk spec ber-OTP (Baseline
+`inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW20`, satu paket per sesi lewat
+`PW01` sampai `PW21`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW20
+1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW21
    selesai.
 2. **Diawali dialog keputusan:** tidak ada.
 3. **Menunggu izin pemilik proyek:** tidak ada.
