@@ -109,6 +109,8 @@ export const EP = {
     periode: "/sesikasir/periode",
     periodeById: (id: string) => `/sesikasir/periode/${id}`,
   },
+  /** Perangkat menunggu persetujuan se-toko (B381, update-pengguna). */
+  perangkatMenunggu: "/device",
   jurnalTransfer: "/jurnaltransfer",
   jurnalTransferById: (id: string) => `/jurnaltransfer/${id}`,
   bebanOperasional: {

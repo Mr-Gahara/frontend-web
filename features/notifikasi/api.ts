@@ -34,7 +34,25 @@ async function hitung(endpoint: string, params: Record<string, string>): Promise
   return hasil.pagination?.total ?? hasil.data.length;
 }
 
+/**
+ * Perangkat menunggu persetujuan (B381, mapDeviceResponse): milik pengguna
+ * se-toko berlevel di bawah peminta (P39), terbaru dulu.
+ */
+export interface PerangkatMenunggu {
+  id: string;
+  installationId: string;
+  deviceName: string | null;
+  pengguna: { id: string; nama: string; status: string; level?: number } | null;
+  createdAt: string;
+}
+
 export const notifikasiApi = {
+  /**
+   * Daftar utuh tanpa paginasi. apiData memakai token pengguna secara
+   * eksplisit; pola "/device/" di determineTokenKey tidak cocok untuk
+   * "/device?status=pending".
+   */
+  perangkatMenunggu: () => apiData.get<PerangkatMenunggu[]>(EP.perangkatMenunggu, { status: "pending" }),
   ringkasanOutlet: () => apiData.get<RingkasanOutlet>(EP.dashboardOutlet),
   /** Stock opname menunggu ditinjau di satu tipe lokasi (status SUBMITTED). */
   opnameMenunggu: (tipeLokasi: "Outlet" | "Gudang") =>

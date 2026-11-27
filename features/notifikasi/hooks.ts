@@ -32,6 +32,7 @@ import {
   URL_GENERATE_JADWAL,
   pemberitahuanHasilPengajuan,
   pemberitahuanIzinCuti,
+  pemberitahuanPerangkatMenunggu,
   pemberitahuanJadwalMingguDepan,
   pemberitahuanKehadiran,
   rentangMingguDepan,
@@ -234,6 +235,13 @@ function useStafLonceng(akses: AksesTautan) {
     enabled: sudahMasuk && punya(IZIN.izinCuti),
     ...OPSI_SEGAR,
   });
+  // Tingkat toko, seperti izin cuti: tidak menunggu ruang (PW08, B381).
+  const perangkat = useQuery({
+    queryKey: queryKeys.notifikasi.perangkatMenunggu(),
+    queryFn: notifikasiApi.perangkatMenunggu,
+    enabled: sudahMasuk && punya(IZIN.ubahPengguna),
+    ...OPSI_SEGAR,
+  });
   const monitoring = useQuery({
     queryKey: queryKeys.notifikasi.monitoring(hariIni, idOutlet),
     queryFn: () => absensiApi.monitoring(hariIni, idOutlet),
@@ -264,13 +272,14 @@ function useStafLonceng(akses: AksesTautan) {
   const daftar = useMemo(
     () => [
       pemberitahuanIzinCuti(izinCuti.data ?? null),
+      pemberitahuanPerangkatMenunggu(perangkat.data ?? null),
       pemberitahuanKehadiran(monitoring.data?.daftar ?? null, jadwalHariIni.data ?? null, kini, akses),
       pemberitahuanJadwalMingguDepan(jadwalDepan.data ?? null, kini, akses),
       pemberitahuanHasilPengajuan(pengajuan.data ?? null, idSaya, kini, akses),
     ],
-    [izinCuti.data, monitoring.data, jadwalHariIni.data, jadwalDepan.data, pengajuan.data, idSaya, kini, akses],
+    [izinCuti.data, perangkat.data, monitoring.data, jadwalHariIni.data, jadwalDepan.data, pengajuan.data, idSaya, kini, akses],
   );
-  const sumber: UseQueryResult<unknown>[] = [izinCuti, monitoring, jadwalHariIni, jadwalDepan, pengajuan];
+  const sumber: UseQueryResult<unknown>[] = [izinCuti, perangkat, monitoring, jadwalHariIni, jadwalDepan, pengajuan];
   return { daftar, sumber };
 }
 

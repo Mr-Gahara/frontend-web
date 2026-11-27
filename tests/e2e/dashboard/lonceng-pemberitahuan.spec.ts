@@ -3,9 +3,11 @@ import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
 import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
 import { balonPanduan } from "../../helpers/panduan-uji";
+import { loginAplikasi } from "../../helpers/sesi-kasir-uji";
+import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
 import { pengingatLangganan } from "../../../features/langganan/pengingat";
 import { pemicuStokProduk } from "../../../features/notifikasi/sumber-stok-produk";
-import type { RingkasanOutlet } from "../../../features/notifikasi/api";
+import type { PerangkatMenunggu, RingkasanOutlet } from "../../../features/notifikasi/api";
 import type { LanggananToko } from "../../../types/langganan";
 import type { Produk } from "../../../types/produk";
 
@@ -117,6 +119,64 @@ for (const { nama, lebar } of [
     await expect(panel(page)).toBeHidden();
   });
 }
+
+/**
+ * Perangkat kedua pengguna uji "E2E Kasir Outlet": perangkat pertamanya sudah
+ * TRUSTED, sehingga login aplikasi dari perangkat ini menunggu persetujuan
+ * (DEVICE_PENDING_APPROVAL). Dicabut lagi di akhir skenario.
+ */
+const PERANGKAT_PENDING = { installationId: "E2E-KASIR-OUTLET-PENDING-001", nama: "E2E HP Kasir Pending" } as const;
+const POLA_PERANGKAT = /\/api\/device\?status=pending$/i;
+
+test.describe("perangkat menunggu izin (PW08, B381)", () => {
+  test("kartu perlu tindakan menyebut jumlah dan nama dari respons nyata, tanpa tautan; tanpa update-pengguna tidak diminta", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await login(page);
+    await siapkanKasirOutlet(page);
+    await loginAplikasi(PENGGUNA_KASIR_OUTLET, PERANGKAT_PENDING);
+    const auth = await bukaDenganAuth(page, URL_DASHBOARD);
+    try {
+      const baca = await api<PerangkatMenunggu[]>(page, auth, "GET", "/device?status=pending");
+      expect(baca.status, baca.pesan).toBe(200);
+      const daftar = baca.data;
+      const milikUji = daftar.find((d) => d.installationId === PERANGKAT_PENDING.installationId);
+      expect(milikUji?.pengguna?.nama, "perangkat uji menunggu izin").toBe(PENGGUNA_KASIR_OUTLET.nama);
+
+      const tMinta = page.waitForResponse((r) => POLA_PERANGKAT.test(r.url()));
+      await page.reload();
+      expect((await tMinta).status(), "lonceng meminta perangkat menunggu dengan token pengguna").toBe(200);
+      await page.waitForLoadState("networkidle");
+      await lonceng(page).click();
+      await expect(panel(page)).toBeVisible();
+      const lihatSemua = panel(page).getByRole("button", { name: /^Lihat semua/ });
+      if ((await lihatSemua.count()) > 0) await lihatSemua.click();
+      const k = kartu(page, "perangkat-menunggu");
+      await expect(k).toHaveAttribute("data-tingkat", "tindakan");
+      await expect(k).toContainText("Perangkat menunggu izin");
+      await expect(k).toContainText(`${daftar.length} perangkat menunggu izin (`);
+      await expect(k).toContainText(PENGGUNA_KASIR_OUTLET.nama);
+      await expect(k).toContainText("Setujui lewat aplikasi.");
+      await expect(k.getByRole("link"), "disetujui lewat aplikasi, tanpa tautan").toHaveCount(0);
+    } finally {
+      const cabut = await api(page, auth, "POST", "/device/revoke", { installationId: PERANGKAT_PENDING.installationId });
+      expect.soft(cabut.status, "cabut perangkat uji: " + cabut.pesan).toBe(200);
+    }
+
+    // Tanpa update-pengguna: lonceng tidak meminta daftar perangkat.
+    await masukBacaSaja(page);
+    // Pencatat dipasang sesudah berpindah pengguna, agar permintaan sesi Owner tidak terhitung.
+    let diminta = 0;
+    page.on("request", (r) => {
+      if (POLA_PERANGKAT.test(r.url())) diminta += 1;
+    });
+    await page.goto(URL_DASHBOARD);
+    await expect(lonceng(page)).toBeEnabled({ timeout: 20_000 });
+    await page.waitForLoadState("networkidle");
+    expect(diminta, "tanpa update-pengguna tidak meminta perangkat menunggu").toBe(0);
+  });
+});
 
 test.describe("toko tanpa produk (akun klien sekali pakai)", () => {
   test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);

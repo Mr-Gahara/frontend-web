@@ -72,6 +72,8 @@ export const RUANG_KARTU: Readonly<Record<string, RuangSumber>> = {
   "terima-gudang": "gudang",
   "opname-gudang": "gudang",
   "izin-cuti": "toko",
+  // Disetujui lewat aplikasi, tanpa halaman web (PW08).
+  "perangkat-menunggu": "toko",
   "setup-fitur": "toko",
 };
 

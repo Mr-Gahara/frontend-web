@@ -19,6 +19,26 @@ function sebut(nama: readonly string[]): string {
   return nama.length > BATAS_NAMA ? `${awal}, dan ${nama.length - BATAS_NAMA} lainnya` : awal;
 }
 
+/**
+ * Perangkat menunggu izin (LN4a, B381, PW08): angka dan sampai tiga nama
+ * pengguna pemiliknya, disetujui lewat aplikasi, tanpa tautan (pemilik
+ * proyek, 27 November 2026). Satu pengguna dengan beberapa perangkat
+ * disebut sekali.
+ */
+export function pemberitahuanPerangkatMenunggu(
+  perangkat: readonly { pengguna: { nama: string } | null }[] | null,
+): Pemberitahuan | null {
+  if (!perangkat || perangkat.length === 0) return null;
+  const nama = [...new Set(perangkat.map((p) => p.pengguna?.nama ?? "staf"))];
+  return {
+    id: "perangkat-menunggu",
+    tingkat: "tindakan",
+    judul: "Perangkat menunggu izin",
+    isi: `${perangkat.length} perangkat menunggu izin (${sebut(nama)}). Setujui lewat aplikasi.`,
+    tautan: [],
+  };
+}
+
 /** Izin, sakit, atau cuti yang menunggu persetujuan; ditinjau lewat aplikasi, tanpa tautan (LN4a). */
 export function pemberitahuanIzinCuti(diajukan: readonly IzinCuti[] | null): Pemberitahuan | null {
   const daftar = (diajukan ?? []).filter((i) => i.status === "diajukan");

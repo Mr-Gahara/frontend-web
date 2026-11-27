@@ -5,6 +5,7 @@ import {
   URL_STATUS_STAF,
   pemberitahuanHasilPengajuan,
   pemberitahuanIzinCuti,
+  pemberitahuanPerangkatMenunggu,
   pemberitahuanJadwalMingguDepan,
   pemberitahuanKehadiran,
   rentangMingguDepan,
@@ -120,5 +121,27 @@ describe("pemberitahuanHasilPengajuan", () => {
   it("tidak ada kartu tanpa pengguna aktif atau tanpa keputusan baru", () => {
     expect(pemberitahuanHasilPengajuan([pengajuan("1", "APPROVED", jamLalu(2))], null, kini, akses)).toBeNull();
     expect(pemberitahuanHasilPengajuan([pengajuan("1", "APPROVED", jamLalu(48))], "saya", kini, akses)).toBeNull();
+  });
+});
+
+describe("pemberitahuanPerangkatMenunggu (PW08, B381)", () => {
+  const perangkat = (nama: string | null) => ({ pengguna: nama ? { nama } : null });
+
+  it("tanpa perangkat menunggu atau belum dimuat: tidak ada kartu", () => {
+    expect(pemberitahuanPerangkatMenunggu([])).toBeNull();
+    expect(pemberitahuanPerangkatMenunggu(null)).toBeNull();
+  });
+
+  it("perlu tindakan, angka dan sampai tiga nama, disetujui lewat aplikasi tanpa tautan", () => {
+    const p = pemberitahuanPerangkatMenunggu(["Sari", "Budi", "Rina", "Aryo"].map(perangkat));
+    expect(p?.tingkat).toBe("tindakan");
+    expect(p?.judul).toBe("Perangkat menunggu izin");
+    expect(p?.isi).toBe("4 perangkat menunggu izin (Sari, Budi, Rina, dan 1 lainnya). Setujui lewat aplikasi.");
+    expect(p?.tautan).toEqual([]);
+  });
+
+  it("satu pengguna dengan dua perangkat disebut sekali; pengguna tanpa data menjadi staf", () => {
+    const p = pemberitahuanPerangkatMenunggu([perangkat("Sari"), perangkat("Sari"), perangkat(null)]);
+    expect(p?.isi).toBe("3 perangkat menunggu izin (Sari, staf). Setujui lewat aplikasi.");
   });
 });

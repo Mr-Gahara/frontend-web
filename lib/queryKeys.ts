@@ -269,6 +269,7 @@ export const queryKeys = {
     sesiKasirBuka: () => ["sesiKasir", "lonceng"] as const,
     booking: (tanggal: string) => ["sesiBooking", "lonceng", tanggal] as const,
     izinCuti: () => ["izinCuti", "lonceng"] as const,
+    perangkatMenunggu: () => ["notifikasi", "perangkatMenunggu"] as const,
     monitoring: (tanggal: string, lokasiId: string) => ["absensi", "lonceng", tanggal, lokasiId] as const,
     jadwal: (startDate: string, endDate: string, lokasiId: string) =>
       ["jadwalShift", "lonceng", startDate, endDate, lokasiId] as const,
