@@ -90,12 +90,9 @@ test.describe("Gerbang rute dashboard", () => {
       for (const c of ditolak) {
         await test.step(`${c.nama}: ditolak tanpa permintaan data`, async () => {
           let terkirim = 0;
+          // Sejak PW07 lonceng tidak lagi meminta GET /produk, sehingga setiap
+          // permintaan produk atau kategori terhitung.
           const catat = (req: Request) => {
-            // GET /produk tanpa query adalah pemicu stok lonceng topbar (LN1a,
-            // modul/pemberitahuan.md), bukan isi halaman: halaman yang diuji di
-            // sini tidak pernah meminta daftar produk lengkap.
-            const u = new URL(req.url());
-            if (u.pathname === "/api/produk" && u.search === "") return;
             if (c.pola.test(req.url())) terkirim += 1;
           };
           hal.on("request", catat);

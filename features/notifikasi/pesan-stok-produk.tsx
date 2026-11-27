@@ -7,7 +7,8 @@ import { KartuPemberitahuan } from "./kartu-pemberitahuan";
  * Pesan pemicu stok LN1a di dalam halaman (LN3a): banner dashboard outlet,
  * Buat Penjualan, pajak per produk, dan diskon per produk. Isinya sama
  * dengan kartu lonceng (LN15a); halaman tetap dapat dipakai. Tidak tampil
- * selama produk belum termuat atau pemicunya tidak berlaku.
+ * selama ringkasan dashboard outlet belum termuat atau pemicunya tidak
+ * berlaku (PW07).
  */
 export function PesanStokProduk({ className }: { className?: string }) {
   const { pemberitahuan } = useStokProdukLonceng();

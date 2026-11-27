@@ -12,9 +12,10 @@
  * - GET /izincuti status=diajukan;
  * - GET /penjualan untuk hitungan: limit=1;
  * - GET /membership dan /diskon status=Aktif tanpa paginasi.
- * GET /produk tanpa query, booking per tanggal, monitoring absensi, dan
- * jadwal hari ini berbentuk sama dengan permintaan halaman, sehingga tidak
- * dikenali di sini; penunggunya disyaratkan lewat query khas halamannya.
+ * Booking per tanggal, monitoring absensi, dan jadwal hari ini berbentuk
+ * sama dengan permintaan halaman, sehingga tidak dikenali di sini;
+ * penunggunya disyaratkan lewat query khas halamannya. Sejak PW07 lonceng
+ * tidak lagi meminta GET /produk; pemicu stok dari GET /dashboard/outlet.
  */
 export function dariLonceng(url: string): boolean {
   const u = new URL(url);

@@ -45,7 +45,7 @@ const ringkasanOutlet = (ubah: Partial<{ menunggu: number; siapP: number; siapK:
       },
     },
     inventory: { stokKritis: n.bahan },
-    produk: { stokKritis: 0 },
+    produk: { stokKritis: 0, total: 1, dapatDijual: 1 },
   };
 };
 const kosong: DataInventaris = { ringkasanOutlet: null, ringkasanGudang: null, stokKritisGudang: null, opnameMenunggu: { outlet: null, gudang: null } };

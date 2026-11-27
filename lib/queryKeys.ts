@@ -263,7 +263,6 @@ export const queryKeys = {
   notifikasi: {
     semua: kunci(["notifikasi"] as const),
     ringkasanOutlet: () => ["notifikasi", "ringkasanOutlet"] as const,
-    produk: () => ["produk", "lonceng"] as const,
     stokKritisGudang: (locationID: string) => ["notifikasi", "stokKritisGudang", locationID] as const,
     opnameMenunggu: (tipeLokasi: string) => ["notifikasi", "opnameMenunggu", tipeLokasi] as const,
     // Di bawah akar domainnya, agar tutup kasir dan aksi booking ikut memperbaruinya.

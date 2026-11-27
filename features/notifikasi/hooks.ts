@@ -90,26 +90,23 @@ export function useAksesTautan(): AksesTautan & { siap: boolean } {
   );
 }
 
-/** Seluruh produk untuk pemicu LN1a; hanya bagi pembaca produk (read-produk atau akses-pos). */
-export function useProdukLonceng() {
-  const { sudahMasuk, permissions } = useSession();
-  // Juga sumber pesan halaman LN3a, yang terbuka tanpa izin dashboard outlet;
-  // karena itu hanya lokasi kerja yang menyaring (LN20a), dan kartunya
-  // disaring di usePemberitahuan (LN21a).
-  const { ruang, siap } = useRuangLokasiKerja();
-  const boleh =
-    sudahMasuk && siap && ruang !== "gudang" && (permissions.includes(IZIN.produk) || permissions.includes(IZIN.aksesPos));
-  return useQuery({ queryKey: queryKeys.notifikasi.produk(), queryFn: notifikasiApi.produk, enabled: boleh, ...OPSI_SEGAR });
-}
-
-/** Pemicu dan kartu LN1a, dipakai lonceng dan pesan halaman (LN3a). */
+/**
+ * Pemicu dan kartu LN1a, dipakai lonceng dan pesan halaman (LN3a), dari
+ * hitungan produk ringkasan dashboard outlet (B380, PW07) dengan kunci yang
+ * sama dengan sumber inventaris, sehingga tidak ada permintaan tambahan.
+ * Laman pemakai pesan berada di ruang outlet, yang menuntut izin dashboard
+ * outlet; ringkasan hanya dimuat bila ruang outlet dapat dimasuki (LN21a).
+ */
 export function useStokProdukLonceng() {
   const akses = useAksesTautan();
-  const produk = useProdukLonceng();
+  const { sudahMasuk } = useSession();
+  const muat = useMuatRuang();
+  const ringkasan = useRingkasanOutletLonceng(ringkasanDimuat((r) => sudahMasuk && muat(r)).outlet);
+  const hitungan = ringkasan.data?.produk;
   return useMemo(() => {
-    const pemicu = produk.data ? pemicuStokProduk(produk.data) : null;
+    const pemicu = pemicuStokProduk(hitungan);
     return { pemicu, pemberitahuan: pemberitahuanStokProduk(pemicu, akses) };
-  }, [produk.data, akses]);
+  }, [hitungan, akses]);
 }
 
 function useRingkasanOutletLonceng(aktif: boolean) {
@@ -344,7 +341,6 @@ function useLanggananLonceng() {
 export function usePemberitahuan() {
   const akses = useAksesTautan();
   const aksesRuangSesi = useAksesRuangLonceng();
-  const produk = useProdukLonceng();
   const langganan = useLanggananLonceng();
   const inventaris = useInventarisLonceng(akses);
   const dataInventaris = inventaris.data;
@@ -354,7 +350,7 @@ export function usePemberitahuan() {
 
   const daftar = useMemo<Pemberitahuan[]>(() => {
     const semua = [
-      pemberitahuanStokProduk(produk.data ? pemicuStokProduk(produk.data) : null, akses),
+      pemberitahuanStokProduk(pemicuStokProduk(dataInventaris.ringkasanOutlet?.produk), akses),
       pemberitahuanLangganan(langganan.pengingat, akses),
       pemberitahuanProdukMinimum(dataInventaris.ringkasanOutlet?.produk.stokKritis, akses),
       ...pemberitahuanInventaris(dataInventaris, akses),
@@ -364,10 +360,10 @@ export function usePemberitahuan() {
     ];
     const ada = semua.filter((p): p is Pemberitahuan => p !== null);
     return urutkanPemberitahuan(saringKartuRuang(ada, aksesRuangSesi));
-  }, [produk.data, langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
+  }, [langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
 
   // Hanya sumber yang aktif (pernah dimuat) yang disegarkan.
-  const sumber: UseQueryResult<unknown>[] = [produk, langganan.query, ...inventaris.sumber, ...operasional.sumber, ...staf.sumber, ...penjualan.sumber];
+  const sumber: UseQueryResult<unknown>[] = [langganan.query, ...inventaris.sumber, ...operasional.sumber, ...staf.sumber, ...penjualan.sumber];
   const segarkan = () => {
     for (const q of sumber) if (q.isFetched) void q.refetch();
   };

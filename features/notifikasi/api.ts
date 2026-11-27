@@ -1,6 +1,5 @@
 import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { Produk } from "@/types/produk";
 import type { SesiBookingResponse } from "@/types/sesiBooking";
 import type { SesiKasir } from "@/types/sesiKasir";
 import type { PengajuanStok } from "@/types/pengajuanStok";
@@ -14,7 +13,8 @@ type HitunganArah<K extends string> = Record<K, number>;
  * Ringkasan GET /dashboard/outlet (dashboardGudangService.getOutletSummary,
  * backend 1718030). Pengajuan: draft, menungguApproval, dan disetujui yang
  * belum punya surat jalan; transfer: sedangDikirim dan sudahDiterima; stok
- * kritis bahan di outlet dan produk berstok langsung.
+ * kritis bahan di outlet dan produk berstok langsung; produk.total dan
+ * produk.dapatDijual (stok terhitung resep) sejak B380, pemicu LN1a (PW07).
  */
 export interface RingkasanOutlet {
   outlet: { id: string; nama: string } | null;
@@ -25,7 +25,7 @@ export interface RingkasanOutlet {
     perArah: Record<"permintaan" | "pengembalian", HitunganArah<"sedangDikirim" | "sudahDiterima">>;
   };
   inventory: { stokKritis: number };
-  produk: { stokKritis: number };
+  produk: { stokKritis: number; total: number; dapatDijual: number };
 }
 
 /** Jumlah baris sebuah daftar berhalaman: satu baris diminta, angkanya dari pagination.total. */
@@ -36,8 +36,6 @@ async function hitung(endpoint: string, params: Record<string, string>): Promise
 
 export const notifikasiApi = {
   ringkasanOutlet: () => apiData.get<RingkasanOutlet>(EP.dashboardOutlet),
-  /** Seluruh produk tanpa paginasi: satu-satunya respons yang mengisi stok terhitung produk beresep (LN8a). */
-  produk: () => apiData.get<Produk[]>(EP.produk.list),
   /** Stock opname menunggu ditinjau di satu tipe lokasi (status SUBMITTED). */
   opnameMenunggu: (tipeLokasi: "Outlet" | "Gudang") =>
     hitung(EP.stockOpname.list, { status: "SUBMITTED", tipeLokasi }),

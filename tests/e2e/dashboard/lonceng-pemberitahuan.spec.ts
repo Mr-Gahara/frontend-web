@@ -41,13 +41,18 @@ for (const { nama, lebar } of [
       api<RingkasanOutlet>(page, auth, "GET", "/dashboard/outlet"),
     ]);
     for (const r of [langganan, produk, ringkasan]) expect(r.status, r.pesan).toBe(200);
+    // B380: hitungan ringkasan sama dengan daftar produk beserta stok terhitung resepnya.
+    expect(ringkasan.data.produk.total, "produk.total ringkasan").toBe(produk.data.length);
+    expect(ringkasan.data.produk.dapatDijual, "produk.dapatDijual ringkasan").toBe(
+      produk.data.filter((p) => p.isUnlimitedStok === true || (p.stok ?? 0) > 0).length,
+    );
 
     const pengingat = pengingatLangganan(langganan.data, new Date());
     // Tiga sumber dihitung dari respons nyata; sumber lain (inventaris,
     // operasional, staf, penjualan) diuji per sumber di unit test, dan di
     // sini cukup terhitung sama antara lencana dan kartu.
     const harapan: Record<string, boolean> = {
-      "stok-produk": pemicuStokProduk(produk.data) !== null,
+      "stok-produk": pemicuStokProduk(ringkasan.data.produk) !== null,
       langganan: pengingat !== null,
       "produk-minimum": ringkasan.data.produk.stokKritis > 0,
     };
