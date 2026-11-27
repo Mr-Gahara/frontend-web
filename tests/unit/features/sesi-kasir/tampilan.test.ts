@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   NAMA_MESIN_DILEPAS,
+  barisHitunganBuka,
   NAMA_PERANGKAT_KOSONG,
   gabungNama,
   kelompokkanPerHari,
@@ -215,5 +216,48 @@ describe("pilihanPerangkat", () => {
     expect(teksPerangkat(tab, sekarang)).toBe("Terakhir dipakai hari ini 08.10, oleh Sari dan Ridho");
     expect(teksPerangkat(bar, sekarang)).toBe("Sudah jadi mesin kasir: Kasir Bar");
     expect(teksPerangkat(redmi, sekarang)).toBe("Belum pernah dipakai, oleh Sari");
+  });
+});
+
+describe("barisHitunganBuka (PW09, B371)", () => {
+  const brankas = { id: "k9", namaAkun: "Brankas" };
+
+  it("tanpa pindah dana: tiga baris seperti sebelumnya, dihitung = modal awal", () => {
+    expect(barisHitunganBuka({ saldoSistemBuka: 200000, nominalBuka: 200000, pindahDanaBuka: null })).toEqual([
+      { label: "Uang di laci menurut sistem", nilai: 200000 },
+      { label: "Uang yang dihitung kasir", nilai: 200000 },
+    ]);
+  });
+
+  it("laci dikosongkan seluruhnya: dihitung = yang dipindah, modal Rp0, sehingga selisih terbaca dari sistem dan dihitung", () => {
+    const baris = barisHitunganBuka({
+      saldoSistemBuka: 500000,
+      nominalBuka: 0,
+      pindahDanaBuka: { jurnalTransferID: "j1", akunKasTujuanID: "k9", akunKasTujuan: brankas, jumlah: 500000 },
+    });
+    expect(baris).toEqual([
+      { label: "Uang di laci menurut sistem", nilai: 500000 },
+      { label: "Uang yang dihitung kasir", nilai: 500000 },
+      { label: "Dipindah ke Brankas", nilai: 500000 },
+      { label: "Modal awal di laci", nilai: 0 },
+    ]);
+  });
+
+  it("sebagian dipindah: dihitung = modal + dipindah, termasuk saat berbeda dari sistem", () => {
+    const baris = barisHitunganBuka({
+      saldoSistemBuka: 500000,
+      nominalBuka: 100000,
+      pindahDanaBuka: { jurnalTransferID: "j1", akunKasTujuanID: "k9", akunKasTujuan: brankas, jumlah: 390000 },
+    });
+    expect(baris.map((b) => b.nilai)).toEqual([500000, 490000, 390000, 100000]);
+  });
+
+  it("nama akun tujuan tidak terbaca: label tetap menyebut akun kas lain", () => {
+    const baris = barisHitunganBuka({
+      saldoSistemBuka: 1,
+      nominalBuka: 0,
+      pindahDanaBuka: { jurnalTransferID: "j1", akunKasTujuanID: "k9", akunKasTujuan: null, jumlah: 1 },
+    });
+    expect(baris[2]).toEqual({ label: "Dipindah ke akun kas lain", nilai: 1 });
   });
 });

@@ -55,6 +55,11 @@ export type SesiKasirMentah = {
   namaPerangkat: string | null;
   akunKasID: string | null;
   status: "BUKA" | "TUTUP";
+  saldoSistemBuka?: number;
+  nominalBuka?: number;
+  selisihBuka?: number;
+  periodeKasirID?: string | null;
+  pindahDanaBuka?: { jurnalTransferID: string | null; akunKasTujuanID: string | null; jumlah: number } | null;
   nominalTutup: number | null;
   selisihTutup: number | null;
   catatanTutup: string | null;
@@ -105,11 +110,20 @@ export async function bersihkanMesinUji(page: Page, auth: Auth, laciID: string) 
   }
 }
 
+/** Isi laci yang dipindah saat buka kasir (B371). */
+export type PindahDanaBukaUji = { akunKasTujuanID: string; jumlah: number };
+
 /**
- * Membuka kasir di perangkat uji lewat API aplikasi, dengan hitungan sama
- * dengan saldo laci sehingga tanpa selisih dan tanpa catatan.
+ * Membuka kasir di perangkat uji lewat API aplikasi. Bawaannya hitungan sama
+ * dengan saldo laci sehingga tanpa selisih dan tanpa catatan. `nominal`
+ * undefined tidak dikirim (modal kosong, disimpan 0, B371); `pindahDana`
+ * mengosongkan laci ke akun kas lain, dan `catatan` wajib bila modal + yang
+ * dipindah berbeda dari saldo laci.
  */
-export async function bukaKasirLewatAplikasi(nominal: number): Promise<SesiKasirMentah> {
+export async function bukaKasirLewatAplikasi(
+  nominal: number | undefined,
+  { pindahDana, catatan }: { pindahDana?: PindahDanaBukaUji; catatan?: string } = {},
+): Promise<SesiKasirMentah> {
   const ctx = await request.newContext({ baseURL: BASIS });
   try {
     const akun = await ctx.post("/api/akun/auth/login", { data: AKUN_UJI });
@@ -126,7 +140,11 @@ export async function bukaKasirLewatAplikasi(nominal: number): Promise<SesiKasir
     expect(token, "login app membawa access token").toBeTruthy();
 
     const buka = await ctx.post("/api/sesikasir/buka", {
-      data: { nominal },
+      data: {
+        ...(nominal === undefined ? {} : { nominal }),
+        ...(pindahDana ? { pindahDana } : {}),
+        ...(catatan ? { catatan } : {}),
+      },
       headers: { Authorization: "Bearer " + token },
     });
     const isiBuka = await buka.json().catch(() => ({}));

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/format";
 import type { SesiKasir } from "@/types/sesiKasir";
 import { ChipSelisih } from "./label";
-import { jamLokal, labelSelisih } from "./tampilan";
+import { type BarisHitungan, barisHitunganBuka, jamLokal, labelSelisih } from "./tampilan";
 
 const FORMAT_HARI = new Intl.DateTimeFormat("id-ID", {
   weekday: "long",
@@ -39,16 +39,14 @@ function Hitungan({
   judul,
   waktu,
   oleh,
-  sistem,
-  dihitung,
+  baris,
   selisih,
   catatan,
 }: {
   judul: string;
   waktu: string;
   oleh: string;
-  sistem: number | null;
-  dihitung: number | null;
+  baris: BarisHitungan[];
   selisih: number | null;
   catatan: string | null;
 }) {
@@ -59,8 +57,9 @@ function Hitungan({
         {waktu}, oleh {oleh}
       </p>
       <dl className="flex flex-col rounded-[14px] bg-gading">
-        <Baris label="Uang di laci menurut sistem" isi={sistem === null ? "-" : formatRupiah(sistem)} />
-        <Baris label="Uang yang dihitung kasir" isi={dihitung === null ? "-" : formatRupiah(dihitung)} />
+        {baris.map((b) => (
+          <Baris key={b.label} label={b.label} isi={b.nilai === null ? "-" : formatRupiah(b.nilai)} />
+        ))}
         <Baris label="Selisih" tebal isi={<ChipSelisih selisih={labelSelisih(selisih)} />} />
       </dl>
       <div className="flex flex-col gap-1">
@@ -122,8 +121,7 @@ export function RincianSesi({
           judul="Saat kasir dibuka"
           waktu={waktuLengkap(sesi.dibukaPada)}
           oleh={sesi.dibukaOleh?.nama ?? "-"}
-          sistem={sesi.saldoSistemBuka}
-          dihitung={sesi.nominalBuka}
+          baris={barisHitunganBuka(sesi)}
           selisih={sesi.selisihBuka}
           catatan={sesi.catatanBuka}
         />
@@ -142,8 +140,10 @@ export function RincianSesi({
             judul="Saat kasir ditutup"
             waktu={waktuLengkap(sesi.ditutupPada)}
             oleh={sesi.ditutupOleh?.nama ?? "-"}
-            sistem={sesi.saldoSistemTutup}
-            dihitung={sesi.nominalTutup}
+            baris={[
+              { label: "Uang di laci menurut sistem", nilai: sesi.saldoSistemTutup },
+              { label: "Uang yang dihitung kasir", nilai: sesi.nominalTutup },
+            ]}
             selisih={sesi.selisihTutup}
             catatan={sesi.catatanTutup}
           />

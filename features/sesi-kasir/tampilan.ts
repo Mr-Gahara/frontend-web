@@ -49,7 +49,34 @@ const FORMAT_HARI_PENDEK = new Intl.DateTimeFormat("id-ID", {
 });
 
 /** Jam lokal, misalnya "08.05". */
-export const jamLokal = (iso: string): string => FORMAT_JAM.format(new Date(iso));
+/** Satu baris angka di kartu hitungan rincian sesi; null tampil "-". */
+export interface BarisHitungan {
+  label: string;
+  nilai: number | null;
+}
+
+/**
+ * Baris angka kartu "Saat kasir dibuka" (keputusan pemilik proyek PW09). Tanpa
+ * pindah dana tiga baris seperti sebelumnya (dihitung = nominalBuka). Bila laci
+ * dikosongkan saat buka (B371), kasir menghitung modal + yang dipindah, sehingga
+ * selisih = dihitung − sistem terbaca langsung: sistem, dihitung, dipindah ke
+ * akun tujuan, lalu modal yang ditinggal (boleh 0). Selisih ditampilkan kartu.
+ */
+export function barisHitunganBuka(
+  sesi: Pick<SesiKasir, "saldoSistemBuka" | "nominalBuka" | "pindahDanaBuka">,
+): BarisHitungan[] {
+  const sistem = { label: "Uang di laci menurut sistem", nilai: sesi.saldoSistemBuka };
+  const pindah = sesi.pindahDanaBuka;
+  if (!pindah) return [sistem, { label: "Uang yang dihitung kasir", nilai: sesi.nominalBuka }];
+  return [
+    sistem,
+    { label: "Uang yang dihitung kasir", nilai: sesi.nominalBuka + pindah.jumlah },
+    { label: `Dipindah ke ${pindah.akunKasTujuan?.namaAkun ?? "akun kas lain"}`, nilai: pindah.jumlah },
+    { label: "Modal awal di laci", nilai: sesi.nominalBuka },
+  ];
+}
+
+export const jamLokal =(iso: string): string => FORMAT_JAM.format(new Date(iso));
 
 /**
  * Jam buka sampai tutup. Sesi yang ditutup di hari berikutnya (kedai yang

@@ -113,7 +113,7 @@ test.describe("pindah dana", () => {
         const tBatal = page.waitForResponse((r) => POLA_TRANSFER_ID.test(r.url()) && r.request().method() === "PUT");
         await dialog.getByRole("button", { name: "Batalkan Transfer" }).click();
         expect((await tBatal).status(), "VOID ditolak").toBe(409);
-        // Pesan 409 pembatalan disusun web, menyebut kedua kemungkinan.
+        // Pesan 409 pembatalan dari backend (jurnalTransferService), menyebut kedua kemungkinan.
         await expect(
           dialog.getByText("Saldo akun kas tujuan tidak cukup untuk membatalkan transfer ini, atau akunnya sudah nonaktif."),
         ).toBeVisible();

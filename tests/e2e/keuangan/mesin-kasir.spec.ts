@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { saldoAkun } from "../../helpers/akun-kas-uji";
+import { akunUjiTetap, daftarAkun, saldoAkun, tutupAkunUji } from "../../helpers/akun-kas-uji";
+import { formatRupiah } from "../../../lib/format";
 import {
   batalkanBooking,
   bersihkanSisaBooking,
@@ -170,6 +171,113 @@ test.describe("Mesin Kasir", () => {
       }
     } finally {
       await bersihkanMesinUji(page, auth, laci.id);
+    }
+  });
+
+  test("laci dikosongkan saat buka di aplikasi: rincian web menampilkan yang dipindah, dan Pindah Dana-nya tidak dapat dibatalkan (PW09, B371)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await login(page);
+    const auth: Auth = await bukaDenganAuth(page, URL);
+    const laci = await siapkanLaciUji(page, auth);
+    await bersihkanMesinUji(page, auth, laci.id);
+    // Akun tujuan tetap: saldonya dikosongkan setiap run oleh akunUjiTetap.
+    const tujuan = await akunUjiTetap(page, auth, "E2E Tujuan Laci Tetap", {
+      keterangan: "E2E tujuan pindah dana buka kasir",
+    });
+    const nama = `E2E Kasir Kosong ${unik()}`;
+
+    try {
+      // Mesin kasir disiapkan lewat API: tambahnya diuji lewat UI di skenario alur.
+      const pasang = await api(page, auth, "POST", "/sesikasir/perangkat", {
+        installationId: PERANGKAT_UJI.installationId,
+        namaPerangkat: nama,
+        akunKasID: laci.id,
+      });
+      expect(pasang.status, "pasang mesin kasir uji: " + pasang.pesan).toBe(200);
+
+      // Seluruh isi laci dipindah dan modal dibiarkan kosong. Laci kosong dari run
+      // sebelumnya tetap memindah Rp1, sehingga hitungannya lebih Rp1 dan wajib catatan.
+      const saldoLaci = await saldoAkun(page, auth, laci.id);
+      const jumlah = Math.max(saldoLaci, 1);
+      const sesi = await bukaKasirLewatAplikasi(undefined, {
+        pindahDana: { akunKasTujuanID: tujuan.id, jumlah },
+        ...(saldoLaci === 0 ? { catatan: "E2E laci kosong dipindah Rp1" } : {}),
+      });
+
+      const detail = await detailSesi(page, auth, sesi.id);
+      expect(detail.nominalBuka, "modal kosong tersimpan 0").toBe(0);
+      expect(detail.saldoSistemBuka).toBe(saldoLaci);
+      expect(detail.selisihBuka, "selisih = modal + dipindah - sistem").toBe(jumlah - saldoLaci);
+      expect(detail.pindahDanaBuka?.jumlah).toBe(jumlah);
+      expect(detail.pindahDanaBuka?.akunKasTujuanID).toBe(tujuan.id);
+      expect(detail.periodeKasirID, "sesi baru bergabung ke periode struk (B376)").toBeTruthy();
+      expect(await saldoAkun(page, auth, laci.id), "laci dikosongkan").toBe(0);
+      expect(await saldoAkun(page, auth, tujuan.id), "isi laci masuk akun tujuan").toBe(jumlah);
+
+      // Rincian web: lima baris berurutan, angka dari respons.
+      await page.goto(`${URL}/${sesi.id}`);
+      const kartu = page.locator("section").filter({ has: page.getByRole("heading", { name: "Saat kasir dibuka" }) });
+      await expect(kartu.getByRole("term")).toHaveText(
+        [
+          "Uang di laci menurut sistem",
+          "Uang yang dihitung kasir",
+          `Dipindah ke ${tujuan.namaAkun}`,
+          "Modal awal di laci",
+          "Selisih",
+        ],
+        { timeout: 20_000 },
+      );
+      await expect(kartu.getByRole("definition").first()).toHaveText(formatRupiah(saldoLaci));
+      await expect(kartu.getByRole("definition").nth(1)).toHaveText(formatRupiah(jumlah));
+      await expect(kartu.getByRole("definition").nth(2)).toHaveText(formatRupiah(jumlah));
+      await expect(kartu.getByRole("definition").nth(3)).toHaveText(formatRupiah(0));
+      await expect(kartu.getByRole("definition").nth(4)).toHaveText(saldoLaci === 0 ? `Lebih ${formatRupiah(1)}` : "Pas");
+
+      // Batalkan Pindah Dana buka kasir ditolak 409; pesannya tampil apa adanya
+      // sampai backend memberi penanda asal (laporan-untuk-backend.md).
+      await page.goto("/dashboard/outlet/keuangan/akunkas/pindahDana");
+      const baris = page
+        .getByRole("row")
+        .filter({ hasText: "Laci dikosongkan saat buka kasir" })
+        .filter({ hasText: tujuan.namaAkun })
+        .first();
+      await expect(baris).toContainText(formatRupiah(jumlah), { timeout: 20_000 });
+      await baris.getByRole("button", { name: "Aksi transfer" }).click();
+      await page.getByRole("menuitem", { name: "Batalkan transfer" }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByLabel(/Alasan pembatalan/).fill("E2E batal pindah dana buka kasir");
+      const tBatal = tunggu(page, /\/api\/jurnaltransfer\/[a-f0-9]{24}$/i, "PUT");
+      await dialog.getByRole("button", { name: "Batalkan Transfer" }).click();
+      const batal = await tBatal;
+      expect(batal.status(), "VOID pindah dana buka kasir").toBe(409);
+      expect(batal.url()).toContain(String(detail.pindahDanaBuka?.jurnalTransferID));
+      await expect(
+        dialog.getByText("Pindah dana dari buka kasir tidak dapat dibatalkan. Catat Pindah Dana balik bila perlu dikoreksi."),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(baris, "transfer tetap Aktif").toContainText("Aktif");
+      expect(await saldoAkun(page, auth, tujuan.id), "saldo tujuan tidak kembali ke laci").toBe(jumlah);
+    } finally {
+      await bersihkanMesinUji(page, auth, laci.id);
+      // Batas 10 akun kas aktif: akun tujuan dikosongkan lalu dinonaktifkan agar tidak
+      // memakan jatah spec lain. Pindah Dana buka kasir tidak dapat di-VOID, sehingga
+      // saldonya dipindah ke akun aktif bukan uji.
+      const semua = await daftarAkun(page, auth);
+      const sisa = Number(semua.find((a) => a.id === tujuan.id)?.saldo ?? 0);
+      const penampung = semua.find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
+      if (sisa > 0 && penampung) {
+        const kosong = await api(page, auth, "POST", "/jurnaltransfer", {
+          kasSumberID: tujuan.id,
+          kasTujuanID: penampung.id,
+          jumlah: sisa,
+          keterangan: "E2E pengosongan akun uji tetap E2E Tujuan Laci Tetap",
+        });
+        expect.soft(kosong.status, "kosongkan akun tujuan laci: " + kosong.pesan).toBe(201);
+      }
+      await tutupAkunUji(page, auth, tujuan.id);
     }
   });
 

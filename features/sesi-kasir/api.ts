@@ -1,11 +1,19 @@
 import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
-import type { PerangkatKasir, PerangkatToko, SesiKasir } from "@/types/sesiKasir";
+import type { PerangkatKasir, PerangkatToko, PeriodeSesiTutup, SesiKasir } from "@/types/sesiKasir";
 import type { PayloadMesinKasir } from "./dialog-mesin-kasir";
 import type { PayloadTutupKasir } from "./dialog-tutup-kasir";
 
 export type HalamanSesiKasir = { data: SesiKasir[]; pagination: Paginasi | null };
+
+/**
+ * Respons tutup (mapSesiKasirButa): tanpa angka (hitung buta), ditambah periode
+ * struk tempat sesi bergabung (B376). periode null untuk sesi sebelum AR48.
+ */
+export type HasilTutupKasir = Pick<SesiKasir, "id" | "status" | "periodeKasirID"> & {
+  periode?: PeriodeSesiTutup | null;
+};
 
 export const sesiKasirApi = {
   /**
@@ -24,7 +32,7 @@ export const sesiKasirApi = {
    * buta), sehingga detail dimuat ulang lewat invalidasi.
    */
   tutup: (id: string, payload: PayloadTutupKasir) =>
-    apiData.post<unknown>(EP.sesiKasir.tutup(id), payload),
+    apiData.post<HasilTutupKasir>(EP.sesiKasir.tutup(id), payload),
 
   daftarPerangkat: () => apiData.get<PerangkatKasir[]>(EP.sesiKasir.perangkat),
   /** Upsert per installationId: tambah dan ubah memakai endpoint yang sama. */

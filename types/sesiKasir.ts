@@ -23,7 +23,28 @@ export interface AkunKasSesiKasir {
   namaAkun: string;
 }
 
-/** Ringkasan tunai selama sesi; hanya di GET /sesikasir/:id (sesiKasirService.getById). */
+/**
+ * Isi laci yang dipindah ke akun kas lain saat buka kasir (B371, _pindahDana di
+ * mapper). Jurnal transfernya tidak dapat di-VOID (409, de0bf66).
+ */
+export interface PindahDanaBukaSesi {
+  jurnalTransferID: string | null;
+  akunKasTujuanID: string | null;
+  akunKasTujuan: AkunKasSesiKasir | null;
+  jumlah: number;
+}
+
+/** Periode struk di respons tutup (B376); null untuk sesi sebelum AR48. */
+export interface PeriodeSesiTutup {
+  id: string;
+  status: StatusSesiKasir;
+}
+
+/**
+ * Ringkasan tunai selama sesi; hanya di GET /sesikasir/:id (sesiKasirService.getById).
+ * Sejak B374 tunaiMasuk dan jumlahPembayaran hanya menghitung pembayaran ke laci,
+ * walau pembayaran non-tunai juga bersesi.
+ */
 export interface RingkasanSesiKasir {
   tunaiMasuk: number;
   jumlahPembayaran: number;
@@ -51,10 +72,16 @@ export interface SesiKasir {
   ditutupPada: string | null;
   /** Asal penutupan (B336); null selama masih buka atau ditutup sebelum 16 November 2026. */
   ditutupDari: AsalPenutupanSesi | null;
+  /** Periode struk tempat sesi bergabung (B376); null untuk sesi sebelum AR48. */
+  periodeKasirID: string | null;
   saldoSistemBuka: number;
+  /** Modal yang ditinggal di laci; boleh 0 sejak B371. */
   nominalBuka: number;
+  /** (nominalBuka + pindahDanaBuka.jumlah) − saldoSistemBuka. */
   selisihBuka: number;
   catatanBuka: string | null;
+  /** null bila laci tidak dikosongkan saat buka (B371). */
+  pindahDanaBuka: PindahDanaBukaSesi | null;
   saldoSistemTutup: number | null;
   nominalTutup: number | null;
   selisihTutup: number | null;
