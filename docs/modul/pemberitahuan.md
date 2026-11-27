@@ -44,7 +44,8 @@ pemegang izin endpoint serta plan fiturnya.
     siap dibuat surat jalan; surat jalan Dikirim yang menunggu diterima;
     stock opname menunggu ditinjau; stok gudang mencapai minimum (Pro).
   - Operasional: kasir lupa ditutup (sesi kasir terbuka sejak hari
-    sebelumnya); setup fitur plan belum selesai; perangkat aplikasi
+    sebelumnya); setup fitur plan belum selesai (sejak PW19 menjadi
+    langkah kartu kesiapan toko, KS6a); perangkat aplikasi
     menunggu izin (menunggu backend, LN8a); booking yang jamnya lewat
     tetapi belum lunas.
   - Staf: izin, sakit, atau cuti yang menunggu persetujuan (tanpa
@@ -92,6 +93,8 @@ pemegang izin endpoint serta plan fiturnya.
   - Info (navy): surat jalan menunggu diterima, pengajuan siap surat
     jalan, setup fitur, hasil pengajuan saya, membership dan diskon
     berakhir.
+  - Sejak PW19 kartu tidak ada produk dan setup fitur menjadi langkah
+    kartu kesiapan toko, dengan tingkat yang sama (KS7a).
 - **LN12a: panel berupa daftar per tingkat.** Lencana angka di lonceng
   (9+ bila lebih) berwarna tingkat tertinggi, menggantikan titik. Panel:
   judul dan jumlah, lalu kartu ringkas diurutkan per tingkat (ikon,
@@ -107,7 +110,9 @@ LN3a:
 - **LN13a: panel terbuka sendiri hanya di beranda dashboard outlet**
   (`/dashboard/outlet`), setiap dibuka atau dimuat ulang selama pemicu
   LN1a berlaku; di halaman lain lencana rose tetap terlihat. Ditunda bila
-  tur panduan dashboard belum pernah tampil, agar tidak bertumpuk.
+  tur panduan dashboard belum pernah tampil, agar tidak bertumpuk. Sejak
+  PW19 dibaca dari pemicu LN1a langsung, bukan id kartu, karena toko tanpa
+  produk tampil sebagai kartu kesiapan toko (KS5a).
 - **LN14a (digantikan LN22a, 27 November 2026): satu produk berstok langsung ke Ubah Produk, lebih dari satu
   ke daftar Produk** ("Lihat produk"). Kartu menyebut jumlah dan sampai
   tiga nama produk.
@@ -200,8 +205,9 @@ dan gudang LN4a:
      `saringKartuRuang` di `features/notifikasi/ruang.ts`), termasuk kartu
      gudang yang datang dari ringkasan outlet. Kartu yang belum tercantum
      disembunyikan; unit test memastikan setiap id kartu di berkas
-     `sumber-*` tercantum. Kartu tingkat toko (izin cuti, setup fitur)
-     tetap tampil bagi siapa pun yang memenuhi syaratnya.
+     `sumber-*` dan `kesiapan.ts` tercantum. Kartu tingkat toko (izin
+     cuti, kesiapan toko) tetap tampil bagi siapa pun yang memenuhi
+     syaratnya.
   Bukti: `tests/unit/features/notifikasi/ruang.test.ts` dan
   `auth/ruang-lokasi-kerja.spec.ts` (test LN20a, LN21a: lonceng di ruang
   gudang tidak meminta `akun/langganan` maupun pengajuan disetujui).
@@ -218,7 +224,9 @@ Diputuskan pemilik proyek lewat dialog PW07, sesudah backend B380:
   tautan Lihat produk serta Pembelian Stok bagi pemegang izinnya.
   Menggantikan pemisahan berstok langsung dan beresep LN2a untuk kartu
   ini, sebutan tiga nama dan tautan Ubah Produk satu produk LN14a, dan
-  Pengajuan ke Gudang di kartu ini. Kartu Toko belum punya produk tetap.
+  Pengajuan ke Gudang di kartu ini. Kartu Toko belum punya produk tetap
+  (sejak PW19 menjadi langkah kartu kesiapan toko, KS5a; pesan halaman
+  LN3a tidak berubah).
   Banner dan pesan halaman (LN3a, LN15a) memakai sumber yang sama. Soal
   izin gugur: seluruh laman pemakai pesan stok berada di ruang outlet yang
   menuntut izin dashboard outlet (`b9fe4a0`).
@@ -234,6 +242,56 @@ Diputuskan pemilik proyek lewat dialog PW08, sesudah backend B381:
   tindakan (LN11a), tingkat toko, hanya bagi pemegang `update-pengguna`;
   sumbernya `GET /device?status=pending`, disaring level peminta (P39).
   Satu pengguna dengan beberapa perangkat disebut sekali (`9b6c133`).
+
+### Kesiapan toko (27 November 2026)
+
+Diputuskan pemilik proyek lewat dialog PW19, dari laporannya: akun baru
+mendapat "Jadwal minggu depan belum dibuat" padahal toko baru punya Owner
+saja dan belum punya shift, lalu diarahkan ke Generate Jadwal. Lonceng
+untuk toko yang belum siap beroperasi mendahulukan setup sampai siap
+(`features/notifikasi/kesiapan.ts`, `kotak-kesiapan.tsx`, `f606985`).
+
+- **KS1a: urutan bidang** produk, karyawan, absensi, lalu fitur plan
+  (sesi booking, gudang). Karyawan (opsional, role lalu pengguna) dan
+  absensi (hanya bila ada staf: shift, pola roster, jadwal) diisi PW18;
+  wizard sudah menjamin pajak, jam buka, kategori, dan bahan beresep.
+  Aplikasi kasir tidak masuk; perangkat menunggu izin punya kartunya.
+- **KS2a: kartu kesiapan paling atas, pengingat yang bergantung
+  ditahan.** Kartu tampil di atas tingkat Penting dan selalu tampil di
+  panel ringkas (`utama`, `ringkasPanel`); pemberitahuan lain tetap tampil
+  di bawahnya menurut tingkatnya.
+- **KS3a: satu kartu, langkah berikutnya.** "Siapkan toko (langkah k dari
+  N)" menyebut langkah pertama yang belum selesai, penjelasannya, dan
+  langkah belum selesai sesudahnya ("Sesudahnya: ..."), dengan tautan ke
+  halamannya bagi pemegang izin. Halaman tujuan menampilkan kotak yang
+  sama (seperti LN15a); kartu berganti sendiri saat langkah selesai.
+- **KS4a: dihitung terus dari data** seperti LN5a, tanpa penyimpanan;
+  toko lama yang datanya lengkap langsung siap, dan langkah yang datanya
+  dihapus muncul lagi. Langkah yang datanya belum diketahui tidak
+  dihitung.
+- **KS5a: langkah produk cukup toko punya produk**, menggantikan kartu
+  Toko belum punya produk. Kehabisan stok tetap kartu operasional Penting
+  LN22a, agar toko yang berjalan tidak kembali ke mode setup; stok awal
+  bahan dan produk berstok dijamin wizard (SA9a).
+- **KS6a: langkah fitur plan menggantikan kartu Info setup fitur**
+  (`fiturSetupPengguna`, aturan izin yang sama dengan `fiturPerluSetup`);
+  banner dashboard setup fitur tetap.
+- **KS7a: tingkat kartu ikut langkah yang tampil**: produk Penting,
+  fitur plan Info, sama dengan kartu yang digantikan; warna lencana tetap
+  tingkat tertinggi (`tingkatTertinggi` tidak lagi bergantung urutan).
+- **KS8a: penahan pengingat absensi.** Jadwal minggu depan dan kehadiran
+  hari ini ditahan selama belum ada staf selain Owner, belum ada shift
+  aktif, atau belum ada pola roster di outlet (`tahanPengingatAbsensi`).
+  Jadwal tidak menjadi syarat, karena pengingat itulah yang mengajak
+  membuatnya. Tanpa izin baca pengguna, shift, atau pola roster, atau bila
+  permintaannya gagal, penahan tidak berlaku. Staf selain Owner dihitung
+  dari pengguna lebih dari satu, karena backend menolak membuat pengguna
+  berrole setingkat pembuatnya; selama data dimuat, pengingat ikut
+  ditahan agar tidak muncul lalu hilang.
+- **KS9a: kotak langkah di Buat Produk dan wizard Setup**
+  (`KotakKesiapan`), di atas isi halaman, hanya selama langkah yang
+  berjalan milik halaman itu, tanpa tautan ke halamannya sendiri. Pesan
+  stok produk LN3a di empat halaman tidak berubah.
 
 ## Catatan
 
@@ -263,7 +321,8 @@ Diputuskan pemilik proyek lewat dialog PW08, sesudah backend B381:
   tautannya ke halaman daftar.
 - Tahap 3 sampai 5 (25 November 2026): `sumber-operasional.ts` (kasir
   lupa ditutup dari sesi BUKA yang dibuka sebelum hari ini; setup fitur
-  dari `fiturPerluSetup`, sama dengan banner dashboard; booking hari ini
+  dari `fiturPerluSetup`, sama dengan banner dashboard, sejak PW19 di
+  `kesiapan.ts`; booking hari ini
   yang lewat jam dan belum lunas, paling banyak tiga tautan detail
   penjualan), `sumber-staf.ts` (izin cuti berstatus diajukan tanpa
   tautan; kehadiran dari monitoring absensi dicocokkan dengan jadwal shift

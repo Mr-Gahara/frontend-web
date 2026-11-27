@@ -50,7 +50,7 @@ tetap `AR`, `B`, dan `P`.
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Belum | |
-| PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Belum | |
+| PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Selesai | `f606985` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -250,61 +250,49 @@ tidak memberi catatan saat syaratnya belum ada.
 Dikerjakan sesudah PW19 (pilihan pemilik proyek 27 November 2026, "PW19
 induk, PW18 bagian"): PW18 adalah bidang absensi di kerangka kesiapan
 toko PW19, sehingga lonceng "absensi belum disiapkan" memakai kerangka
-itu, dan PW18 mengisi langkah berurutan serta catatan syaratnya.
-Termasuk (pemilik proyek, 27 November 2026) pemberitahuan opsional
-"tambah karyawan atau pengguna dulu" bila pengguna toko hanya Owner,
-ditampilkan sebelum langkah absensi dan jadwal; opsional karena toko
-boleh dijalankan Owner sendiri, sehingga dialog perlu memutuskan cara
-klien menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak
-menetap. Urutannya (pemilik proyek, 27 November 2026): pemberitahuan
-tambah staf lebih dulu, tidak wajib; bila diklik, ia juga membuka
-panduan menambah staf. Pemberitahuan absensi PW18 baru tampil sesudah
-toko punya sedikitnya satu staf selain Owner; perlakuan absensi bagi
-toko yang menyatakan hanya Owner diputuskan di dialog. Sebelum dialog,
-periksa keadaan kosong setiap halaman (Generate Jadwal tanpa pola atau
-karyawan, Jadwal tanpa shift, Rekap Absensi tanpa jadwal), di ruang
-outlet dan gudang. Arah dari pemilik proyek: akun yang absensinya belum
-disiapkan tidak mendapat pengingat jadwal minggu depan, melainkan
-pemberitahuan "absensi belum disiapkan" yang mengajak menyiapkannya;
-mengkliknya membuka langkah berurutan yang mengarahkan ke halaman
-pertama, lalu halaman berikutnya, sampai absensi aktif. Pertanyaan untuk
-pemilik proyek: (0) syarat "absensi siap" (karyawan, shift aktif, pola
-roster, jadwal) dan bentuk langkahnya (halaman panduan tersendiri, tur
-sorotan, atau daftar periksa); (1) catatan syarat di halaman beserta
-tautan ke halaman yang dibutuhkan; (2) tombol Simpan pola dimatikan atau
-tetap aktif selama ruang belum punya shift aktif (backend menerima pola
-libur semua); (3) titik tur dashboard menyebut urutan empat langkah; (4)
+itu, dan PW18 mengisi langkah berurutan serta catatan syaratnya: slot
+karyawan dan absensi di `langkahKesiapan`
+(`features/notifikasi/kesiapan.ts`, KS1a, PW19 selesai `f606985`),
+dengan penahan pengingat absensi KS8a yang sudah berlaku. Termasuk
+(pemilik proyek, 27 November 2026) pemberitahuan opsional "tambah
+karyawan atau pengguna dulu" bila pengguna toko hanya Owner, ditampilkan
+sebelum langkah absensi dan jadwal; opsional karena toko boleh
+dijalankan Owner sendiri, sehingga dialog perlu memutuskan cara klien
+menyatakan "hanya saya sendiri" agar pemberitahuan itu tidak menetap.
+Urutannya (pemilik proyek, 27 November 2026): pemberitahuan tambah staf
+lebih dulu, tidak wajib; bila diklik, ia juga membuka panduan menambah
+staf. Pemberitahuan absensi PW18 baru tampil sesudah toko punya
+sedikitnya satu staf selain Owner; perlakuan absensi bagi toko yang
+menyatakan hanya Owner diputuskan di dialog. Sebelum dialog, periksa
+keadaan kosong setiap halaman (Generate Jadwal tanpa pola atau karyawan,
+Jadwal tanpa shift, Rekap Absensi tanpa jadwal), di ruang outlet dan
+gudang. Arah dari pemilik proyek: akun yang absensinya belum disiapkan
+tidak mendapat pengingat jadwal minggu depan, melainkan pemberitahuan
+"absensi belum disiapkan" yang mengajak menyiapkannya; mengkliknya
+membuka langkah berurutan yang mengarahkan ke halaman pertama, lalu
+halaman berikutnya, sampai absensi aktif. Pertanyaan untuk pemilik
+proyek: (0) syarat "absensi siap" (karyawan, shift aktif, pola roster,
+jadwal) dan bentuk langkahnya (halaman panduan tersendiri, tur sorotan,
+atau daftar periksa); (1) catatan syarat di halaman beserta tautan ke
+halaman yang dibutuhkan; (2) tombol Simpan pola dimatikan atau tetap
+aktif selama ruang belum punya shift aktif (backend menerima pola libur
+semua); (3) titik tur dashboard menyebut urutan empat langkah; (4)
 daftar periksa "Siapkan absensi" di dashboard, cakupan lebih besar.
 
 ### PW19: lonceng kesiapan toko
 
-Arah pemilik proyek 27 November 2026, lanjutan LN4a (lonceng diberdayakan
-maksimal, `modul/pemberitahuan.md`): untuk toko yang belum siap
-beroperasi, lonceng mendahulukan setup yang belum lengkap, yaitu produk,
-bahan baku, karyawan, jam dan jadwal toko, absensi, dan bidang lain yang
-dibutuhkan. Setelah semuanya lengkap, prioritas lonceng yang sekarang
-berlaku (LN4a, LN5a). Dipilih sebagai paket induk; PW18 (bidang absensi)
-dikerjakan sesudahnya.
-
-Isinya kerangka: daftar syarat siap per bidang dan sumber datanya
-(endpoint yang ada, karena backend tidak punya sistem notifikasi), mode
-lonceng "toko belum siap" yang menampilkan pemberitahuan setup lebih
-dulu, dan pengalihan pengingat biasa yang bergantung pada bidang yang
-belum siap (misalnya "Jadwal minggu depan belum dibuat" tidak tampil
-selama absensi belum disiapkan). Urutan berlaku di setiap bidang, bukan
-hanya absensi (pemilik proyek, 27 November 2026): produk yang memakai
-resep dan stok bergantung pada bahan baku, satuan dan ukuran, resep,
-stok, harga, dan pajak, dan pemberitahuannya muncul menurut prioritas
-dan urutan itu, satu langkah yang dapat dikerjakan sekarang lebih dulu.
-Sumber "setup fitur plan belum selesai" (LN4a) dan wizard setup ikut
-ditinjau agar tidak bertumpuk.
-
-Pertanyaan untuk pemilik proyek, diajukan sesudah fakta diperiksa:
-bidang dan syarat siap masing-masing serta urutannya; apakah pemberitahuan
-lain disembunyikan, diturunkan, atau tetap tampil di bawah setup selama
-toko belum siap; perlakuan per plan dan per ruang (outlet dan gudang);
-dan apakah kesiapan dihitung sekali (toko lama yang datanya lengkap
-langsung siap) atau terus diperiksa.
+Selesai 27 November 2026 (`f606985`), atas keputusan pemilik proyek
+KS1a sampai KS9a (`modul/pemberitahuan.md`, Kesiapan toko). Satu kartu
+"Siapkan toko (langkah k dari N)" paling atas di lonceng, dihitung terus
+dari data, dengan urutan produk, karyawan, absensi, lalu fitur plan;
+langkah produk cukup toko punya produk dan menggantikan kartu Toko belum
+punya produk, langkah fitur plan menggantikan kartu setup fitur.
+Pengingat jadwal minggu depan dan kehadiran ditahan selama belum ada
+staf selain Owner, shift aktif, atau pola roster. Kotak langkah yang
+sama di Buat Produk dan wizard Setup. Slot karyawan dan absensi di
+`langkahKesiapan` diisi PW18. Urutan bergantung di bidang produk (bahan,
+satuan, resep, stok, harga, pajak) dijamin wizard (SA9a sampai SA11a),
+sehingga langkahnya cukup punya produk (KS5a).
 
 ## Perubahan backend tanpa pekerjaan web
 

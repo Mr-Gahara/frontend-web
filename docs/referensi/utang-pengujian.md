@@ -199,6 +199,13 @@ skip bersyarat data, dan catatan proses.
   25 November 2026 punya tepat lima pemberitahuan; spec
   `dashboard/lonceng-pemberitahuan` membentangkan panel bila tombolnya
   ada.
+- **Kesiapan toko (PW19): penahan tanpa izin baca dan langkah Gudang
+  hanya teruji di unit test** (`tests/unit/features/notifikasi`).
+  Skenario `dashboard/lonceng-pemberitahuan` memakai akun Advanced sekali
+  pakai yang dipegang Owner, sehingga penahan selalu berizin, dan
+  langkah setup Gudang (plan Pro) tidak dilalui. Kotak di wizard Setup
+  diuji saat setup inti belum selesai; pada pemakaian nyata langkah
+  fitur baru tampil sesudah setup inti tuntas.
 
 ## Data uji yang menetap dan data per run
 

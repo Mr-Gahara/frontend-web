@@ -257,6 +257,13 @@ bersyarat).
   karena halaman menerima data yang sudah dinormalkan. Pada stock
   adjustment, `referenceID` mentah membawa `_id`, sehingga href yang
   diharapkan menjadi `.../undefined` padahal halamannya benar.
+  Hal yang sama berlaku untuk id hasil `api()` yang dipakai sebagai
+  payload berikutnya: `POST /kategori` dan `GET /role` (beserta
+  permission bersarangnya) membawa `_id`, sedangkan `POST /shift`
+  membawa `id`. Ambil dengan `id ?? _id` seperti `idMilik`
+  (`tests/helpers/terkunci-uji.ts`); `undefined` terkirim sebagai id
+  dan ditolak 400 dengan pesan format tidak valid (PW19, dua putaran
+  terbuang di skenario kesiapan toko).
 - Bukti bahwa sebuah aksi tidak mengirim permintaan diambil dari penghitung
   `page.on("request", ...)` yang dilepas dengan `page.off`, bukan hanya dari
   toast. Contoh: langkah pengosongan di spec draft stock opname.

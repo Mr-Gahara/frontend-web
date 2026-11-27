@@ -39,16 +39,15 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW17)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW19)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
 B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
 backend, dan Ridho menyatakan pekerjaan backend MVP selesai. Pembuktian
 web atas baris `Menunggu verifikasi` di `docs/pengembangan/klien.md`
-backend dan tampilan struk tutup kasir selesai (PW02 sampai PW14);
-baris itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya
-PW15.
+backend dan tampilan struk tutup kasir selesai (PW02 sampai PW14); baris
+itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya PW15.
 Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
 `hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW06
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna
@@ -56,31 +55,34 @@ bertahan dimuat ulang (`569c3f9`), Rekap Absensi boleh kosong
 (`12ded07`), booking tanpa pajak per aset dibuktikan (`c214786`), dan
 lonceng pengembalian bagi pengguna gudang saja (`efb5596`). PW09 selesai
 27 November 2026 (`b232cad`): rincian sesi menampilkan isi laci yang
-dipindah saat buka kasir (MK18a), dan penanda asal Pindah Dana buka kasir
-dilaporkan ke backend (butir 196, MK19a). PW10 selesai (`00fbd5d`):
-Laporan Tutup Kasir di grup Laporan, daftar periode dan laporan
-bersusunan struk (PT1a sampai PT5a). PW11 selesai (`c289fd9`): cetak
-struk dari browser di kertas 80 mm setinggi struk. PW12 selesai
+dipindah saat buka kasir (MK18a), dan penanda asal Pindah Dana buka
+kasir dilaporkan ke backend (butir 196, MK19a). PW10 selesai
+(`00fbd5d`): Laporan Tutup Kasir di grup Laporan, daftar periode dan
+laporan bersusunan struk (PT1a sampai PT5a). PW11 selesai (`c289fd9`):
+cetak struk dari browser di kertas 80 mm setinggi struk. PW12 selesai
 (`e42caa9`): unduh laporan PDF dan Excel. PW07 selesai (`b9fe4a0`):
 pemicu stok produk lonceng dari ringkasan dashboard, kartu berupa angka
 (LN22a). PW08 selesai (`9b6c133`): lonceng perangkat menunggu izin,
 disetujui lewat aplikasi (LN23a). PW13 selesai (`86aa357`): struk tutup
-kasir terbukti e2e dari transaksi nyata; bagian web MVP struk tutup kasir
-selesai. PW16 selesai (`0d30692`): kelas `font-mono` menjadi Geist Mono
-dan blok CSS mati di `app/globals.css` dibuang (FN1a, FN2a). Vitest kini
-1333 lolos dari 158 berkas. PW14 selesai: suite e2e penuh
-27 November 2026 (`81e9214`, backend `6478d29`) 837 lolos dari 837,
-tanpa gagal maupun dilewati, termasuk spec ber-OTP (Baseline
-`inti/pengujian.md`).
+kasir terbukti e2e dari transaksi nyata; bagian web MVP struk tutup
+kasir selesai. PW16 selesai (`0d30692`): kelas `font-mono` menjadi Geist
+Mono dan blok CSS mati di `app/globals.css` dibuang (FN1a, FN2a). PW19
+selesai (`f606985`): lonceng kesiapan toko, satu kartu "Siapkan toko"
+berlangkah dan penahan pengingat absensi (KS1a sampai KS9a,
+`modul/pemberitahuan.md`). Vitest kini 1344 lolos dari 159 berkas. PW14
+selesai: suite e2e penuh 27 November 2026 (`81e9214`, backend `6478d29`)
+837 lolos dari 837, tanpa gagal maupun dilewati, termasuk spec ber-OTP
+(Baseline `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
 `PW01` sampai `PW19`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14, PW16, dan PW17 selesai.
-2. **Diawali dialog keputusan:** PW19, lonceng kesiapan toko (akun baru
-   mendahulukan setup sampai siap beroperasi), lalu PW18, bidang absensi
-   di kerangkanya (langkah berurutan dan catatan syarat di halaman).
+1. **Sekarang:** tidak ada; PW01 sampai PW14, PW16, PW17, dan PW19
+   selesai.
+2. **Diawali dialog keputusan:** PW18, bidang karyawan (opsional) dan
+   absensi di kerangka kesiapan toko PW19 (langkah berurutan dan catatan
+   syarat di halaman).
 3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
