@@ -42,7 +42,7 @@ tetap `AR`, `B`, dan `P`.
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
-| PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Belum | |
+| PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Selesai | `c289fd9` |
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Belum | |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Belum | |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
@@ -183,13 +183,13 @@ tumpukan bawaan Tailwind (PW16).
 
 ### PW11: struk tutup kasir, cetak dari browser
 
-Keputusan 8 (25 November 2026): cetak dari browser ikut MVP. Halaman
-cetak selebar 80 mm lewat `window.print`, susunan dan garis putus-putus
-sesuai Susunan struk, hanya untuk periode `TUTUP`. Struk memakai
-`StrukLaporan` dari PW10; tombol "Cetak struk" (navy) di kepala laman
-laporan sesuai papan A (PT5a). Uji: unit atau
-integration untuk susunan, dan e2e yang memeriksa halaman cetak (gaya
-`@media print`).
+Selesai 27 November 2026 (`c289fd9`). Tombol "Cetak struk" di kepala
+laman laporan periode TUTUP memanggil `window.print`; salinan
+`StrukLaporan` khusus cetak dipasang di body, dan `@media print`
+menyembunyikan selainnya. `size: 80mm auto` ternyata tidak sah (PDF
+terukur Letter), sehingga kertas 80 mm x tinggi struk disetel pada
+`beforeprint`. Dibuktikan e2e lewat `emulateMedia` dan ukuran `/MediaBox`
+PDF.
 
 ### PW12: struk tutup kasir, unduh
 

@@ -548,6 +548,11 @@ seluruh mesin kasir di outlet per shift atau hari toko (B375, B376).
   "Rp" seperti struk kertas (`angkaStruk`), huruf Geist Mono.
 - Tombol Cetak dan Unduh di kanvas hanya penanda letak (kepala laman:
   Unduh bergaris tepi, Cetak struk navy); dipasang di PW11 dan PW12.
+- Cetak struk (PW11, `c289fd9`, keputusan 8): tombol "Cetak struk" hanya
+  untuk periode TUTUP, memanggil `window.print`. Salinan struk khusus cetak
+  dipasang di body (`AreaCetakStruk`), dan `@media print` menyembunyikan
+  seluruh aplikasi selainnya. Kertas 80 mm setinggi struk disetel pada
+  `beforeprint`, sehingga berlaku juga dari menu cetak browser.
 
 ### Sub-menu Keuangan dan Laporan
 

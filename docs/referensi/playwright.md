@@ -635,6 +635,15 @@ bersyarat).
   disorot tampil utuh hanya bila muat di layar; elemen yang lebih besar
   dari layar, seperti daftar tujuh hari jam buka, cukup bersinggungan
   dengan layar. Balonnya tetap harus seluruhnya di dalam layar (JB10a).
+- Cetak dari browser diuji tanpa dialog cetak, yang tidak dapat
+  dikendalikan Playwright: `window.print` diganti pencatat lewat
+  `page.evaluate` sebelum tombol diklik, tampilan cetak lewat
+  `page.emulateMedia({ media: "print" })`, dan ukuran kertas dari
+  `page.pdf({ preferCSSPageSize: true })` dengan membaca `/MediaBox` PDF
+  (pt; 80 mm = 226,77). `page.pdf` tidak memicu `beforeprint`, sehingga
+  peristiwa itu dipicu sendiri dengan `dispatchEvent` sebelumnya
+  (`keuangan/laporan-tutup-kasir`, PW11). Untuk melihat hasilnya,
+  simpan PDF lalu ubah dengan `pdftoppm -png`.
 
 ## Spec rujukan
 

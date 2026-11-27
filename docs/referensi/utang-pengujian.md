@@ -195,6 +195,11 @@ skip bersyarat data, dan catatan proses.
   (`tests/integration/components/sesi-kasir/struk-laporan.test.tsx`);
   e2e membandingkan setiap angka struk dengan laporan backend yang bernilai
   0. Transaksi tunai, non-tunai, dan invoice bersesi adalah PW13.
+- **Cetak struk ke printer sungguhan tidak diuji** (PW11): dialog cetak
+  browser tidak dapat dikendalikan Playwright, sehingga `window.print`
+  dicatat lewat pengganti, tampilan cetak dibuktikan dengan
+  `emulateMedia`, dan ukuran kertas dari PDF `@page` (80 mm, satu lembar
+  setinggi struk). Hasil di printer termal 80 mm nyata belum dicoba.
 - **Lihat semua di panel lonceng (LN19a) hanya teruji di test integrasi**
   (`tests/integration/components/notifikasi`), karena akun uji per
   25 November 2026 punya tepat lima pemberitahuan; spec
