@@ -201,6 +201,18 @@ const PERAN_KASIR_OUTLET: PeranUji = {
 };
 
 /**
+ * Kasir yang hanya membuka dan menutup kasir (PW13): buka-tutup-kasir dan
+ * dashboard outlet, tanpa read-sesi-kasir, untuk membuktikan unduhan laporan
+ * periode ditolak 403 (getPeriode backend).
+ */
+const PERAN_KASIR_BUKA_TUTUP: PeranUji = {
+  nama: "E2E Kasir Buka Tutup",
+  pin: "864297",
+  deskripsi: "Peran uji e2e: hanya buka-tutup-kasir dan dashboard outlet",
+  izin: (n) => n === "buka-tutup-kasir" || n === IZIN.dashboardOutlet,
+};
+
+/**
  * Izin baca Owner tanpa read-akunkas, ditambah buat dan ubah metode
  * pembayaran (pemilik proyek, 23 November 2026): halaman buat metode
  * ditolak gerbang rute, halaman ubah tetap terbuka dengan akun tujuan tetap.
@@ -350,6 +362,7 @@ export const NAMA_BACA_SAJA = PERAN_BACA_SAJA.nama;
 
 export const masukTanpaIzinLintas = (page: Page) => masukSebagai(page, PERAN_TERKUNCI);
 export const masukBacaSaja = (page: Page) => masukSebagai(page, PERAN_BACA_SAJA);
+export const masukKasirBukaTutup = (page: Page) => masukSebagai(page, PERAN_KASIR_BUKA_TUTUP);
 export const masukPembelianOutlet = (page: Page) => masukSebagai(page, PERAN_PEMBELIAN_OUTLET);
 export const masukLokasiGudang = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG);
 export const masukAkunBukanOwner = (page: Page) => masukSebagai(page, PERAN_AKUN_BUKAN_OWNER);

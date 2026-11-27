@@ -114,6 +114,18 @@ export async function bersihkanMesinUji(page: Page, auth: Auth, laciID: string) 
 export type PindahDanaBukaUji = { akunKasTujuanID: string; jumlah: number };
 
 /**
+ * Buka dan tutup kasir dibatasi 10 hitungan per menit per pengguna
+ * (batasHitungan di routes/sesiKasirRoute.js), perlindungan hitung buta yang
+ * tidak diakali. Spec yang membuka dan menutup kasir berkali-kali, atau
+ * dijalankan berturut-turut, menunggu jendelanya habis lalu mengulang sekali
+ * (Retry-After, paling lama 61 detik).
+ */
+export async function tungguBatasHitungan(headers: Record<string, string>) {
+  const detik = Math.min(Number(headers["retry-after"]) || 60, 60) + 1;
+  await new Promise((selesai) => setTimeout(selesai, detik * 1000));
+}
+
+/**
  * Membuka kasir di perangkat uji lewat API aplikasi. Bawaannya hitungan sama
  * dengan saldo laci sehingga tanpa selisih dan tanpa catatan. `nominal`
  * undefined tidak dikirim (modal kosong, disimpan 0, B371); `pindahDana`
@@ -139,18 +151,53 @@ export async function bukaKasirLewatAplikasi(
     expect(masuk.status(), `login app: ${isiMasuk.message ?? ""}`).toBe(200);
     expect(token, "login app membawa access token").toBeTruthy();
 
-    const buka = await ctx.post("/api/sesikasir/buka", {
-      data: {
-        ...(nominal === undefined ? {} : { nominal }),
-        ...(pindahDana ? { pindahDana } : {}),
-        ...(catatan ? { catatan } : {}),
-      },
-      headers: { Authorization: "Bearer " + token },
-    });
+    const kirimBuka = () =>
+      ctx.post("/api/sesikasir/buka", {
+        data: {
+          ...(nominal === undefined ? {} : { nominal }),
+          ...(pindahDana ? { pindahDana } : {}),
+          ...(catatan ? { catatan } : {}),
+        },
+        headers: { Authorization: "Bearer " + token },
+      });
+    let buka = await kirimBuka();
+    if (buka.status() === 429) {
+      await tungguBatasHitungan(buka.headers());
+      buka = await kirimBuka();
+    }
     const isiBuka = await buka.json().catch(() => ({}));
     expect(buka.status(), `buka kasir dari aplikasi: ${isiBuka.message ?? ""}`).toBe(201);
     return isiBuka.data as SesiKasirMentah;
   } finally {
     await ctx.dispose();
   }
+}
+
+/**
+ * Sesi aplikasi untuk transaksi bersesi (PW13): login akun lalu login app di
+ * perangkat itu, dan kirim permintaan dengan token aplikasinya. Penjualan dan
+ * pembayaran dari perangkat yang kasirnya buka menyimpan sesiKasirID (B373,
+ * B374), sehingga masuk laporan periode. Panggil tutup() di akhir.
+ */
+export async function sesiAplikasi(
+  pengguna: { nama: string; pin: string } = PENGGUNA_UJI,
+  perangkat: { installationId: string } = PERANGKAT_UJI,
+) {
+  const ctx = await request.newContext({ baseURL: BASIS });
+  const akun = await ctx.post("/api/akun/auth/login", { data: AKUN_UJI });
+  const isiAkun = await akun.json().catch(() => ({}));
+  expect(akun.status(), `login akun: ${isiAkun.message ?? ""}`).toBe(200);
+  const masuk = await ctx.post("/api/pengguna/pin-login", {
+    data: { ...pengguna, loginType: "app", installationId: perangkat.installationId },
+    headers: { Authorization: "Bearer " + isiAkun.accessToken },
+  });
+  const isiMasuk = await masuk.json().catch(() => ({}));
+  const token = isiMasuk.accessToken ?? isiMasuk.data?.accessToken;
+  expect(token, `login app ${pengguna.nama}: ${isiMasuk.message ?? ""}`).toBeTruthy();
+  const kirim = async <T>(method: "GET" | "POST" | "PUT", path: string, data?: unknown) => {
+    const res = await ctx.fetch("/api" + path, { method, data, headers: { Authorization: "Bearer " + token } });
+    const isi = await res.json().catch(() => ({}));
+    return { status: res.status(), data: isi.data as T, pesan: String(isi.message ?? "") };
+  };
+  return { kirim, tutup: () => ctx.dispose() };
 }
