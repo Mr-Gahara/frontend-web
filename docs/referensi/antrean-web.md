@@ -48,6 +48,7 @@ tetap `AR`, `B`, dan `P`.
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Selesai | `81e9214` |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
+| PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -215,6 +216,15 @@ mati dibuang, dan `StrukLaporan` kembali berkelas `font-mono` (FN1a,
 FN2a, `modul/ui-ux.md`). Geist Mono 0 sampai 5% lebih sempit tanpa
 luberan baru; skenario HP `keuangan/laporan-tutup-kasir` memeriksa
 hurufnya.
+
+### PW17: dokumen sinkron sesudah PW14
+
+Paket dokumen saja, dari laporan `/sisa-frontend-web` 27 November 2026.
+Tiga kalimat tertinggal sesudah PW02 sampai PW14: Keadaan di
+`inti/status.md` masih menyebut pembuktian baris `Menunggu verifikasi`
+dan tampilan struk tutup kasir sebagai sisa web; judul "Kriteria selesai
+MVP (usulan)" di `referensi/rencana-struk-tutup-kasir.md`; dan Keadaan
+di `referensi/laporan-untuk-backend.md` belum menyebut suite penuh PW14.
 
 ## Perubahan backend tanpa pekerjaan web
 

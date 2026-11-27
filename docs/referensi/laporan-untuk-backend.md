@@ -21,7 +21,9 @@ tetap disebut agar jelas modulnya.
 **Keadaan 27 November 2026:** seluruh butir dan kebutuhan laporan 24
 sampai 26 November 2026 dikerjakan backend `6478d29` (AR46 sampai AR51,
 B369 sampai B384) dan sudah dibuktikan web lewat paket PW02 sampai PW13,
-lalu dipindah ke `arsip/laporan-backend.md`; di
+lalu dipindah ke `arsip/laporan-backend.md`; suite e2e penuh
+27 November 2026 (PW14, web `81e9214`) membuktikan ulang seluruhnya,
+837 lolos dari 837. Di
 `docs/pengembangan/klien.md` backend barisnya masih `Menunggu
 verifikasi` sampai Ridho menutupnya (AR31). Yang terbuka tinggal butir
 196, laporan baru yang belum diserahkan ke backend.

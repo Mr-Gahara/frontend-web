@@ -44,9 +44,11 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
 B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
-backend, dan Ridho menyatakan pekerjaan backend MVP selesai; yang
-tersisa di sisi web adalah pembuktian baris `Menunggu verifikasi` di
-`docs/pengembangan/klien.md` backend dan tampilan struk tutup kasir.
+backend, dan Ridho menyatakan pekerjaan backend MVP selesai. Pembuktian
+web atas baris `Menunggu verifikasi` di `docs/pengembangan/klien.md`
+backend dan tampilan struk tutup kasir selesai (PW02 sampai PW14);
+baris itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya
+PW15.
 Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
 `hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW06
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna

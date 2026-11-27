@@ -233,7 +233,7 @@ keputusan terbuka 24 November 2026:
 
 Tidak ada.
 
-## Kriteria selesai MVP (usulan)
+## Kriteria selesai MVP
 
 Bagian web seluruhnya terbukti per 27 November 2026 (PW10 sampai PW13):
 laporan periode di web, cetak dari browser, unduh, dan angka yang sama
