@@ -287,8 +287,9 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
         await lonceng(page).click();
         const siapkan = kartu(page, "kesiapan-toko");
         await expect(siapkan).toHaveAttribute("data-tingkat", "penting");
-        await expect(siapkan).toContainText("Siapkan toko (langkah 1 dari 2)");
-        await expect(siapkan).toContainText("Sesudahnya: Setup Sesi Booking.");
+        // Produk, Buat posisi, Tambah karyawan, lalu Setup Sesi Booking (KS1a, KS10a).
+        await expect(siapkan).toContainText("Siapkan toko (langkah 1 dari 4)");
+        await expect(siapkan).toContainText("Sesudahnya: Buat posisi karyawan.");
         await expect(siapkan.getByRole("link", { name: "Buat Produk" })).toHaveAttribute(
           "href",
           "/dashboard/outlet/inventaris/produk/buatProduk",
@@ -310,17 +311,99 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
       await test.step("Buat Produk memuat kotak langkah yang sama tanpa tautan ke dirinya", async () => {
         await kartu(page, "kesiapan-toko").getByRole("link", { name: "Buat Produk" }).click();
         await page.waitForURL("**/inventaris/produk/buatProduk");
-        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 1 dari 2)" });
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 1 dari 4)" });
         await expect(kotak).toBeVisible({ timeout: 15_000 });
         await expect(kotak).toContainText("Toko belum punya produk");
         await expect(kotak.getByRole("link")).toHaveCount(0);
       });
 
-      await test.step("sesudah ada staf, shift aktif, dan pola roster, pengingat jadwal minggu depan tampil", async () => {
-        // Data milik modul lain disiapkan lewat API (keputusan rancangan butir 23).
-        // Izin diambil dari role Owner toko ini, seperti helper peran uji (terkunci-uji).
-        type Mentah = { id?: string; _id?: string; nama?: string; namaRole?: string; permissions?: Mentah[] };
-        const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
+      await test.step("catatan syarat di toko kosong: Generate Jadwal, dialog Pola Roster, dan Tambah Pengguna (KS12a)", async () => {
+        const catatan = page.getByRole("note", { name: "Syarat belum ada" });
+        await page.goto("/dashboard/outlet/jadwal/generate");
+        await expect(catatan.filter({ hasText: "Belum ada pola roster di outlet." })).toBeVisible({ timeout: 15_000 });
+        await expect(catatan.getByRole("link", { name: "Buat pola roster" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/pola-roster",
+        );
+        await expect(catatan.getByRole("link", { name: "Tambah karyawan" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/pengguna",
+        );
+
+        await page.goto("/dashboard/outlet/pola-roster");
+        await page.getByRole("button", { name: /buat pola roster/i }).click();
+        const dialogPola = page.getByRole("dialog");
+        await expect(dialogPola.getByRole("note", { name: "Syarat belum ada" })).toContainText(
+          "Belum ada shift aktif di outlet.",
+        );
+        await expect(dialogPola.getByRole("link", { name: "Buat shift" })).toHaveAttribute("href", "/dashboard/outlet/shift");
+        await dialogPola.getByLabel("Nama Pola Roster").fill("Pola Tanpa Shift");
+        await expect(dialogPola.getByRole("button", { name: "Simpan Pola Roster" })).toBeDisabled();
+        await page.keyboard.press("Escape");
+
+        await page.goto("/dashboard/outlet/pengguna");
+        await page.getByRole("button", { name: "Tambah Pengguna" }).click();
+        const dialogPengguna = page.getByRole("dialog");
+        await expect(dialogPengguna.getByRole("note", { name: "Syarat belum ada" })).toContainText(
+          "Belum ada posisi yang dapat diberikan ke karyawan.",
+          { timeout: 15_000 },
+        );
+        await expect(dialogPengguna.getByRole("link", { name: "Buat posisi" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/pengaturan/roles",
+        );
+        await page.keyboard.press("Escape");
+      });
+
+      // Data milik modul lain disiapkan lewat API (keputusan rancangan butir 23).
+      type Mentah = { id?: string; _id?: string; nama?: string; namaRole?: string; permissions?: Mentah[] };
+      const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
+
+      await test.step("sesudah ada produk: langkah 2 Buat posisi (info), kotaknya di Posisi, lalu Toko ini hanya saya", async () => {
+        const kategori = await api<Mentah>(page, auth, "POST", "/kategori", {
+          namaKategori: "Kopi Kesiapan",
+          kodeKategori: "KSP",
+          keterangan: "Kategori uji kesiapan toko",
+        });
+        expect(kategori.status, `POST /kategori: ${kategori.pesan}`).toBe(201);
+        const produk = await api(page, auth, "POST", "/produk", {
+          namaProduk: "Kopi Kesiapan E2E",
+          hargaJual: 10000,
+          hargaDasar: 5000,
+          kategoriID: idMilik(kategori.data),
+          isUnlimitedStok: true,
+        });
+        expect(produk.status, `POST /produk: ${produk.pesan}`).toBe(201);
+
+        await page.goto(URL_DASHBOARD);
+        await page.waitForLoadState("networkidle");
+        await lonceng(page).click();
+        const siapkan = kartu(page, "kesiapan-toko");
+        await expect(siapkan).toContainText("Siapkan toko (langkah 2 dari 4)", { timeout: 15_000 });
+        await expect(siapkan).toHaveAttribute("data-tingkat", "info");
+        await expect(siapkan).toContainText("Sesudahnya: Tambah karyawan.");
+        await expect(siapkan.getByRole("button", { name: "Toko ini hanya saya" })).toBeVisible();
+        await siapkan.getByRole("link", { name: "Buat posisi" }).click();
+        await page.waitForURL("**/pengaturan/roles");
+        const kotak = page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 2 dari 4)" });
+        await expect(kotak).toBeVisible({ timeout: 15_000 });
+        await expect(kotak.getByRole("link")).toHaveCount(0);
+        // Pernyataan per perangkat (KS10a): langkah karyawan dan absensi dilewati.
+        await kotak.getByRole("button", { name: "Toko ini hanya saya" }).click();
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko" })).toHaveCount(0);
+        await page.goto(URL_DASHBOARD);
+        await page.waitForLoadState("networkidle");
+        await lonceng(page).click();
+        await expect(kartu(page, "kesiapan-toko")).toContainText("Siapkan toko (langkah 2 dari 2)", { timeout: 15_000 });
+        await expect(kartu(page, "kesiapan-toko")).toContainText("Setup Sesi Booking belum selesai");
+        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      });
+
+      let idStaf = "";
+      let idShift = "";
+      let locationID = "";
+      await test.step("ada staf, shift aktif, dan pola: langkah absensi tetap muncul, Generate jadwal menggantikan pengingat", async () => {
         const daftarPeran = await api<Mentah[]>(page, auth, "GET", "/role");
         expect(daftarPeran.status, daftarPeran.pesan).toBe(200);
         const owner = daftarPeran.data.find((r) => /^owner$/i.test(r.namaRole ?? ""));
@@ -333,15 +416,16 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
           permissions: [idMilik(dashboardOutlet)],
         });
         expect(peran.status, `POST /role: ${peran.pesan}`).toBe(201);
-        const staf = await api(page, auth, "POST", "/pengguna/register-pengguna", {
+        const staf = await api<Mentah>(page, auth, "POST", "/pengguna/register-pengguna", {
           nama: "Staf Kesiapan E2E",
           pin: "246810",
           roleID: idMilik(peran.data),
           aksesType: ["app"],
         });
         expect(staf.status, `register-pengguna: ${staf.pesan}`).toBe(201);
-        const locationID = await idLokasiRuang(page, auth);
-        const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
+        idStaf = idMilik(staf.data);
+        locationID = await idLokasiRuang(page, auth);
+        const shift = await api<Mentah>(page, auth, "POST", "/shift", {
           namaShift: "Pagi Kesiapan E2E",
           jamMasuk: "07:00",
           jamPulang: "15:00",
@@ -351,10 +435,11 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
           locationID,
         });
         expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
+        idShift = idMilik(shift.data);
         const pola = await api(page, auth, "POST", "/polaroster", {
           namaPola: "Pola Kesiapan E2E",
           siklusHari: 1,
-          detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+          detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: idShift }],
           locationID,
         });
         expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
@@ -362,34 +447,40 @@ test.describe("kesiapan toko (PW19, akun klien sekali pakai)", () => {
         await page.goto(URL_DASHBOARD);
         await page.waitForLoadState("networkidle");
         await lonceng(page).click();
-        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(1, { timeout: 15_000 });
-        await expect(kartu(page, "kesiapan-toko")).toContainText("Siapkan toko (langkah 1 dari 2)");
-        await page.keyboard.press("Escape");
+        const siapkan = kartu(page, "kesiapan-toko");
+        // Produk, posisi, karyawan, shift, pola selesai; langkah 6 Generate jadwal (KS11a).
+        await expect(siapkan).toContainText("Siapkan toko (langkah 6 dari 7)", { timeout: 15_000 });
+        await expect(siapkan).toHaveAttribute("data-tingkat", "tindakan");
+        await expect(siapkan.getByRole("button", { name: "Toko ini hanya saya" })).toHaveCount(0);
+        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(0);
+        await siapkan.getByRole("link", { name: "Generate jadwal" }).click();
+        await page.waitForURL("**/jadwal/generate");
+        await expect(page.getByRole("status").filter({ hasText: "Siapkan toko (langkah 6 dari 7)" })).toBeVisible({
+          timeout: 15_000,
+        });
+        await expect(page.getByRole("note", { name: "Syarat belum ada" })).toHaveCount(0);
       });
 
-      await test.step("sesudah ada produk: langkah 2 setup fitur bertingkat info; wizard di setup inti tanpa kotak", async () => {
-        const kategori = await api<{ id?: string; _id?: string }>(page, auth, "POST", "/kategori", {
-          namaKategori: "Kopi Kesiapan",
-          kodeKategori: "KSP",
-          keterangan: "Kategori uji kesiapan toko",
+      await test.step("jadwal pernah dibuat: langkah 7 setup fitur, pengingat jadwal minggu depan kembali; wizard tanpa kotak", async () => {
+        const lalu = new Date(Date.now() - 7 * 86_400_000);
+        const tanggal = `${lalu.getFullYear()}-${String(lalu.getMonth() + 1).padStart(2, "0")}-${String(lalu.getDate()).padStart(2, "0")}`;
+        const jadwal = await api<{ ditolak: number }>(page, auth, "POST", "/jadwalshift", {
+          penggunaId: idStaf,
+          tanggal,
+          isLibur: false,
+          shiftIds: [idShift],
         });
-        expect(kategori.status, `POST /kategori: ${kategori.pesan}`).toBe(201);
-        const produk = await api(page, auth, "POST", "/produk", {
-          namaProduk: "Kopi Kesiapan E2E",
-          hargaJual: 10000,
-          hargaDasar: 5000,
-          kategoriID: String(kategori.data.id ?? kategori.data._id ?? ""),
-          isUnlimitedStok: true,
-        });
-        expect(produk.status, `POST /produk: ${produk.pesan}`).toBe(201);
+        expect(jadwal.status, `POST /jadwalshift: ${jadwal.pesan}`).toBe(201);
 
-        await page.reload();
+        await page.goto(URL_DASHBOARD);
         await page.waitForLoadState("networkidle");
         await lonceng(page).click();
         const siapkan = kartu(page, "kesiapan-toko");
         await expect(siapkan).toHaveAttribute("data-tingkat", "info", { timeout: 15_000 });
-        await expect(siapkan).toContainText("Siapkan toko (langkah 2 dari 2)");
+        await expect(siapkan).toContainText("Siapkan toko (langkah 7 dari 7)");
         await expect(siapkan).toContainText("Setup Sesi Booking belum selesai, sehingga fiturnya masih terkunci.");
+        // Penahan KS8a lepas dan langkah jadwal selesai: pengingat toko berjalan tampil.
+        await expect(kartu(page, "jadwal-minggu-depan")).toHaveCount(1);
         await siapkan.getByRole("link", { name: "Lengkapi setup" }).click();
         await page.waitForURL("**/setup");
         // Setup inti akun ini belum selesai (wizard di jam buka), sehingga

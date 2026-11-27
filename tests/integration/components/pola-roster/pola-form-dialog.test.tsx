@@ -3,6 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import { PolaFormDialog } from "@/features/pola-roster/form-pola-roster";
+
+vi.mock("@/lib/auth/useSession", async () => {
+  const { IZIN_HALAMAN } = await import("@/lib/auth/permissions");
+  const semua = [...new Set(Object.values(IZIN_HALAMAN).flatMap((s) => s.flat()))];
+  return { useSession: () => ({ permissions: semua }) };
+});
 import type { ShiftItem } from "@/types/shift";
 
 describe("Integration - PolaFormDialog", () => {
@@ -33,6 +39,7 @@ describe("Integration - PolaFormDialog", () => {
   ];
 
   const defaultProps = {
+    ruang: "outlet" as const,
     open: true,
     onOpenChange: mockOnOpenChange,
     editTarget: null,
@@ -48,6 +55,21 @@ describe("Integration - PolaFormDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("tanpa shift aktif: catatan Buat shift bertaut ke Master Shift ruangnya, dan Simpan dimatikan (KS12a)", () => {
+    const nonaktif = shiftList.map((s) => ({ ...s, status: "Non-Aktif" as const }));
+    render(<PolaFormDialog {...defaultProps} ruang="gudang" shiftList={nonaktif} />);
+    const catatan = screen.getByRole("note", { name: "Syarat belum ada" });
+    expect(catatan).toHaveTextContent("Belum ada shift aktif di gudang.");
+    expect(screen.getByRole("link", { name: "Buat shift" })).toHaveAttribute("href", "/dashboard/gudang/shift");
+    expect(screen.getByRole("button", { name: "Simpan Pola Roster" })).toBeDisabled();
+  });
+
+  it("dengan shift aktif: tanpa catatan syarat dan Simpan aktif", () => {
+    render(<PolaFormDialog {...defaultProps} />);
+    expect(screen.queryByRole("note", { name: "Syarat belum ada" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Simpan Pola Roster" })).toBeEnabled();
   });
 
   it("merender form default dengan 7 hari siklus", () => {

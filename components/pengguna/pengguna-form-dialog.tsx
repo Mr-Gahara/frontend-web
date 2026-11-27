@@ -1,5 +1,6 @@
 "use client";
 
+import { CatatanSyarat } from "@/components/catatan-syarat";
 import React from "react";
 import {
   Dialog,
@@ -205,6 +206,15 @@ export default function PenggunaFormDialog({
               </div>
             )}
           </div>
+
+          {/* Daftar role termuat (Owner selalu ada) tetapi tidak ada posisi
+              di bawah level pengguna ini (KS12a): staf belum dapat dibuat. */}
+          {!isSelf && roleList.length > 0 && roleList.every((role) => role.level >= currentUserLevel) && (
+            <CatatanSyarat
+              isi="Belum ada posisi yang dapat diberikan ke karyawan. Buat posisi dulu di Posisi & Hak Akses, lalu pilih di sini."
+              tautan={{ href: "/dashboard/outlet/pengaturan/roles", label: "Buat posisi" }}
+            />
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

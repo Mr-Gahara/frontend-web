@@ -1,5 +1,7 @@
 "use client";
 
+import { CatatanSyarat } from "@/components/catatan-syarat";
+import type { RuangPolaRoster } from "./ruang";
 import { useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +34,8 @@ import {
 } from "./payload";
 
 interface PolaFormDialogProps {
+  /** Ruang pola, untuk tautan Master Shift di catatan syarat (KS12a). */
+  ruang: RuangPolaRoster;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editTarget: PolaRosterItem | null;
@@ -41,6 +45,7 @@ interface PolaFormDialogProps {
 }
 
 interface IsiFormPolaRosterProps {
+  ruang: RuangPolaRoster;
   editTarget: PolaRosterItem | null;
   shiftList: ShiftItem[];
   onSubmit: (data: PolaRosterRequest) => void;
@@ -57,7 +62,7 @@ interface IsiFormPolaRosterProps {
  * ditolak, dan rincian baru disesuaikan saat siklus berisi angka sah
  * (PL3a).
  */
-function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFormPolaRosterProps) {
+function IsiFormPolaRoster({ ruang, editTarget, shiftList, onSubmit, isPending }: IsiFormPolaRosterProps) {
   const shiftAktif = useMemo(() => shiftList.filter((s) => s.status === "Aktif"), [shiftList]);
   const idShiftAktif = useMemo(() => new Set(shiftAktif.map((s) => s.id)), [shiftAktif]);
   const skema = useMemo(() => buatSkemaPolaRoster(idShiftAktif), [idShiftAktif]);
@@ -89,8 +94,19 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
     );
   };
 
+  // Tanpa shift aktif hanya Libur yang dapat dipilih; Simpan dimatikan agar
+  // tidak tersimpan pola libur semua tanpa sengaja (KS12a, pemilik proyek PW18).
+  const tanpaShift = shiftAktif.length === 0;
+
   return (
     <>
+      {tanpaShift && (
+        <CatatanSyarat
+          className="mb-4 shrink-0"
+          isi={`Belum ada shift aktif di ${ruang === "outlet" ? "outlet" : "gudang"}. Buat shift dulu di Master Shift, baru hari kerja dapat dipilih.`}
+          tautan={{ href: `/dashboard/${ruang}/shift`, label: "Buat shift" }}
+        />
+      )}
       {pesanGalat && (
         <div
           role="alert"
@@ -213,7 +229,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
         <Button
           type="submit"
           form="pola-form"
-          disabled={isPending || rincian.length === 0}
+          disabled={isPending || rincian.length === 0 || tanpaShift}
           className="w-full h-14 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-besar font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? "Menyimpan..." : "Simpan Pola Roster"}
@@ -224,6 +240,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
 }
 
 export function PolaFormDialog({
+  ruang,
   open,
   onOpenChange,
   editTarget,
@@ -260,6 +277,7 @@ export function PolaFormDialog({
 
         <IsiFormPolaRoster
           key={editTarget?.id ?? "baru"}
+          ruang={ruang}
           editTarget={editTarget}
           shiftList={shiftList}
           onSubmit={onSubmit}

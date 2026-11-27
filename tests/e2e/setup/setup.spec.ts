@@ -228,6 +228,11 @@ test.describe("Wizard setup", () => {
       });
 
       await test.step("wizard dibuka lagi mulai dari sesi booking; pajak dapat ditambah", async () => {
+        // Toko ini belum punya staf, sehingga langkah kesiapan berjalan adalah
+        // Buat posisi (PW18, KS1a dan KS10a). Owner menyatakan toko dijalankan
+        // sendiri (kunci per akun, hanya-owner.ts) agar langkah berjalan
+        // menjadi setup fitur dan kotaknya di wizard dapat diuji.
+        await page.evaluate((akun) => localStorage.setItem(`tachyon.kesiapan.hanyaOwner.${akun}`, "ya"), id);
         await page.goto("/setup");
         await expect(langkahAktif(page)).toContainText("Sesi booking", { timeout: 15_000 });
         // Kotak langkah kesiapan toko (PW19, KS9a) hanya di langkah wizard

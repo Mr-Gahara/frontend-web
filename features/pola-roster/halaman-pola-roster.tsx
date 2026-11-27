@@ -230,6 +230,7 @@ export default function PolaUtama({
 
       {/* 4. DIALOGS */}
       <PolaFormDialog
+        ruang={tipeRuang}
         open={formOpen}
         onOpenChange={setFormOpen}
         editTarget={selectedPola}

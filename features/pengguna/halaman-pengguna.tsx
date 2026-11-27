@@ -1,5 +1,6 @@
 "use client";
 
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useState } from "react";
@@ -396,6 +397,9 @@ export default function HalamanPengguna({
           </Button>
         )}
       </div>
+
+      {/* Langkah kesiapan toko (PW18, KS13a): karyawan dihitung dari ruang outlet. */}
+      {workspace === "outlet" && <KotakKesiapan langkah={["karyawan"]} />}
 
       {/* MASTER BENTO GRID */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-5 mt-2 auto-rows-min">

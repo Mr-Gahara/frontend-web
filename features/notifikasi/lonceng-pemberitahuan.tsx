@@ -42,7 +42,7 @@ export function bolehBukaSendiri(m: { pathname: string; adaPemicuStok: boolean; 
 export function LoncengPemberitahuan() {
   const pathname = usePathname();
   const { pengguna } = useSession();
-  const { daftar, segarkan } = usePemberitahuan();
+  const { daftar, segarkan, nyatakanHanyaOwner } = usePemberitahuan();
   const [buka, setBuka] = useState(false);
   const jumlah = daftar.length;
   const panel = { ...ringkasPanel(daftar), semua: daftar };
@@ -115,7 +115,12 @@ export function LoncengPemberitahuan() {
           <>
             <div className="-mr-2 flex max-h-[70vh] flex-col gap-2.5 overflow-y-auto pr-2">
               {(semua ? panel.semua : panel.tampil).map((p) => (
-                <KartuPemberitahuan key={p.id} pemberitahuan={p} onBukaTautan={() => ubahBuka(false)} />
+                <KartuPemberitahuan
+                  key={p.id}
+                  pemberitahuan={p}
+                  onBukaTautan={() => ubahBuka(false)}
+                  onTombol={nyatakanHanyaOwner ? () => nyatakanHanyaOwner() : undefined}
+                />
               ))}
             </div>
             {!semua && panel.tersembunyi > 0 && (

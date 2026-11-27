@@ -28,6 +28,8 @@ export interface Pemberitahuan {
    * dan selalu tampil di panel ringkas, tetapi warnanya tetap menurut tingkat.
    */
   utama?: boolean;
+  /** Tombol aksi di kartu selain tautan; ditangani pemasang kartu (KS10a: "Toko ini hanya saya"). */
+  tombol?: { aksi: "hanya-owner"; label: string };
 }
 
 const URUTAN: Record<TingkatPemberitahuan, number> = { penting: 0, tindakan: 1, info: 2 };

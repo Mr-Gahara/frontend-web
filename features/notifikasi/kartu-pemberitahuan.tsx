@@ -23,11 +23,14 @@ const IKON: Record<TingkatPemberitahuan, typeof Info> = { penting: AlertTriangle
 export function KartuPemberitahuan({
   pemberitahuan: p,
   onBukaTautan,
+  onTombol,
   className,
 }: {
   pemberitahuan: Pemberitahuan;
   /** Dipanggil saat tautan diklik, misalnya untuk menutup panel lonceng. */
   onBukaTautan?: () => void;
+  /** Penanganan tombol aksi kartu (KS10a); tanpa ini tombolnya tidak dipasang. */
+  onTombol?: (aksi: NonNullable<Pemberitahuan["tombol"]>["aksi"]) => void;
   className?: string;
 }) {
   const gaya = GAYA_TINGKAT[p.tingkat];
@@ -54,7 +57,7 @@ export function KartuPemberitahuan({
           <div className={cn("h-1.5 rounded-full", gaya.bilah)} style={{ width: `${p.persen}%` }} />
         </div>
       )}
-      {p.tautan.length > 0 && (
+      {(p.tautan.length > 0 || (p.tombol && onTombol)) && (
         <div className="flex flex-wrap gap-2">
           {p.tautan.map((t) => (
             <Link
@@ -66,6 +69,15 @@ export function KartuPemberitahuan({
               {t.label}
             </Link>
           ))}
+          {p.tombol && onTombol && (
+            <button
+              type="button"
+              onClick={() => onTombol(p.tombol!.aksi)}
+              className="inline-flex h-9 items-center rounded-lg border border-navy/20 bg-gading px-3.5 text-isi font-semibold text-navy hover:bg-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+            >
+              {p.tombol.label}
+            </button>
+          )}
         </div>
       )}
     </article>

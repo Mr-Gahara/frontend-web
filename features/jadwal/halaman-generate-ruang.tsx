@@ -7,6 +7,8 @@
  * backend ditampilkan dan halaman tetap di langkah 2 (J2a); bila tidak ada
  * yang ditolak, halaman kembali ke kalender ruang itu.
  */
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
+import { CatatanSyarat } from "@/components/catatan-syarat";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Loader2, AlertCircle } from "lucide-react";
@@ -103,6 +105,28 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
         >
           <AlertCircle className="h-5 w-5 shrink-0" />
           <p>{pesanSimpan}</p>
+        </div>
+      )}
+
+      {/* Langkah kesiapan toko (PW18, KS13a), dihitung dari ruang outlet. */}
+      {ruang === "outlet" && <KotakKesiapan langkah={["jadwal"]} className="mx-auto mb-6 max-w-5xl" />}
+
+      {/* Catatan syarat (KS12a): seluruh data sudah termuat di titik ini. */}
+      {(langkah === 1 || !params) && (pola.data.length === 0 || karyawanList.length <= 1) && (
+        <div className="mx-auto mb-6 flex max-w-5xl flex-col gap-3">
+          {pola.data.length === 0 && (
+            <CatatanSyarat
+              isi={`Belum ada pola roster di ${ruang}. Buat pola roster dulu, lalu pilih di sini sebagai template jadwal.`}
+              tautan={{ href: `/dashboard/${ruang}/pola-roster`, label: "Buat pola roster" }}
+            />
+          )}
+          {/* Daftar karyawan ruang selalu memuat Owner (getByWorkspace backend). */}
+          {karyawanList.length <= 1 && (
+            <CatatanSyarat
+              isi={`Belum ada karyawan selain Owner di ${ruang}. Tambah karyawan dulu agar jadwalnya dapat dibuat.`}
+              tautan={{ href: `/dashboard/${ruang}/pengguna`, label: "Tambah karyawan" }}
+            />
+          )}
         </div>
       )}
 

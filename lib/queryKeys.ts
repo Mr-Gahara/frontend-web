@@ -273,6 +273,8 @@ export const queryKeys = {
     // Penahan pengingat absensi (KS8a), di bawah akar domainnya agar tambah
     // pengguna, shift, dan pola roster ikut memperbaruinya.
     pengguna: () => ["pengguna", "lonceng"] as const,
+    // Posisi staf kartu kesiapan (PW18), di bawah akar roles.
+    role: () => ["roles", "lonceng"] as const,
     shift: (lokasiId: string) => ["shift", "lonceng", lokasiId] as const,
     polaRoster: (lokasiId: string) => ["polaRoster", "lonceng", lokasiId] as const,
     monitoring: (tanggal: string, lokasiId: string) => ["absensi", "lonceng", tanggal, lokasiId] as const,

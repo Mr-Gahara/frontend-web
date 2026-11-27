@@ -27,7 +27,8 @@ const TITIK_MENU = [
   {
     href: "/dashboard/outlet/jadwal",
     judul: "Atur jadwal kerja",
-    isi: "Tentukan siapa bekerja di shift mana setiap hari.",
+    // Urutan menyiapkan absensi (KS12a, PW18).
+    isi: "Tentukan siapa bekerja di shift mana setiap hari. Urutannya: tambah karyawan, buat Master Shift, buat Pola Roster, lalu Generate Jadwal.",
   },
   {
     href: "/dashboard/outlet/pengaturan",

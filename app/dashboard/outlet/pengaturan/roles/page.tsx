@@ -1,5 +1,6 @@
 "use client";
 
+import { KotakKesiapan } from "@/features/notifikasi/kotak-kesiapan";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -136,6 +137,9 @@ export default function RolesPage() {
           </Button>
         </div>
       </div>
+
+      {/* Langkah kesiapan toko (PW18, KS13a). */}
+      <KotakKesiapan langkah={["posisi"]} />
 
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-12">

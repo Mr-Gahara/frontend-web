@@ -7,6 +7,12 @@ import type { PenggunaRequest } from "@/types/pengguna";
 import type { Role } from "@/types/role";
 import type { Lokasi } from "@/types/location";
 
+vi.mock("@/lib/auth/useSession", async () => {
+  const { IZIN_HALAMAN } = await import("@/lib/auth/permissions");
+  const semua = [...new Set(Object.values(IZIN_HALAMAN).flatMap((s) => s.flat()))];
+  return { useSession: () => ({ permissions: semua }) };
+});
+
 describe("Integration - PenggunaFormDialog", () => {
   const mockSetShowDialog = vi.fn();
   const mockSetForm = vi.fn();
@@ -33,6 +39,27 @@ describe("Integration - PenggunaFormDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("toko baru hanya punya role Owner: catatan Buat posisi bertaut ke Posisi & Hak Akses (KS12a)", () => {
+    const owner = [{ id: "o", namaRole: "Owner", deskripsi: null, level: 100, permissions: [] }] as Role[];
+    render(<PenggunaFormDialog {...defaultProps} roleList={owner} currentUserLevel={100} />);
+    expect(screen.getByRole("note", { name: "Syarat belum ada" })).toHaveTextContent(
+      "Belum ada posisi yang dapat diberikan ke karyawan.",
+    );
+    expect(screen.getByRole("link", { name: "Buat posisi" })).toHaveAttribute("href", "/dashboard/outlet/pengaturan/roles");
+  });
+
+  it("ada posisi di bawah level pengguna, atau role belum termuat: tanpa catatan", () => {
+    const peran = [
+      { id: "o", namaRole: "Owner", deskripsi: null, level: 100, permissions: [] },
+      { id: "k", namaRole: "Kasir", deskripsi: null, level: 10, permissions: [] },
+    ] as Role[];
+    const { unmount } = render(<PenggunaFormDialog {...defaultProps} roleList={peran} currentUserLevel={100} />);
+    expect(screen.queryByRole("note", { name: "Syarat belum ada" })).toBeNull();
+    unmount();
+    render(<PenggunaFormDialog {...defaultProps} roleList={[]} currentUserLevel={100} />);
+    expect(screen.queryByRole("note", { name: "Syarat belum ada" })).toBeNull();
   });
 
   it("harus merender form saat showDialog bernilai true (Happy Path)", () => {

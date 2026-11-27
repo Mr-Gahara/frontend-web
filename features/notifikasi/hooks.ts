@@ -21,6 +21,7 @@ import { absensiApi } from "@/features/absensi/api";
 import { izinCutiApi } from "@/features/izin-cuti/api";
 import { jadwalApi } from "@/features/jadwal/api";
 import { penggunaApi } from "@/features/pengguna/api";
+import { roleApi } from "@/features/role/api";
 import { polaRosterApi } from "@/features/pola-roster/api";
 import { shiftApi } from "@/features/shift/api";
 import { bolehTinjauOpname } from "@/features/stock-opname/izin";
@@ -28,7 +29,8 @@ import { fiturAktif, type AksesTautan } from "./akses";
 import { notifikasiApi } from "./api";
 import { muatRuang, ringkasanDimuat, saringKartuRuang, type AksesRuangSesi, type RuangSumber } from "./ruang";
 import { urutkanPemberitahuan, type Pemberitahuan } from "./jenis";
-import { keadaanKesiapan, langkahKesiapan, pemberitahuanKesiapan } from "./kesiapan";
+import { useHanyaOwner } from "./hanya-owner";
+import { keadaanKesiapan, langkahKesiapan, pemberitahuanKesiapan, rentangJadwalKesiapan } from "./kesiapan";
 import { IZIN_MUAT, pemberitahuanInventaris, type DataInventaris } from "./sumber-inventaris";
 import { pemberitahuanLangganan } from "./sumber-langganan";
 import { pemberitahuanDiskonBerakhir, pemberitahuanMembershipBerakhir, pemberitahuanPenjualanBelumLunas } from "./sumber-penjualan";
@@ -137,11 +139,96 @@ export function useKesiapanToko() {
   const muat = useMuatRuang();
   const ringkasan = useRingkasanOutletLonceng(ringkasanDimuat((r) => sudahMasuk && muat(r)).outlet);
   const produk = ringkasan.data?.produk;
+  const karyawanAbsensi = useKaryawanAbsensiKesiapan();
+  const { hanyaOwner, nyatakan } = useHanyaOwner();
   return useMemo(() => {
     const fitur = status.data ? fiturSetupPengguna(status.data, permissions) : [];
-    const keadaan = keadaanKesiapan(langkahKesiapan({ produk, fitur }));
-    return { keadaan, pemberitahuan: pemberitahuanKesiapan(keadaan, akses), sumber: status };
-  }, [produk, status, permissions, akses]);
+    const keadaan = keadaanKesiapan(
+      langkahKesiapan({
+        produk,
+        fitur,
+        karyawan: { ...karyawanAbsensi.karyawan, hanyaOwner },
+        absensi: karyawanAbsensi.absensi,
+      }),
+    );
+    return {
+      keadaan,
+      pemberitahuan: pemberitahuanKesiapan(keadaan, akses),
+      sumber: [status, ...karyawanAbsensi.sumber],
+      nyatakanHanyaOwner: nyatakan,
+    };
+  }, [produk, status, permissions, akses, karyawanAbsensi, hanyaOwner, nyatakan]);
+}
+
+/**
+ * Data bidang karyawan dan absensi outlet kartu kesiapan (PW18, KS10a dan
+ * KS11a). Pengguna, shift, dan pola roster memakai kunci yang sama dengan
+ * penahan KS8a, sehingga tidak ada permintaan ganda. Data yang tidak
+ * berizin atau belum termuat bernilai null (langkahnya tidak dihitung).
+ */
+function useKaryawanAbsensiKesiapan() {
+  const { sudahMasuk, permissions } = useSession();
+  const muat = useMuatRuang();
+  const punya = (i: string) => permissions.includes(i);
+  const kini = useJamBerjalan(60_000);
+  const ruangOutlet = sudahMasuk && muat("outlet");
+  const outlet = useLokasiRuang("outlet", { aktif: ruangOutlet && punya(IZIN.location) });
+  const idOutlet = outlet.lokasiId ?? "";
+  const bolehPengguna = ruangOutlet && punya(IZIN.pengguna);
+  const peran = useQuery({
+    queryKey: queryKeys.notifikasi.role(),
+    queryFn: roleApi.daftar,
+    enabled: bolehPengguna && punya(IZIN.role),
+    ...OPSI_SEGAR,
+  });
+  const penggunaToko = useQuery({
+    queryKey: queryKeys.notifikasi.pengguna(),
+    queryFn: () => penggunaApi.daftarSemua(),
+    enabled: bolehPengguna,
+    ...OPSI_SEGAR,
+  });
+  const shiftOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.shift(idOutlet),
+    queryFn: () => shiftApi.daftar({ locationID: idOutlet }),
+    enabled: bolehPengguna && punya(IZIN.shift) && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const polaOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.polaRoster(idOutlet),
+    queryFn: () => polaRosterApi.daftar({ locationID: idOutlet }),
+    enabled: bolehPengguna && punya(IZIN.polaRoster) && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const rentang = rentangJadwalKesiapan(rentangMingguDepan(kini).endDate);
+  const jadwalOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.jadwal(rentang.startDate, rentang.endDate, idOutlet),
+    queryFn: () => jadwalApi.daftar({ ...rentang, locationID: idOutlet }),
+    enabled: bolehPengguna && punya(IZIN.jadwalShift) && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const dataPeran = peran.data;
+  const dataPengguna = penggunaToko.data;
+  const dataShift = shiftOutlet.data;
+  const dataPola = polaOutlet.data;
+  const dataJadwal = jadwalOutlet.data;
+  return useMemo(
+    () => ({
+      karyawan: {
+        // Role Owner berlevel 100 (OWNER_LEVEL backend); posisi staf di bawahnya.
+        posisi: dataPeran ? dataPeran.some((r) => r.level < 100) : null,
+        staf: dataPengguna ? dataPengguna.length > 1 : null,
+      },
+      absensi: {
+        shiftAktif: dataShift ? dataShift.some((s) => s.status === "Aktif") : null,
+        pola: dataPola ? dataPola.length > 0 : null,
+        jadwal: dataJadwal ? dataJadwal.length > 0 : null,
+      },
+      sumber: [peran, penggunaToko, shiftOutlet, polaOutlet, jadwalOutlet] as UseQueryResult<unknown>[],
+    }),
+    // Objek kueri berganti setiap render; cukup data yang dipakai.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataPeran, dataPengguna, dataShift, dataPola, dataJadwal],
+  );
 }
 
 /**
@@ -432,14 +519,19 @@ export function usePemberitahuan() {
       ...staf.daftar,
       ...penjualan.daftar,
     ];
-    const ada = semua.filter((p): p is Pemberitahuan => p !== null);
+    // Selama langkah kesiapan Generate jadwal berjalan, pengingat jadwal
+    // minggu depan tidak tampil agar tidak dobel (KS11a).
+    const langkahJadwal = kesiapan.keadaan?.langkah.kunci === "jadwal";
+    const ada = semua.filter(
+      (p): p is Pemberitahuan => p !== null && !(langkahJadwal && p.id === "jadwal-minggu-depan"),
+    );
     return urutkanPemberitahuan(saringKartuRuang(ada, aksesRuangSesi));
-  }, [kesiapan.pemberitahuan, langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
+  }, [kesiapan.pemberitahuan, kesiapan.keadaan, langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
 
   // Hanya sumber yang aktif (pernah dimuat) yang disegarkan.
   const sumber: UseQueryResult<unknown>[] = [
     langganan.query,
-    kesiapan.sumber,
+    ...kesiapan.sumber,
     ...inventaris.sumber,
     ...operasional.sumber,
     ...staf.sumber,
@@ -449,5 +541,5 @@ export function usePemberitahuan() {
     for (const q of sumber) if (q.isFetched) void q.refetch();
   };
 
-  return { daftar, segarkan };
+  return { daftar, segarkan, nyatakanHanyaOwner: kesiapan.nyatakanHanyaOwner };
 }

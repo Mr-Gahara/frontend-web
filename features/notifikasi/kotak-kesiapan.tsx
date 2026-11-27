@@ -14,12 +14,16 @@ import type { KunciLangkahKesiapan } from "./kesiapan";
  */
 export function KotakKesiapan({ langkah, className }: { langkah: readonly KunciLangkahKesiapan[]; className?: string }) {
   const pathname = usePathname();
-  const { keadaan, pemberitahuan } = useKesiapanToko();
+  const { keadaan, pemberitahuan, nyatakanHanyaOwner } = useKesiapanToko();
   if (!keadaan || !pemberitahuan || !langkah.includes(keadaan.langkah.kunci)) return null;
   const isi = { ...pemberitahuan, tautan: pemberitahuan.tautan.filter((t) => t.href !== pathname) };
   return (
     <div role="status" className={className}>
-      <KartuPemberitahuan pemberitahuan={isi} className="border border-navy/10 sm:px-5" />
+      <KartuPemberitahuan
+        pemberitahuan={isi}
+        onTombol={() => nyatakanHanyaOwner()}
+        className="border border-navy/10 sm:px-5"
+      />
     </div>
   );
 }
