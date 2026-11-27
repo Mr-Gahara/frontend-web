@@ -338,10 +338,12 @@ proyek):
 - Langkah absensi bertingkat Perlu tindakan; posisi dihitung dari role
   berlevel di bawah 100 (Owner berlevel 100); data yang belum termuat
   atau tidak berizin tidak dihitung (KS4a).
-- Kunci "Toko ini hanya saya" per akun (`hanya-owner.ts`), sehingga akun
-  lain di perangkat yang sama tidak mewarisinya (keputusan rancangan
-  butir 33); kartu lonceng dan kotak berbagi nilainya lewat satu
-  peristiwa di tab yang sama.
+- Kunci "Toko ini hanya saya" per akun (`hanya-owner.ts`), mengikuti
+  preseden penyimpanan per perangkat tur panduan (keputusan rancangan
+  butir 32): akun lain di perangkat yang sama tidak mewarisinya, dan
+  kuncinya tidak dibersihkan saat ganti akun atau pengguna (bukan pola
+  pembersihan butir 33). Kartu lonceng dan kotak berbagi nilainya lewat
+  satu peristiwa di tab yang sama.
 - Kotak langkah karyawan dan absensi hanya di halaman ruang outlet, karena
   langkahnya dihitung dari outlet; catatan syarat KS12a di kedua ruang.
 - Staf di Generate Jadwal dihitung dari daftar karyawan ruang lebih dari

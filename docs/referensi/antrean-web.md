@@ -268,10 +268,14 @@ petugas gudang, absensi gudang (shift, pola roster, dan jadwal gudang
 terpisah dari outlet, sedangkan langkah KS11a dan penahan KS8a dihitung
 dari outlet), dan barang gudang pertama, karena gudang baru mulai kosong
 dan barang ditarik dari master. Sebelum dialog, periksa keadaan kosong
-ruang gudang akun Pro baru dan siapa pemegang izinnya; pertanyaannya:
-bidang dan urutan gudang di kartu (satu kartu bersama outlet atau per
-ruang), syarat siap barang gudang, dan apakah penahan pengingat berlaku
-per ruang.
+ruang gudang akun Pro baru dan siapa pemegang izinnya. Catatan dari
+PW18: "ada staf" dihitung dari seluruh pengguna toko lebih dari satu,
+sedangkan langkah absensi dan penahan KS8a memakai data outlet, sehingga
+toko Pro dengan Owner dan petugas gudang saja mendapat langkah absensi
+outlet walau outlet tanpa staf; putuskan staf dihitung per ruang atau
+tetap se-toko. Pertanyaannya: bidang dan urutan gudang di kartu (satu
+kartu bersama outlet atau per ruang), syarat siap barang gudang, dan
+apakah penahan pengingat berlaku per ruang.
 
 ## Perubahan backend tanpa pekerjaan web
 
