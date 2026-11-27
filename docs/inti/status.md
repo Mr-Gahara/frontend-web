@@ -39,7 +39,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW14)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW17)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -74,10 +74,10 @@ tanpa gagal maupun dilewati, termasuk spec ber-OTP (Baseline
 `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW16`, satu paket per sesi lewat
+`PW01` sampai `PW17`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 selesai.
+1. **Sekarang:** tidak ada; PW01 sampai PW14, PW16, dan PW17 selesai.
 2. **Diawali dialog keputusan:** tidak ada.
 3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
