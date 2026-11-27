@@ -557,6 +557,10 @@ seluruh mesin kasir di outlet per shift atau hari toko (B375, B376).
   "Unduh" bergaris tepi di samping Cetak struk, menu PDF dan Excel saja
   (backend menolak format lain), hanya periode TUTUP; berkas dari
   `GET /sesikasir/periode/:id?format=`.
+- E2E alur nyata (PW13, `86aa357`): `keuangan/struk-tutup-kasir-alur`
+  membuktikan laporan, layar, cetak, dan Excel dari transaksi tunai,
+  non-tunai, belum dibayar, dan invoice web, penolakan unduh tanpa
+  `read-sesi-kasir`, dan laporan yang tidak berubah sesudah VOID.
 
 ### Sub-menu Keuangan dan Laporan
 

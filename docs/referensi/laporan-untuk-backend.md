@@ -18,37 +18,13 @@ Butir diurutkan menurut kepentingan dan ditutup tabel prioritas. Sejak
 16 November 2026 Ridho memimpin seluruh pekerjaan backend; pemilik modul
 tetap disebut agar jelas modulnya.
 
-**Keadaan 26 November 2026:** seluruh butir dan kebutuhan di bawah
-dikerjakan backend `6478d29` (AR46 sampai AR51, B369 sampai B384) dan
-berstatus `Menunggu verifikasi` di `docs/pengembangan/klien.md` backend.
-Setiap butir dipindah ke `arsip/laporan-backend.md` sesudah web
-membuktikannya lewat paket PW02 sampai PW13 (`referensi/antrean-web.md`).
-Butir 196 (27 November 2026) adalah laporan baru sesudahnya, belum
-diserahkan ke backend.
-
-## Laporan 24 November 2026 (utang pengujian)
-
-Diperiksa terhadap backend `ridho` lokal `1718030`.
-
-### Kebutuhan fitur MVP: struk laporan tutup kasir
-
-Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
-`referensi/rencana-struk-tutup-kasir.md`:
-
-- `nominal` buka kasir opsional dengan bawaan 0. Laci yang dikosongkan
-  saat buka dicatat sebagai pindah dana dari laci ke akun kas lain yang
-  dipilih, bukan mutasi selisih kas keluar seperti sekarang (keputusan 9,
-  25 November 2026).
-- Penjualan dan pembayaran seluruh metode terhubung ke sesi kasir
-  (`sesiKasirID`); sekarang hanya pembayaran tunai.
-- Endpoint laporan tutup kasir per shift atau per hari toko, menggabungkan
-  seluruh mesin kasir dan seluruh kasir di periode itu, dihitung backend
-  dan dipotret saat tutup (keputusan 2, 3, dan 5, 25 November 2026).
-- "Total penerimaan kasir" dari transaksi POS realtime, dan "Total
-  penerimaan" yang menambahkan pembayaran invoice (penjualan dan sesi
-  booking) dalam periode dan outlet struk, termasuk yang dicatat tanpa
-  sesi kasir (keputusan 10), dengan baris "Total penerimaan invoice"
-  tersendiri di bawah "Total penerimaan kasir" (keputusan 11).
+**Keadaan 27 November 2026:** seluruh butir dan kebutuhan laporan 24
+sampai 26 November 2026 dikerjakan backend `6478d29` (AR46 sampai AR51,
+B369 sampai B384) dan sudah dibuktikan web lewat paket PW02 sampai PW13,
+lalu dipindah ke `arsip/laporan-backend.md`; di
+`docs/pengembangan/klien.md` backend barisnya masih `Menunggu
+verifikasi` sampai Ridho menutupnya (AR31). Yang terbuka tinggal butir
+196, laporan baru yang belum diserahkan ke backend.
 
 ## Laporan 27 November 2026 (Mesin Kasir)
 
@@ -85,5 +61,4 @@ Modul akun kas dan jurnal transfer (Nizar), dikerjakan Ridho.
 
 | Prioritas | Butir | Pemilik | Dampak |
 |---|---|---|---|
-| 2 | Struk tutup kasir | Ridho dan Nizar | Wajib MVP; data per sesi belum tersedia |
 | 9 | Butir 196: penanda asal Pindah Dana buka kasir | Ridho (modul Nizar) | Batalkan tampil lalu ditolak 409 |

@@ -44,7 +44,7 @@ tetap `AR`, `B`, dan `P`.
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Selesai | `00fbd5d` |
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Selesai | `c289fd9` |
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Selesai | `e42caa9` |
-| PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Belum | |
+| PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Selesai | `86aa357` |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
 | PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Belum | |
@@ -179,13 +179,14 @@ dengan laporan backend. Penolakan 403 bagi kasir tetap di PW13.
 
 ### PW13: struk tutup kasir, e2e alur nyata
 
-Sesi baru dibuka lewat aplikasi uji (sesi lama tidak punya periode),
-transaksi tunai dan non-tunai bersesi, pembayaran invoice dari web
-(tanpa sesi), lalu tutup dari web (respons memuat `periode`); angka
-laporan di layar, cetak, dan unduhan dibandingkan dengan respons
-backend. Termasuk izin: kasir `buka-tutup-kasir` tidak mengunduh (403).
-Kriteria selesai MVP di `referensi/rencana-struk-tutup-kasir.md` ditutup
-di sini.
+Selesai 27 November 2026 (`86aa357`). Spec `keuangan/struk-tutup-kasir-alur`:
+sesi pembatas, lalu penjualan POS tunai, non-tunai, dan belum dibayar dari
+aplikasi serta invoice dari web, ditutup dari web; laporan backend sama
+dengan harapan dari transaksi itu, begitu pula layar, cetak, dan Excel;
+kasir tanpa `read-sesi-kasir` ditolak 403; VOID sesudah tutup tidak
+mengubah laporan. Batas hitungan buka dan tutup kasir (10 per menit per
+pengguna) ditunggu helper `tungguBatasHitungan`. Kriteria selesai MVP
+bagian web ditutup.
 
 ### PW14: suite e2e penuh
 

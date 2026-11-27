@@ -189,12 +189,6 @@ skip bersyarat data, dan catatan proses.
   uji "E2E Lokasi Gudang" hanya memegang izin baca. Pembuktian e2e butuh
   peran uji gudang berizin terima dan surat jalan pengembalian yang
   dikirim lewat UI (stok outlet berpindah ke gudang setiap run).
-- **Angka struk Laporan Tutup Kasir dengan transaksi nyata belum diuji
-  e2e** (PW10): periode uji tanpa penjualan, sehingga penerimaan per
-  metode dan produk terjual teruji di test integrasi
-  (`tests/integration/components/sesi-kasir/struk-laporan.test.tsx`);
-  e2e membandingkan setiap angka struk dengan laporan backend yang bernilai
-  0. Transaksi tunai, non-tunai, dan invoice bersesi adalah PW13.
 - **Cetak struk ke printer sungguhan tidak diuji** (PW11): dialog cetak
   browser tidak dapat dikendalikan Playwright, sehingga `window.print`
   dicatat lewat pengganti, tampilan cetak dibuktikan dengan
@@ -424,6 +418,12 @@ tanggal di butir di bawah adalah pembersihan sebelumnya.
   pengguna uji E2E Kasir Outlet menjadi PENDING lewat login aplikasi setiap
   run, lalu dicabut di akhir skenario; satu catatan perangkat menetap dan
   kembali PENDING pada run berikutnya, sehingga tidak menumpuk.
+- **Data per run spec struk alur nyata** (`keuangan/struk-tutup-kasir-alur`,
+  PW13): dua sesi kasir dan dua periode tertutup (pembatas dan uji), tiga
+  penjualan POS dari aplikasi dan satu penjualan web yang di-VOID beserta
+  pembayarannya di akhir, dan stok produk uji yang terpotong lalu kembali
+  lewat VOID. Peran dan pengguna uji "E2E Kasir Buka Tutup" menetap,
+  dibuat sekali lewat `tests/helpers/terkunci-uji.ts`.
 - **Data per run spec Laporan Tutup Kasir** (`keuangan/laporan-tutup-kasir`,
   PW10, 27 November 2026): satu sesi kasir dan satu periode tertutup di
   laci uji, dibuka lewat aplikasi lalu ditutup lewat API dengan hitungan

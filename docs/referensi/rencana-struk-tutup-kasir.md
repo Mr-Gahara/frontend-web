@@ -166,7 +166,8 @@ PW09 sampai PW13 (`referensi/antrean-web.md`):
 4. **Spec e2e** dengan respons nyata: sesi baru dibuka dari aplikasi uji
    (`bukaKasirLewatAplikasi`), transaksi tunai dan non-tunai bersesi,
    pembayaran invoice dari web, ditutup, lalu angka laporan di web
-   dibandingkan dengan respons backend (PW13).
+   dibandingkan dengan respons backend. Selesai di PW13 (`86aa357`,
+   `keuangan/struk-tutup-kasir-alur`).
 
 ## Keputusan 25 November 2026
 
@@ -233,6 +234,12 @@ keputusan terbuka 24 November 2026:
 Tidak ada.
 
 ## Kriteria selesai MVP (usulan)
+
+Bagian web seluruhnya terbukti per 27 November 2026 (PW10 sampai PW13):
+laporan periode di web, cetak dari browser, unduh, dan angka yang sama
+dengan transaksi sesi termasuk non-tunai, belum terbayar, invoice, dan
+VOID. Bagian aplikasi (buka tanpa modal, cetak struk di aplikasi) milik
+mobile.
 
 - Kasir dapat membuka kasir tanpa mengisi modal awal, dan tersimpan 0.
 - Penjualan dan pembayaran seluruh metode dari perangkat bersesi

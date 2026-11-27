@@ -7,6 +7,19 @@ Lapis arsip: kirim hanya bila riwayatnya dibutuhkan. Dibuat 25 Oktober 2026 dari
 Riwayat baseline, riwayat pelepasan fixme, utang pengujian yang lunas, dan
 kejadian sesekali yang tidak berulang.
 
+## Utang yang dilunasi 27 November 2026
+
+- **Angka struk Laporan Tutup Kasir dengan transaksi nyata belum diuji
+  e2e** (PW10): periode uji tanpa penjualan, sehingga penerimaan per
+  metode dan produk terjual teruji di test integrasi
+  (`tests/integration/components/sesi-kasir/struk-laporan.test.tsx`);
+  e2e membandingkan setiap angka struk dengan laporan backend yang bernilai
+  0. Transaksi tunai, non-tunai, dan invoice bersesi adalah PW13.
+  Lunas di PW13 (`86aa357`): `keuangan/struk-tutup-kasir-alur` membuat
+  transaksi tunai, non-tunai, belum dibayar, dan invoice web, lalu
+  membandingkan laporan, layar, cetak, dan Excel dengan harapan dari
+  transaksi itu.
+
 ## Utang yang dilunasi 26 November 2026
 
 - **Keadaan kosong Rekap Absensi hanya teruji lewat simulasi** (butir

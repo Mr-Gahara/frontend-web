@@ -580,3 +580,33 @@ Modul auth dan perangkat (Ridho).
   penggunanya, dan lonceng Owner menampilkannya sebagai kartu Perlu
   tindakan; pengguna tanpa `update-pengguna` tidak memintanya
   (`dashboard/lonceng-pemberitahuan`, LN23a).
+
+### Kebutuhan fitur MVP: struk laporan tutup kasir (laporan 24 November 2026)
+
+Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
+`referensi/rencana-struk-tutup-kasir.md`:
+
+- `nominal` buka kasir opsional dengan bawaan 0. Laci yang dikosongkan
+  saat buka dicatat sebagai pindah dana dari laci ke akun kas lain yang
+  dipilih, bukan mutasi selisih kas keluar seperti sekarang (keputusan 9,
+  25 November 2026).
+- Penjualan dan pembayaran seluruh metode terhubung ke sesi kasir
+  (`sesiKasirID`); sekarang hanya pembayaran tunai.
+- Endpoint laporan tutup kasir per shift atau per hari toko, menggabungkan
+  seluruh mesin kasir dan seluruh kasir di periode itu, dihitung backend
+  dan dipotret saat tutup (keputusan 2, 3, dan 5, 25 November 2026).
+- "Total penerimaan kasir" dari transaksi POS realtime, dan "Total
+  penerimaan" yang menambahkan pembayaran invoice (penjualan dan sesi
+  booking) dalam periode dan outlet struk, termasuk yang dicatat tanpa
+  sesi kasir (keputusan 10), dengan baris "Total penerimaan invoice"
+  tersendiri di bawah "Total penerimaan kasir" (keputusan 11).
+- **Dibuktikan:** 27 November 2026 (PW09 sampai PW13; e2e `86aa357`)
+  terhadap backend `6478d29` (B371 sampai B376): modal opsional dan
+  pindah dana saat buka (`keuangan/mesin-kasir`), lalu satu periode berisi
+  penjualan POS tunai, non-tunai, dan belum dibayar dari aplikasi serta
+  pembayaran invoice dari web memberi laporan yang sama persis dengan
+  harapan yang disusun dari transaksi itu (kasir, modal, per metode,
+  penerimaan kasir dan invoice, saldo akhir, transaksi, laci, produk);
+  angka yang sama di layar, cetak, dan Excel; unduhan ditolak 403 tanpa
+  `read-sesi-kasir`; VOID sesudah tutup tidak mengubah laporan
+  (`keuangan/struk-tutup-kasir-alur`).

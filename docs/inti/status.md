@@ -36,7 +36,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW08)
+### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW13)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -59,7 +59,9 @@ struk dari browser di kertas 80 mm setinggi struk. PW12 selesai
 (`e42caa9`): unduh laporan PDF dan Excel. PW07 selesai (`b9fe4a0`):
 pemicu stok produk lonceng dari ringkasan dashboard, kartu berupa angka
 (LN22a). PW08 selesai (`9b6c133`): lonceng perangkat menunggu izin,
-disetujui lewat aplikasi (LN23a). Vitest kini 1333 lolos. Suite
+disetujui lewat aplikasi (LN23a). PW13 selesai (`86aa357`): struk tutup
+kasir terbukti e2e dari transaksi nyata; bagian web MVP struk tutup kasir
+selesai. Vitest kini 1333 lolos. Suite
 e2e penuh terakhir 26 November 2026 (`fb186f2`,
 backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
@@ -69,8 +71,8 @@ suite berikutnya tidak mengharapkan kegagalan.
 `PW01` sampai `PW14`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** PW13 e2e alur nyata struk tutup kasir; PW10 sampai PW12
-   sudah selesai.
+1. **Sekarang:** tidak ada; PW01 sampai PW13 selesai kecuali yang
+   menunggu.
 2. **Diawali dialog keputusan:** PW16 kelas `font-mono` menjadi Geist
    Mono.
 3. **Menunggu izin pemilik proyek:** PW14 suite e2e penuh.
@@ -127,7 +129,8 @@ karena nominal buka sekarang memicu mutasi selisih laci) di
 (B371), penjualan dan pembayaran seluruh metode bersesi (B373, B374),
 dan laporan per periode (gabungan sesi di outlet, per shift atau hari
 toko) di `GET /sesikasir/periode/:id` beserta unduhannya (B375, B376).
-Pekerjaan web: PW09 sampai PW13 (`referensi/antrean-web.md`).
+Pekerjaan web: PW09 sampai PW13 (`referensi/antrean-web.md`), seluruhnya
+selesai 27 November 2026 dan terbukti e2e dari transaksi nyata (PW13).
 
 ### Pasca-MVP: struk dapur (dicatat 24 November 2026)
 
