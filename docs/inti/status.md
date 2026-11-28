@@ -100,9 +100,10 @@ T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
 1. **Sekarang:** tidak ada; PW01 sampai PW29 selesai. PW29 (`a3993f3`):
-   kartu Laporan Tutup Kasir kembali berpadding di layout Keuangan (TH1a). PW28 (`388938d`):
-   suite penuh 28 November 2026 sore, 838 lolos dan 3 gagal dari 841;
-   ketiganya sisa pola RG4a, diperbaiki dan dibuktikan per berkas. PW27 (`cb9b8bd`):
+   kartu Laporan Tutup Kasir kembali berpadding di layout Keuangan
+   (TH1a). PW28 (`388938d`): suite penuh 28 November 2026 sore, 838
+   lolos dan 3 gagal dari 841; ketiganya sisa pola RG4a, diperbaiki dan
+   dibuktikan per berkas. PW27 (`cb9b8bd`):
    helper `masukUlang` untuk login ulang tanpa sesi lama di tujuh titik
    spec, dan butir 180 Tertutup.
 2. **Diawali dialog keputusan:** tidak ada paket tersendiri.
