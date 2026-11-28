@@ -522,6 +522,11 @@ bersyarat).
   sudah login sebagai Ridho (`masuk(page)`) lebih dulu; tanpa itu
   `bukaDenganAuth` habis waktu menunggu `pin-refresh` (spec Akun Toko,
   13 November 2026).
+- Kembali ke Ridho sesudah `masukSebagai`, `masukBacaSaja`, atau
+  `masukTanpaLokasi` di halaman yang sama, termasuk di `finally`, memakai
+  `masukUlang` (`tests/helpers/masuk-uji.ts`), bukan `login(page)`:
+  cookie sesi pengguna uji dibuang dulu agar tidak dipulihkan bersamaan
+  dengan login baru (pola RG4a, PW27).
 - Spec ber-OTP yang belum boleh dijalankan sendirian dibuktikan
   prasyaratnya lewat spec sementara yang berhenti tepat sebelum
   permintaan kode pertama (akun sekali pakai, halaman tujuan, dan locator

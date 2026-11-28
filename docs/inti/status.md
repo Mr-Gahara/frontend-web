@@ -96,10 +96,12 @@ dibuktikan dengan berkasnya, 15 lolos dari 15 (Baseline
 T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW26`, satu paket per sesi lewat
+`PW01` sampai `PW27`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW26 selesai.
+1. **Sekarang:** tidak ada; PW01 sampai PW27 selesai. PW27 (`cb9b8bd`):
+   helper `masukUlang` untuk login ulang tanpa sesi lama di tujuh titik
+   spec, dan butir 180 Tertutup.
 2. **Diawali dialog keputusan:** tidak ada paket tersendiri.
 3. **Menunggu izin pemilik proyek:** tidak ada. PW26 selesai
    (`c20184a`): suite penuh 28 November 2026 siang terhadap backend

@@ -61,6 +61,7 @@ tetap `AR`, `B`, dan `P`.
 | PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Selesai | `fa97abd` |
 | PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Selesai | `93a26c1` |
 | PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Selesai | `c20184a` |
+| PW27 | Login ulang tanpa sesi lama (pola RG4a) dan status butir 180 | Sekarang | Selesai | `cb9b8bd` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -351,6 +352,23 @@ login ulang sebagai Ridho tanpa membuang cookie sesi pengguna uji (pola
 RG4a di arah sebaliknya); cookie kini dibuang lebih dulu (`c20184a`), dan
 berkasnya lolos 6 dari 6 dengan `--repeat-each 3`. Harapan spec dan kode
 aplikasi tidak berubah; baseline baru di `inti/pengujian.md`.
+
+### PW27: login ulang tanpa sesi lama dan status butir 180
+
+Selesai 28 November 2026 (`cb9b8bd`), diusulkan laporan sisa sesudah
+PW26. Penelusuran seluruh spec menemukan lima titik lain yang login ulang
+sebagai Ridho dari sesi pengguna uji tanpa membuang cookie, pola yang
+menggagalkan PW26: `inventaris/pengajuanStok/alur-pengajuan-stok`
+(rekan selokasi), `inventaris/transferStok/pengiriman-penerimaan` (dua
+kali, termasuk `finally`), `keuangan/belanja-stok` (`finally`), dan
+`akses/jalur-bukan-owner` (gate stock adjustment). Helper `masukUlang`
+di `tests/helpers/masuk-uji.ts` membuang cookie lalu login, dan dipakai
+di kelima titik itu serta di `roles/level-bukan-owner` dan
+`pengguna/crud-pengguna`; `login()` bersama tidak diubah. Keenam berkas
+lolos 46 dari 46, dan ketujuh skenario yang disentuh 21 dari 21 dengan
+`--repeat-each 3`. Butir 180 di `kontrak/temuan.md` ditandai Tertutup:
+backend B329 lalu B353 sudah dipakai halaman Pembayaran per Metode
+(OM2a), dan baris itu tertinggal berstatus menunggu endpoint.
 
 ## Perubahan backend tanpa pekerjaan web
 
