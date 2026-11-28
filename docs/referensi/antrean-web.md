@@ -59,7 +59,7 @@ tetap `AR`, `B`, dan `P`.
 | PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Selesai | `0d124c7` |
 | PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Selesai | `eda7694` |
 | PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Belum | |
-| PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Belum | |
+| PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Selesai | `93a26c1` |
 | PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
@@ -333,13 +333,14 @@ arsip laporan.
 
 ### PW25: langkah sesudah tarik backend `c4aae0d`
 
-Belum. Backend `ridho` maju lima commit di atas `6478d29` ke `c4aae0d`
-(28 November 2026, AR53 sampai AR55); `nizar` dan `yoga` tidak punya
-commit di luarnya. Seed dan skrip migrasi tidak berubah; satu index
-parsial baru di sesi kasir dibentuk saat backend menyala. B385 masuk
-PW24 dan B386 masuk PW15, sehingga keduanya berpindah ke kelompok
-Sekarang. Rincian di `referensi/keputusan-penyesuaian-backend.md`
-(`c4aae0d`).
+Selesai 28 November 2026 (`93a26c1`), dokumen saja. Backend `ridho`
+maju lima commit di atas `6478d29` ke `c4aae0d` (AR53 sampai AR55);
+`nizar` dan `yoga` tidak punya commit di luarnya. Seed dan skrip migrasi
+tidak berubah, dan index parsial baru
+`{ tenantID, pindahDanaBuka.jurnalTransferID }` di sesi kasir terbentuk
+saat backend menyala. B385 masuk PW24 dan B386 masuk PW15, keduanya
+berpindah ke kelompok Sekarang; PW26 ditambah untuk suite penuh.
+Rincian di `referensi/keputusan-penyesuaian-backend.md` (`c4aae0d`).
 
 ### PW26: suite e2e penuh penutup putaran PW24 dan PW15
 
