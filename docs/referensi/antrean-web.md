@@ -49,7 +49,7 @@ tetap `AR`, `B`, dan `P`.
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Selesai | `e42caa9` |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Selesai | `86aa357` |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Selesai | `81e9214` |
-| PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Sekarang | Belum | |
+| PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Sekarang | Selesai | `0aef46e` |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Selesai | `041238b` |
@@ -213,17 +213,15 @@ diubah. Tidak ada perbaikan kode; baseline baru di `inti/pengujian.md`.
 
 ### PW15: Pindah Dana buka kasir tanpa Batalkan
 
-Dapat dikerjakan sejak backend `c4aae0d` (butir 196,
-`referensi/laporan-untuk-backend.md`): respons `GET`, `POST`, dan
-`PUT /jurnaltransfer` membawa `asal` (`"buka-kasir"` atau `"manual"`)
-dan `sesiKasirID` (B386, R29, AR55 `df4238e`), dihitung saat baca
-sehingga jurnal lama ikut benar. Menu Batalkan di
-`features/jurnal-transfer/halaman-pindah-dana.tsx` disembunyikan untuk
-`asal: "buka-kasir"` (aturan di `features/jurnal-transfer/izin.ts` atau
-fungsi murni), skenario 409 di `keuangan/mesin-kasir` diganti
-pemeriksaan tanpa Batalkan, dan MK19a diperbarui. Apakah asal itu juga
-ditampilkan (misalnya label di riwayat atau dialog rincian) belum
-diputuskan dan diajukan di awal paket.
+Selesai 28 November 2026 (`0aef46e`), atas keputusan pemilik proyek
+MK20a (`modul/keuangan.md`, Label dan tautan) sesudah backend B386:
+Batalkan disembunyikan untuk asal buka-kasir (`bolehBatalTransfer`),
+riwayat bertanda "Dari buka kasir", dan rincian transfer menambah baris
+Asal yang bertaut ke rincian sesi kasir bagi pemegang `read-sesi-kasir`.
+Skenario 409 di `keuangan/mesin-kasir` diganti pemeriksaan respons
+(`asal`, `sesiKasirID`), VOID API tetap 409, baris tanpa menu, dan
+tautan; skenario baru tanpa `read-sesi-kasir`. Keduanya gagal dengan
+kode lama. Butir 196 dipindah ke `arsip/laporan-backend.md`.
 
 ### PW16: kelas `font-mono` menjadi Geist Mono
 

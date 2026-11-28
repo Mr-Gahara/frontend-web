@@ -551,6 +551,39 @@ Modul pengguna dan RBAC (Ridho).
   `GET /pengguna?workspace=` dan `ruang-staf.ts` di `features/pengguna`
   dibuang.
 
+### Butir 196 (laporan 27 November 2026): penanda asal Pindah Dana buka kasir di jurnal transfer
+
+Modul akun kas dan jurnal transfer (Nizar), dikerjakan Ridho.
+
+- **Bukti:** `mappers/jurnalTransferMapper.js` `mapJurnalTransferResponse`
+  mengirim `tanggal`, `kasSumber`, `kasTujuan`, `jumlah`, `keterangan`,
+  `status`, `catatan`, dan `dicatatOleh`, tanpa penanda asal. Penolakan
+  VOID di `services/jurnalTransferService.js` (`de0bf66`) mengenali
+  jurnal buka kasir lewat
+  `SesiKasir.exists({ "pindahDanaBuka.jurnalTransferID": id })`,
+  dan `GET /sesikasir` tidak menerima filter per jurnal. Keterangan
+  "Laci dikosongkan saat buka kasir" dapat diubah lewat `PUT`, sehingga
+  bukan penanda. Dibuktikan e2e 27 November 2026
+  (`keuangan/mesin-kasir`, PW09): Batalkan di halaman Pindah Dana dijawab
+  409 dan transfer tetap Aktif.
+- **Penyebab:** asal jurnal hanya tersimpan di dokumen sesi kasir.
+- **Kenapa penting:** halaman Pindah Dana menawarkan Batalkan untuk
+  setiap transfer Aktif kepada pemegang `update-jurnal-transfer`; untuk
+  jurnal buka kasir tombol itu selalu berakhir 409.
+- **Saran:** respons `GET /jurnaltransfer` dan `GET /jurnaltransfer/:id`
+  membawa penanda, misalnya `sesiKasirID` atau `asal: "buka-kasir"`
+  (bisa juga `bolehVoid: false`), tanpa memaksakan bentuknya.
+- **Penanganan sementara di frontend:** tidak ada kode khusus; dialog
+  batal menampilkan pesan 409 backend apa adanya (MK19a,
+  `modul/keuangan.md`). Begitu penandanya ada, Batalkan disembunyikan
+  untuk jurnal itu (PW15, `referensi/antrean-web.md`).
+- **Dibuktikan:** 28 November 2026 (PW15, `0aef46e`) terhadap backend
+  `c4aae0d` (B386, AR55, R29): `GET /jurnaltransfer/:id` Pindah Dana buka
+  kasir membawa `asal: "buka-kasir"` dan `sesiKasirID` sesi pencatatnya,
+  VOID-nya tetap 409, dan halaman Pindah Dana tidak lagi menawarkan
+  Batalkan; rincian transfer bertaut ke sesi kasirnya
+  (`keuangan/mesin-kasir`, MK20a).
+
 ### Kebutuhan: surat jalan dikirim per arah di ringkasan gudang (laporan 25 November 2026)
 
 Modul dashboard dan transfer stok (Yoga).

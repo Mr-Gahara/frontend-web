@@ -512,7 +512,16 @@ berubah hanya tampilan pantau.
   `referensi/laporan-untuk-backend.md` (`kontrak/temuan.md` butir 196),
   dan penyembunyian tombolnya paket PW15 (`referensi/antrean-web.md`).
   Mencocokkan lewat keterangan "Laci dikosongkan saat buka kasir" ditolak,
-  karena keterangan dapat diubah.
+  karena keterangan dapat diubah. Berakhir 28 November 2026, diganti
+  MK20a.
+- **MK20a: Pindah Dana buka kasir tanpa Batalkan, asalnya bertaut ke
+  sesi kasir** (pemilik proyek, 28 November 2026, PW15, `0aef46e`, sesudah
+  backend B386): Batalkan disembunyikan untuk asal buka-kasir; riwayat
+  menampilkan teks kecil "Dari buka kasir" di bawah status; dialog rincian
+  menambah baris "Asal: Buka kasir" berupa tautan ke rincian sesi kasir
+  (`mesinKasir/<sesiKasirID>`) bagi pemegang `read-sesi-kasir`, dan teks
+  biasa bagi yang tidak. Asal manual tidak ditampilkan. Aturannya
+  `bolehBatalTransfer` di `features/jurnal-transfer/izin.ts`.
 - Ringkasan sesi (`tunaiMasuk`, `jumlahPembayaran`) tidak ditampilkan
   web, sehingga perubahan B374 (hanya pembayaran ke laci) tidak mengubah
   label apa pun.

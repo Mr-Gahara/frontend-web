@@ -1215,6 +1215,9 @@ digabung.
   ke daftar workspace apa adanya, `ruang-staf.ts` di `features/pengguna`
   dibuang, dan B385 dibuktikan di `pengguna/crud-pengguna`.
 - **B386** (AR55, R29, butir 196): `asal` dan `sesiKasirID` di respons
-  jurnal transfer; pekerjaan web PW15.
+  jurnal transfer; pekerjaan web PW15, selesai 28 November 2026
+  (`0aef46e`): Batalkan disembunyikan untuk asal buka kasir dan asalnya
+  bertaut ke sesi kasir (MK20a, `modul/keuangan.md`).
 - Kedua baris di `docs/pengembangan/klien.md` backend `Menunggu
-  verifikasi` sampai web membuktikannya; butir 197 terbukti di PW24.
+  verifikasi` sampai web membuktikannya; butir 197 terbukti di PW24 dan
+  butir 196 di PW15.

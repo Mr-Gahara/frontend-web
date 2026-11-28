@@ -7,6 +7,19 @@ Lapis arsip: kirim hanya bila riwayatnya dibutuhkan. Dibuat 25 Oktober 2026 dari
 Riwayat baseline, riwayat pelepasan fixme, utang pengujian yang lunas, dan
 kejadian sesekali yang tidak berulang.
 
+## Utang yang dilunasi 28 November 2026
+
+- **Pindah Dana buka kasir tanpa Batalkan** (butir 196, PW15):
+  `keuangan/mesin-kasir` skenario "laci dikosongkan saat buka di
+  aplikasi" kini memeriksa Batalkan ditolak 409 dengan pesannya tampil
+  apa adanya. Sejak backend `c4aae0d` respons jurnal transfer membawa
+  `asal` (B386), sehingga pemeriksaan itu diganti pemeriksaan tanpa
+  Batalkan. Dipindah dari Menunggu backend 28 November 2026 (PW25).
+  Dilunasi 28 November 2026 (PW15, `0aef46e`): skenario itu memeriksa
+  `asal` dan `sesiKasirID` dari respons, VOID lewat API tetap 409, baris
+  riwayat tanpa menu aksi, dan tautan Asal ke rincian sesi; skenario baru
+  membuktikan asal tanpa tautan bagi peran tanpa `read-sesi-kasir`.
+
 ## Utang yang dilunasi 27 November 2026
 
 - **Angka struk Laporan Tutup Kasir dengan transaksi nyata belum diuji
