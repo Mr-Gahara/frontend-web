@@ -31,7 +31,13 @@ tanpa VOID), termasuk laba rugi dan stok saat ini.
 
 ## Menunggu backend
 
-Tidak ada. Ketiga skenario merah disengaja (butir 191, 192, 193) lolos
+- **Pindah Dana buka kasir tanpa Batalkan** (butir 196, PW15):
+  `keuangan/mesin-kasir` skenario "laci dikosongkan saat buka di
+  aplikasi" kini memeriksa Batalkan ditolak 409 dengan pesannya tampil
+  apa adanya. Begitu respons jurnal transfer membawa penanda asal buka
+  kasir, pemeriksaan itu diganti pemeriksaan tanpa Batalkan.
+
+Ketiga skenario merah disengaja sebelumnya (butir 191, 192, 193) lolos
 sesudah backend `6478d29` (PW02, 26 November 2026;
 `arsip/riwayat-pengujian.md`).
 
