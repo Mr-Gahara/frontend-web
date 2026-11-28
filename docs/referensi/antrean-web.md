@@ -9,7 +9,9 @@ satu paket per sesi. Disusun 26 November 2026 sesudah backend `ridho`
 maju dari `1718030` ke `6478d29` (AR45 sampai AR51, B369 sampai B384),
 dari pembacaan `docs/pengembangan/klien.md`, `status/ridho.md`,
 `rencana/struk-tutup-kasir.md`, dan `docs/api/` backend, dicocokkan
-dengan kode web `82b24c1`.
+dengan kode web `82b24c1`. Diperbarui 28 November 2026 sesudah backend
+`ridho` maju lagi dari `6478d29` ke `c4aae0d` (AR53 sampai AR55, B385
+dan B386), dicocokkan dengan kode web `ffd3e38` (PW25).
 
 Kode `PWnn` hanya penanda paket. Keputusan yang lahir di dalam paket
 tetap memakai kode keputusan modulnya (misalnya LN22a), dan kode backend
@@ -26,7 +28,8 @@ tetap `AR`, `B`, dan `P`.
   commit kode (atau dokumen bila paketnya dokumen saja), dan bagian
   rincinya diringkas menjadi satu kalimat hasil. Paket yang memunculkan
   pekerjaan baru menambah baris di akhir kelompoknya.
-- PW01 (selesai) menyiapkan backend lokal: kode dan basis data `6478d29`.
+- PW01 (selesai) menyiapkan backend lokal: kode dan basis data `6478d29`;
+  PW25 (selesai) untuk `c4aae0d`.
 
 ## Antrean
 
@@ -46,7 +49,7 @@ tetap `AR`, `B`, dan `P`.
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Selesai | `e42caa9` |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Selesai | `86aa357` |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Selesai | `81e9214` |
-| PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
+| PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Sekarang | Belum | |
 | PW16 | Kelas `font-mono` menjadi Geist Mono | Keputusan | Selesai | `0d30692` |
 | PW17 | Dokumen sinkron sesudah PW14 | Sekarang | Selesai | `3284338` |
 | PW18 | Panduan menyiapkan absensi: lonceng, langkah berurutan, dan catatan syarat | Keputusan | Selesai | `041238b` |
@@ -55,14 +58,17 @@ tetap `AR`, `B`, dan `P`.
 | PW21 | Staf akses aplikasi tampil di daftar ruang (butir 197) | Keputusan | Selesai | `7553126` |
 | PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Selesai | `0d124c7` |
 | PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Selesai | `eda7694` |
-| PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Menunggu backend | Belum | |
+| PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Belum | |
+| PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Belum | |
+| PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
 **Menunggu izin** hanya atas izin pemilik proyek; **Menunggu backend**
 dimulai begitu backend menyediakan yang dibutuhkan. Urutan yang disarankan
 mengikuti tabel; PW10 sampai PW13 berurutan, dan PW11 serta PW12 butuh
-PW10.
+PW10. Sesudah PW25: PW24 (backend P1) lebih dulu, lalu PW15, lalu PW26
+atas izin pemilik proyek.
 
 ## Rincian paket
 
@@ -207,12 +213,17 @@ diubah. Tidak ada perbaikan kode; baseline baru di `inti/pengujian.md`.
 
 ### PW15: Pindah Dana buka kasir tanpa Batalkan
 
-Menunggu backend (butir 196, `referensi/laporan-untuk-backend.md`):
-respons jurnal transfer membawa penanda asal buka kasir. Sesudahnya menu
-Batalkan di `features/jurnal-transfer/halaman-pindah-dana.tsx`
-disembunyikan untuk jurnal itu (aturan di `features/jurnal-transfer/izin.ts`
-atau fungsi murni), skenario 409 di `keuangan/mesin-kasir` diganti
-pemeriksaan tanpa Batalkan, dan MK19a diperbarui.
+Dapat dikerjakan sejak backend `c4aae0d` (butir 196,
+`referensi/laporan-untuk-backend.md`): respons `GET`, `POST`, dan
+`PUT /jurnaltransfer` membawa `asal` (`"buka-kasir"` atau `"manual"`)
+dan `sesiKasirID` (B386, R29, AR55 `df4238e`), dihitung saat baca
+sehingga jurnal lama ikut benar. Menu Batalkan di
+`features/jurnal-transfer/halaman-pindah-dana.tsx` disembunyikan untuk
+`asal: "buka-kasir"` (aturan di `features/jurnal-transfer/izin.ts` atau
+fungsi murni), skenario 409 di `keuangan/mesin-kasir` diganti
+pemeriksaan tanpa Batalkan, dan MK19a diperbarui. Apakah asal itu juga
+ditampilkan (misalnya label di riwayat atau dialog rincian) belum
+diputuskan dan diajukan di awal paket.
 
 ### PW16: kelas `font-mono` menjadi Geist Mono
 
@@ -306,13 +317,35 @@ skenario 409 Batalkan Pindah Dana tercatat di Menunggu backend
 
 ### PW24: daftar ruang kembali ke `GET /pengguna?workspace=`
 
-Menunggu backend (butir 197, `referensi/laporan-untuk-backend.md`):
-ruang staf diturunkan dari lokasi kerja, lalu izin dashboard, lalu
-outlet, sama dengan RS1a. Sesudahnya `features/pengguna/ruang-staf.ts`
-berhenti memuat seluruh pengguna dan memilah sendiri, web kembali ke
-`GET /pengguna?workspace=`, skenario RS1a di `pengguna/crud-pengguna`
-membuktikan staf akses aplikasi ada di respons `workspace=outlet`, dan
-butir 197 dipindah ke arsip laporan.
+Dapat dikerjakan sejak backend `c4aae0d` (butir 197,
+`referensi/laporan-untuk-backend.md`): `GET /pengguna?workspace=`
+memilah ruang dengan aturan RS1a (B385, P90, AR54 `6595622`): Owner di
+kedua ruang, lokasi kerja terisi menentukan ruang, tanpa lokasi kerja
+izin dashboard role, tanpa keduanya outlet; bentuk respons tidak
+berubah. Monitoring absensi staf izin tanpa lokasi kerja (P84) memakai
+aturan yang sama, sehingga staf tanpa lokasi kerja dan tanpa izin
+dashboard yang sedang izin kini ikut di monitoring Outlet (Status Staf).
+`features/pengguna/ruang-staf.ts` berhenti memuat seluruh pengguna dan
+memilah sendiri, web kembali ke `GET /pengguna?workspace=`, skenario
+RS1a di `pengguna/crud-pengguna` membuktikan staf akses aplikasi ada di
+respons `workspace=outlet`, RS1a diperbarui, dan butir 197 dipindah ke
+arsip laporan.
+
+### PW25: langkah sesudah tarik backend `c4aae0d`
+
+Belum. Backend `ridho` maju lima commit di atas `6478d29` ke `c4aae0d`
+(28 November 2026, AR53 sampai AR55); `nizar` dan `yoga` tidak punya
+commit di luarnya. Seed dan skrip migrasi tidak berubah; satu index
+parsial baru di sesi kasir dibentuk saat backend menyala. B385 masuk
+PW24 dan B386 masuk PW15, sehingga keduanya berpindah ke kelompok
+Sekarang. Rincian di `referensi/keputusan-penyesuaian-backend.md`
+(`c4aae0d`).
+
+### PW26: suite e2e penuh penutup putaran PW24 dan PW15
+
+Menunggu izin pemilik proyek, sesudah PW24 dan PW15 selesai: suite e2e
+penuh terhadap backend `c4aae0d`, termasuk spec ber-OTP, dengan charger
+tersambung dan layanan uji lengkap (Mailpit, env inline).
 
 ## Perubahan backend tanpa pekerjaan web
 
@@ -329,6 +362,10 @@ Setiap label B369 sampai B384 lainnya masuk tepat satu paket di atas:
 B369, B370, B377 (PW02); B378 (PW03); B379 (PW04); B384 (PW05); B382
 (PW06); B380 (PW07); B381 (PW08); B371, B376 (PW09); B375 (PW10 sampai
 PW13).
+
+Diperiksa 28 November 2026 terhadap kode web `ffd3e38`: B385 (PW24) dan
+B386 (PW15) sama-sama punya pekerjaan web, sehingga tidak ada label
+`c4aae0d` yang masuk tabel di atas.
 
 ## Ditunda
 

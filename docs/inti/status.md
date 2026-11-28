@@ -39,16 +39,21 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 27 November 2026, sesudah PW21)
+### Mulai di sini (keadaan akhir 28 November 2026, sesudah PW25)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
-dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
-B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
-backend, dan Ridho menyatakan pekerjaan backend MVP selesai. Pembuktian
-web atas baris `Menunggu verifikasi` di `docs/pengembangan/klien.md`
-backend dan tampilan struk tutup kasir selesai (PW02 sampai PW14); baris
-itu tinggal ditutup Ridho di backend (AR31), dan sisa web hanya PW15
-(butir 196) serta butir 197 yang ditangani web lewat RS1a (PW21).
+dari `6478d29` ke `c4aae0d` (28 November 2026, lima commit, AR53 sampai
+AR55): butir 197 dikerjakan lewat B385 (AR54, P90) dan butir 196 lewat
+B386 (AR55, R29), keduanya `Menunggu verifikasi` di
+`docs/pengembangan/klien.md` backend; baris laporan 24 sampai
+26 November 2026 sudah ditutup `Selesai` di sana (AR53). PW25 selesai:
+seed dan migrasi tidak berubah, index parsial baru sesi kasir terbentuk,
+dan PW24 serta PW15 berpindah ke kelompok Sekarang
+(`referensi/keputusan-penyesuaian-backend.md`, `c4aae0d`). Sebelumnya
+backend `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
+B384) mengerjakan seluruh laporan web 24 sampai 26 November 2026, dan
+Ridho menyatakan pekerjaan backend MVP selesai; pembuktian web dan
+tampilan struk tutup kasir selesai di PW02 sampai PW14.
 Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
 `hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW06
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna
@@ -85,18 +90,19 @@ dibuktikan dengan berkasnya, 15 lolos dari 15 (Baseline
 T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW24`, satu paket per sesi lewat
+`PW01` sampai `PW26`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW23
-   selesai.
-2. **Diawali dialog keputusan:** tidak ada.
-3. **Menunggu izin pemilik proyek:** tidak ada.
-4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
-   disembunyikan begitu respons jurnal transfer membawa penanda asalnya
-   (butir 196, `referensi/laporan-untuk-backend.md`); PW24, daftar
-   ruang kembali ke `GET /pengguna?workspace=` begitu backend memilah
-   ruang dari lokasi kerja (butir 197). Langkah pertama setiap sesi tetap
+1. **Sekarang:** PW24 lebih dulu (backend P1), daftar ruang kembali ke
+   `GET /pengguna?workspace=` dan `features/pengguna/ruang-staf.ts`
+   berhenti memilah sendiri (butir 197, B385); lalu PW15, Batalkan
+   Pindah Dana disembunyikan untuk `asal: "buka-kasir"` (butir 196,
+   B386), diawali pertanyaan apakah asal itu juga ditampilkan. PW01
+   sampai PW14 dan PW16 sampai PW23, serta PW25, selesai.
+2. **Diawali dialog keputusan:** tidak ada paket tersendiri.
+3. **Menunggu izin pemilik proyek:** PW26, suite e2e penuh sesudah PW24
+   dan PW15.
+4. **Menunggu backend:** tidak ada. Langkah pertama setiap sesi tetap
    memeriksa apakah cabang backend maju; bila maju, petakan paket baru
    di `referensi/antrean-web.md`. Backend dijalankan dengan env inline
    (`inti/pengujian.md`, Menjalankan layanan uji), dan kodenya tidak

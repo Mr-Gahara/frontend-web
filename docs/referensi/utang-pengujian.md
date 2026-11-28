@@ -17,7 +17,14 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 Hanya menyentuh frontend dan data uji; tidak menunggu backend maupun
 keputusan baru.
 
-Tidak ada. Seluruh butir dilunasi 25 November 2026
+- **Pindah Dana buka kasir tanpa Batalkan** (butir 196, PW15):
+  `keuangan/mesin-kasir` skenario "laci dikosongkan saat buka di
+  aplikasi" kini memeriksa Batalkan ditolak 409 dengan pesannya tampil
+  apa adanya. Sejak backend `c4aae0d` respons jurnal transfer membawa
+  `asal` (B386), sehingga pemeriksaan itu diganti pemeriksaan tanpa
+  Batalkan. Dipindah dari Menunggu backend 28 November 2026 (PW25).
+
+Butir sebelumnya dilunasi 25 November 2026
 (`arsip/riwayat-pengujian.md`).
 
 ## Menunggu keputusan pemilik proyek
@@ -31,14 +38,9 @@ tanpa VOID), termasuk laba rugi dan stok saat ini.
 
 ## Menunggu backend
 
-- **Pindah Dana buka kasir tanpa Batalkan** (butir 196, PW15):
-  `keuangan/mesin-kasir` skenario "laci dikosongkan saat buka di
-  aplikasi" kini memeriksa Batalkan ditolak 409 dengan pesannya tampil
-  apa adanya. Begitu respons jurnal transfer membawa penanda asal buka
-  kasir, pemeriksaan itu diganti pemeriksaan tanpa Batalkan.
-
-Ketiga skenario merah disengaja sebelumnya (butir 191, 192, 193) lolos
-sesudah backend `6478d29` (PW02, 26 November 2026;
+Tidak ada sejak backend `c4aae0d` (PW25, 28 November 2026). Ketiga
+skenario merah disengaja sebelumnya (butir 191, 192, 193) lolos sesudah
+backend `6478d29` (PW02, 26 November 2026;
 `arsip/riwayat-pengujian.md`).
 
 ## Tidak dapat dibuktikan dengan data atau lingkungan sekarang

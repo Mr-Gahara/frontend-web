@@ -23,10 +23,15 @@ sampai 26 November 2026 dikerjakan backend `6478d29` (AR46 sampai AR51,
 B369 sampai B384) dan sudah dibuktikan web lewat paket PW02 sampai PW13,
 lalu dipindah ke `arsip/laporan-backend.md`; suite e2e penuh
 27 November 2026 (PW14, web `81e9214`) membuktikan ulang seluruhnya,
-837 lolos dari 837. Di
-`docs/pengembangan/klien.md` backend barisnya masih `Menunggu
-verifikasi` sampai Ridho menutupnya (AR31). Yang terbuka tinggal butir
-196 dan 197, laporan baru yang belum diserahkan ke backend.
+837 lolos dari 837. Ridho menutup baris itu `Selesai` di
+`docs/pengembangan/klien.md` backend pada 28 November 2026 (AR53).
+
+**Keadaan 28 November 2026:** butir 196 dan 197 dibaca backend (AR53)
+dan dikerjakan di `c4aae0d`: butir 197 lewat B385 (AR54, P90,
+`6595622`) dan butir 196 lewat B386 (AR55, R29, `df4238e`). Keduanya
+`Menunggu verifikasi` di `docs/pengembangan/klien.md` backend, dan
+tetap di berkas ini sampai dibuktikan web (PW24 dan PW15,
+`referensi/antrean-web.md`).
 
 ## Laporan 27 November 2026 (Mesin Kasir)
 

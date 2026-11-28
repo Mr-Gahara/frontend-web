@@ -1188,3 +1188,31 @@ digabung. Pemetaan per label B ke paket web ada di antrean.
 - **Laporan periode** (B375, B376, PW10, 27 November 2026, `00fbd5d`):
   daftar dan laporan bersusunan struk di grup Laporan (PT1a sampai PT5a,
   `modul/keuangan.md`).
+
+## Penyesuaian backend `ridho` `c4aae0d`
+
+Langkah sesudah tarik dikerjakan 28 November 2026 (PW25,
+`referensi/antrean-web.md`). Backend `ridho` maju lima commit di atas
+`6478d29` ke `c4aae0d` (28 November 2026, AR53 sampai AR55, B385 dan
+B386), mengerjakan laporan web 27 November 2026 (butir 196 dan 197);
+`nizar` dan `yoga` tidak punya commit di luarnya, sehingga tidak ada yang
+digabung.
+
+- **Permission dan migrasi**: `seeds/` dan skrip migrasi tidak disentuh
+  kelima commit itu (`git diff --stat 6478d29..c4aae0d`), sehingga
+  tinjauan permission dan migrasi tidak dijalankan.
+- **Index**: backend dinyalakan ulang dengan kode `c4aae0d` (env inline,
+  `inti/pengujian.md`), dan `getIndexes()` `sesikasirs` memuat index
+  parsial baru `{ tenantID, "pindahDanaBuka.jurnalTransferID" }` (R29),
+  dibentuk saat backend menyala. `npm run db:indeks` tidak diperlukan.
+- **AR53** (dokumen backend): laporan web 27 sampai 28 November 2026
+  dicatat di `docs/pengembangan/klien.md`, dan baris laporan 24 sampai
+  26 November 2026 (189 sampai 195, tiga kebutuhan lonceng, struk tutup
+  kasir) ditutup `Selesai` dari bukti web PW02 sampai PW14 dan PW22.
+- **B385** (AR54, P90, butir 197): ruang staf di
+  `GET /pengguna?workspace=` dan monitoring absensi memakai aturan RS1a;
+  pekerjaan web PW24.
+- **B386** (AR55, R29, butir 196): `asal` dan `sesiKasirID` di respons
+  jurnal transfer; pekerjaan web PW15.
+- Kedua baris di `docs/pengembangan/klien.md` backend `Menunggu
+  verifikasi` sampai web membuktikannya.

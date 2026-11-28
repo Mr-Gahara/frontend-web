@@ -314,6 +314,12 @@ baru `hapusPajakAset.js` dijalankan mode laporan, lalu diterapkan untuk
 membuang satu field `assetID` dan dua index lama; index model baru
 dibentuk saat backend menyala. Pekerjaan web dipetakan ke paket PW
 (`referensi/antrean-web.md`, `referensi/keputusan-penyesuaian-backend.md`).
+Pada 28 November 2026 `ridho` remote maju lima commit di atas `6478d29`
+ke `c4aae0d` (AR53 sampai AR55, B385 dan B386), dan `ridho` lokal sudah
+sama dengannya; `nizar` dan `yoga` tidak punya commit di luarnya. Seed
+dan skrip migrasi tidak berubah; satu index parsial baru di sesi kasir
+dibentuk saat backend menyala. Pemetaannya PW25
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Sejak 16 November 2026 Ridho, sebagai pemimpin tim backend, mengambil
 alih seluruh pekerjaan backend di modul siapa pun sampai backend siap
