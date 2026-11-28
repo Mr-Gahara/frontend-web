@@ -758,7 +758,10 @@ nyata, lima papan):
   dibuang per halaman, karena 11 komponen halaman dipakai bersama ruang
   Gudang yang tidak punya layout modul. Diperiksa di 46 rute ketiga modul:
   tidak ada pembungkus yang masih berpadding dan tidak ada kartu yang ikut
-  kehilangan padding. Melengkapi keputusan rancangan butir 35.
+  kehilangan padding. Melengkapi keputusan rancangan butir 35. Halaman
+  baru di dalam layout modul tetap memakai pembungkus SP1a di luar
+  kartunya; tanpa itu padding kartu yang dinetralkan dan isinya menempel
+  ke tepi (Laporan Tutup Kasir PW10, diperbaiki PW29 `a3993f3`).
 - **TI1a: isian form setinggi 42 px.** Sebelumnya Input 42 px, Select
   46 px (varian `data-[size=default]:h-auto` menimpa tinggi yang ditulis
   halaman), dan combobox 32 px. `SelectTrigger` ukuran default kini 42 px

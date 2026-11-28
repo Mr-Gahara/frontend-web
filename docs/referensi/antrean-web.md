@@ -63,6 +63,7 @@ tetap `AR`, `B`, dan `P`.
 | PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Selesai | `c20184a` |
 | PW27 | Login ulang tanpa sesi lama (pola RG4a) dan status butir 180 | Sekarang | Selesai | `cb9b8bd` |
 | PW28 | Suite e2e penuh penutup PW27 | Menunggu izin | Selesai | `388938d` |
+| PW29 | Kartu Laporan Tutup Kasir kembali berpadding (TH1a) | Sekarang | Selesai | `a3993f3` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -387,6 +388,18 @@ berikutnya) ditangani `pastikanFixture` yang mengganti nama sisa itu.
 Sesudahnya berkas itu 10 lolos dari 10, dan keempat skenario yang
 disentuh 12 lolos dari 12 dengan `--repeat-each 3`. Harapan spec dan kode
 aplikasi tidak berubah.
+
+### PW29: kartu Laporan Tutup Kasir kembali berpadding
+
+Selesai 28 November 2026 (`a3993f3`), dilaporkan pemilik proyek lewat
+tangkapan layar: di 640 px ke atas isi kartu Laporan Tutup Kasir menempel
+ke tepinya. Layout Keuangan menetralkan padding anak langsung wadah
+kontennya (TH1a), dan halaman PW10 merender kartunya langsung tanpa
+pembungkus SP1a. Kartu kini dibungkus pembungkus SP1a seperti halaman
+Keuangan lain. Pemeriksaan browser atas 34 rute statis ketiga layout
+modul menemukan hanya rute ini yang terdampak. Skenario daftar
+`keuangan/laporan-tutup-kasir` memeriksa padding kartu 24px (gagal pada
+kode lama), dan berkas itu bersama `akses/syarat-rute` lolos 7 dari 7.
 
 ## Perubahan backend tanpa pekerjaan web
 
