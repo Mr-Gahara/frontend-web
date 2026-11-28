@@ -96,10 +96,12 @@ dibuktikan dengan berkasnya, 15 lolos dari 15 (Baseline
 T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW27`, satu paket per sesi lewat
+`PW01` sampai `PW28`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW27 selesai. PW27 (`cb9b8bd`):
+1. **Sekarang:** tidak ada; PW01 sampai PW28 selesai. PW28 (`388938d`):
+   suite penuh 28 November 2026 sore, 838 lolos dan 3 gagal dari 841;
+   ketiganya sisa pola RG4a, diperbaiki dan dibuktikan per berkas. PW27 (`cb9b8bd`):
    helper `masukUlang` untuk login ulang tanpa sesi lama di tujuh titik
    spec, dan butir 180 Tertutup.
 2. **Diawali dialog keputusan:** tidak ada paket tersendiri.

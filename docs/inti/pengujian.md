@@ -12,17 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
-**Suite penuh 28 November 2026 siang** (web `5085336`, backend `ridho`
-lokal `c4aae0d`, pukul 12.57 sampai 13.54 WIB, penutup putaran PW24 dan
-PW15, PW26): vitest 1359 lolos dari 159 berkas, dan e2e 840 lolos dan
-1 gagal dari 841 dalam 57,6 menit, tanpa dilewati. Termasuk spec
-ber-OTP. Yang gagal, `roles/level-bukan-owner` RL3a "level tidak
-diketahui", gagal di bersih-bersih `hapusPosisi`: login ulang sebagai
-Ridho dari sesi pengguna uji tanpa membuang cookie (pola RG4a di arah
-sebaliknya). Harapan spec tidak berubah; cookie dibuang sebelum login
-ulang (`c20184a`), lalu dibuktikan dengan berkasnya saja,
-`--repeat-each 3`, 6 lolos dari 6. Skenario baru PW24 (RS1a) dan PW15
-(MK20a) ikut lolos.
+**Suite penuh 28 November 2026 sore** (web `fd7a60d`, backend `ridho`
+lokal `c4aae0d`, pukul 16.06 sampai 17.20 WIB, penutup PW27, PW28):
+vitest 1359 lolos dari 159 berkas, dan e2e 838 lolos dan 3 gagal dari
+841 dalam 73,9 menit, tanpa dilewati. Termasuk spec ber-OTP. Ketiganya
+pola RG4a yang dilewatkan pemindaian PW27 (login ulang sesudah pembungkus
+panah `masukSebagai` di `tests/helpers/terkunci-uji.ts`):
+`keuangan/struk-tutup-kasir-alur`, `pengaturan/kelola-metode-pembayaran`
+skenario tanpa `read-akunkas`, dan `reservasi/daftar/tandai-selesai`
+B347. Lima titik di empat spec kini memakai `masukUlang` (`388938d`).
+Harapan spec tidak berubah. Sesudah perbaikan, `kelola-metode-pembayaran`
+10 lolos dari 10, dan keempat skenario yang disentuh 12 lolos dari 12
+dengan `--repeat-each 3`.
 
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
@@ -34,7 +35,7 @@ kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
 pada 24 November 2026, suite penuh 24 dan 25 November 2026 pada
 26 November 2026, suite penuh 26 November 2026 pada 27 November 2026,
 suite penuh 27 November 2026 pada 28 November 2026, dan suite penuh
-28 November 2026 pagi pada siang harinya; yang tersisa di
+28 November 2026 pagi dan siang pada hari yang sama; yang tersisa di
 atas hanya suite penuh terbaru.
 
 ## Kredensial uji
@@ -130,7 +131,7 @@ Pola kegagalan yang berulang:
 | `page.goto` `net::ERR_ABORTED` tepat setelah spec memasang `page.route` 403 | Halaman sebelumnya masih memuat permintaan susulan (panel dashboard) yang ikut dijawab 403 dan mengalihkan ke /login. Pasang route setelah halaman tujuan termuat, lalu `reload({ waitUntil: "commit" })` (suite penuh 8 November 2026) |
 | Opsi popover terlepas dari DOM sekali lalu tidak kembali, hanya di spec ber-`page.clock` | Radix mengembalikan fokus ke pemicu popover sebelumnya lewat `setTimeout`, yang dipalsukan `page.clock`; bila berjalan setelah popover berikutnya dibuka, popover itu menutup. Tunggu popover lepas dan fokus kembali sebelum membuka popover berikutnya (`tungguPopoverLepas` di `tests/helpers/penjualan-uji.ts`). Dibuktikan dengan `page.clock.pauseAt` lalu `runFor`, bukan dengan angka flaky (suite penuh 12 November 2026) |
 | Alur berhasil tetapi mendarat di dashboard, bukan kembali ke wizard | Parameter `?kembali=/setup` hilang saat jalur login pengguna melewati halaman lain (`/lupa-pin`). Setiap halaman di jalur itu meneruskannya lewat `denganKembali` (`lib/auth/tujuan.ts`); periksa URL setelah tautan dan pengalihan, bukan hanya tujuan akhir (suite penuh 13 November 2026, OA1a). Penunggu glob seperti `waitForURL("**/lupa-pin")` tidak cocok dengan URL ber-query; pakai regex yang menyebut query-nya |
-| Isian PIN terlepas dari DOM saat login ulang sebagai pengguna lain di tab yang sama, lalu halaman sampai di dashboard tanpa `pin-login` | `/login` memulihkan sesi lama lewat cookie (`refreshtoken`, `pin-refresh`) bersamaan dengan login baru, dan halaman login pengguna mengalihkan begitu sesi lama pulih. Buang cookie (`about:blank`, `clearCookies`) sebelum login ulang (`masukSebagai`). Dibuktikan dengan menahan `pin-refresh` sampai URL `/login/pengguna` (suite 12 November 2026, RG4a). Berlaku juga di arah sebaliknya: login ulang sebagai Ridho dari sesi pengguna uji, misalnya di bersih-bersih `finally`, membuang cookie lebih dulu (suite PW26, `roles/level-bukan-owner`); sejak PW27 lewat `masukUlang` di `tests/helpers/masuk-uji.ts` |
+| Isian PIN terlepas dari DOM saat login ulang sebagai pengguna lain di tab yang sama, lalu halaman sampai di dashboard tanpa `pin-login` | `/login` memulihkan sesi lama lewat cookie (`refreshtoken`, `pin-refresh`) bersamaan dengan login baru, dan halaman login pengguna mengalihkan begitu sesi lama pulih. Buang cookie (`about:blank`, `clearCookies`) sebelum login ulang (`masukSebagai`). Dibuktikan dengan menahan `pin-refresh` sampai URL `/login/pengguna` (suite 12 November 2026, RG4a). Berlaku juga di arah sebaliknya: login ulang sebagai Ridho dari sesi pengguna uji, misalnya di bersih-bersih `finally`, membuang cookie lebih dulu (suite PW26, `roles/level-bukan-owner`); sejak PW27 lewat `masukUlang` di `tests/helpers/masuk-uji.ts`. Mencari titik yang tersisa harus menelusuri setiap helper yang memanggil `masukSebagai` atau `gantiKePenggunaUji`, termasuk pembungkus `const` panah di `terkunci-uji.ts`, sampai tidak ada nama baru; daftar nama tetap melewatkan tiga yang menggagalkan suite PW28 |
 | Tangkapan atau ukuran gaya tidak berubah sesudah token tema baru, atau kelas token tidak berpengaruh | Dev server melayani CSS basi setelah `git stash` bolak-balik atau perubahan `@theme`; `touch app/globals.css` tidak selalu cukup. Periksa `getComputedStyle` atau aturan di `document.styleSheets` lebih dulu; bila kosong, hentikan dev server, hapus `.next/dev`, lalu jalankan ulang (14 November 2026, tipografi CV24a). Setelah `git stash` bolak-balik, hasil e2e juga tidak dapat dipercaya sampai dev server dimulai ulang: label kartu `tabel:hidden` tampil di 1280 px dan tampak seperti regresi spec (17 November 2026, LT1a). Dev server yang baru dinyalakan di atas `.next/dev` lama juga dapat menjawab 404 untuk setiap rute di bawah layout bertingkat (inventaris, pengaturan, keuangan), sedangkan `/dashboard/outlet` 200; bandingkan dengan `curl` beberapa rute yang tidak disentuh sebelum menelusuri kode (lonceng LN1a, 25 November 2026) |
 | Kepala kolom tidak ditemukan atau label sel ikut terbaca di 1280 px, padahal tampilan tidak diubah | Sejak LT1a `DataTable` tampil sebagai kartu bila lebar alaminya melebihi wadah, misalnya karena data uji yang panjang. Periksa `[data-kartu]` lebih dulu; perbaiki dengan `meta.lebarBungkus` di kolom terlebar seperti LT2a, bukan dengan mengubah spec |
 | Klik tanggal kalender kena dua elemen (`strict mode violation`) untuk hari 22 sampai 31 | Grid kalender juga menampilkan tanggal bulan sebelumnya; pilih lewat `button[data-day="M/D/YYYY"]`, seperti `pilihTanggalKalender` di `tests/helpers/jadwal-uji.ts` (`2bcb1ce`) |

@@ -88,7 +88,21 @@ Suite penuh 24 November 2026 dipindah dari `inti/pengujian.md` pada
 27 November 2026, digantikan suite penuh 27 November 2026; suite penuh
 27 November 2026 dipindah pada 28 November 2026, digantikan suite penuh
 28 November 2026 pagi; suite penuh 28 November 2026 pagi dipindah pada
-siang harinya, digantikan suite penuh 28 November 2026 siang.
+siang harinya, digantikan suite penuh 28 November 2026 siang; suite penuh
+28 November 2026 siang dipindah pada sore harinya, digantikan suite penuh
+28 November 2026 sore.
+
+**Suite penuh 28 November 2026 siang** (web `5085336`, backend `ridho`
+lokal `c4aae0d`, pukul 12.57 sampai 13.54 WIB, penutup putaran PW24 dan
+PW15, PW26): vitest 1359 lolos dari 159 berkas, dan e2e 840 lolos dan
+1 gagal dari 841 dalam 57,6 menit, tanpa dilewati. Termasuk spec
+ber-OTP. Yang gagal, `roles/level-bukan-owner` RL3a "level tidak
+diketahui", gagal di bersih-bersih `hapusPosisi`: login ulang sebagai
+Ridho dari sesi pengguna uji tanpa membuang cookie (pola RG4a di arah
+sebaliknya). Harapan spec tidak berubah; cookie dibuang sebelum login
+ulang (`c20184a`), lalu dibuktikan dengan berkasnya saja,
+`--repeat-each 3`, 6 lolos dari 6. Skenario baru PW24 (RS1a) dan PW15
+(MK20a) ikut lolos.
 
 **Suite penuh 28 November 2026 pagi** (web `fb2a39f`, backend `ridho` lokal
 `6478d29`, pukul 07.50 sampai 08.46 WIB, penutup putaran PW17 sampai

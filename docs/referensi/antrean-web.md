@@ -62,6 +62,7 @@ tetap `AR`, `B`, dan `P`.
 | PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Selesai | `93a26c1` |
 | PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Selesai | `c20184a` |
 | PW27 | Login ulang tanpa sesi lama (pola RG4a) dan status butir 180 | Sekarang | Selesai | `cb9b8bd` |
+| PW28 | Suite e2e penuh penutup PW27 | Menunggu izin | Selesai | `388938d` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -369,6 +370,23 @@ lolos 46 dari 46, dan ketujuh skenario yang disentuh 21 dari 21 dengan
 `--repeat-each 3`. Butir 180 di `kontrak/temuan.md` ditandai Tertutup:
 backend B329 lalu B353 sudah dipakai halaman Pembayaran per Metode
 (OM2a), dan baris itu tertinggal berstatus menunggu endpoint.
+
+### PW28: suite e2e penuh penutup PW27
+
+Selesai 28 November 2026 atas izin pemilik proyek, pada web `fd7a60d`
+dan backend `c4aae0d`, dengan charger tersambung dan layanan uji lengkap:
+e2e 838 lolos dan 3 gagal dari 841 dalam 73,9 menit, tanpa dilewati,
+termasuk spec ber-OTP; vitest 1359 lolos dari 159 berkas. Ketiganya pola
+RG4a yang dilewatkan pemindaian PW27, karena pemindaian itu hanya
+mengenali nama helper tertentu, bukan pembungkus `const` panah di
+`terkunci-uji.ts`. Pemindaian ulang (19 helper ganti pengguna) menemukan
+lima titik di empat spec, kini memakai `masukUlang` (`388938d`), dan
+tidak ada titik tersisa. Akibat ikutan di `kelola-metode-pembayaran`
+(fixture tertinggal bernama "… Ubah", strict mode dan 409 di run
+berikutnya) ditangani `pastikanFixture` yang mengganti nama sisa itu.
+Sesudahnya berkas itu 10 lolos dari 10, dan keempat skenario yang
+disentuh 12 lolos dari 12 dengan `--repeat-each 3`. Harapan spec dan kode
+aplikasi tidak berubah.
 
 ## Perubahan backend tanpa pekerjaan web
 

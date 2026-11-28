@@ -280,7 +280,13 @@ tanggal di butir di bawah adalah pembersihan sebelumnya.
 - **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
   metode pembayaran, karena metode tidak dapat dihapus (PO10a).
   Dibersihkan 20 November 2026: 4 metode E2E nonaktif yang tidak dirujuk
-  pembayaran.
+  pembayaran. Fixture yang tertinggal bernama "E2E Metode Uji Ubah" karena
+  run gagal sebelum namanya dikembalikan diganti `pastikanFixture` menjadi
+  "E2E Sisa Metode <akhiran id>" (PW28, satu per 28 November 2026).
+- **Run struk alur nyata yang gagal sebelum `finally` selesai meninggalkan
+  penjualan uji tanpa VOID** di sesi yang sudah ditutup, karena id-nya
+  hanya ada di memori run: sekali pada suite penuh PW28. Mesin uji
+  dibersihkan sendiri di awal run berikutnya (`bersihkanMesinUji`).
 - **Spec profil toko mengubah nama toko tenant uji untuk sementara**,
   lalu mengembalikannya lewat UI dan, bila test berhenti di tengah, lewat
   API di `finally`. Kode pos tenant uji menjadi teks kosong, bukan null,
