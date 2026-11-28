@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { masukUlang } from "../../helpers/masuk-uji";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { ID_TIDAK_ADA, cocok, unik } from "../../helpers/reservasi-uji";
 import { masukMetodeTanpaAkun } from "../../helpers/terkunci-uji";
@@ -27,6 +28,8 @@ const POLA_BUAT = /\/api\/metodepembayaran$/i;
 const POLA_DETAIL = /\/api\/metodepembayaran\/[a-f0-9]{24}$/i;
 const PLACEHOLDER_NAMA = "Misal: Transfer Bank Mandiri";
 const NAMA_FIXTURE = "E2E Metode Uji";
+/** Nama sementara fixture di skenario tanpa read-akunkas; dikembalikan di finally. */
+const NAMA_FIXTURE_UBAH = NAMA_FIXTURE + " Ubah";
 
 type MetodeMentah = {
   id: string;
@@ -55,6 +58,15 @@ async function metodeTunaiAktif(page: Page, auth: Auth) {
 async function pastikanFixture(page: Page, auth: Auth): Promise<MetodeMentah> {
   const r = await api<MetodeMentah[]>(page, auth, "GET", "/metodepembayaran?showAll=true");
   expect(r.status, "GET daftar kelola " + r.pesan).toBe(200);
+  // Sisa run yang gagal sebelum namanya dikembalikan (suite penuh PW28) diberi
+  // nama yang tidak mengandung NAMA_FIXTURE, agar tidak ikut tercari dan tidak
+  // bentrok dengan nama sementara skenario tanpa read-akunkas.
+  for (const sisa of r.data.filter((m) => m.namaPembayaran === NAMA_FIXTURE_UBAH)) {
+    const ganti = await api(page, auth, "PUT", "/metodepembayaran/" + sisa.id, {
+      namaPembayaran: `E2E Sisa Metode ${sisa.id.slice(-6)}`,
+    });
+    expect(ganti.status, "ganti nama sisa fixture " + ganti.pesan).toBe(200);
+  }
   const ada = r.data.find((m) => m.namaPembayaran === NAMA_FIXTURE);
   if (ada && !ada.isActive) return ada;
   if (ada) {
@@ -328,7 +340,7 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     test.setTimeout(90_000);
     let auth = await bukaDenganAuth(page, URL_DAFTAR);
     const fixture = await pastikanFixture(page, auth);
-    const namaBaru = NAMA_FIXTURE + " Ubah";
+    const namaBaru = NAMA_FIXTURE_UBAH;
     try {
       await masukMetodeTanpaAkun(page);
       // Buat: gerbang rute menuntut read-akunkas, dengan deskripsi izin dari backend.
@@ -356,7 +368,7 @@ test.describe("E2E — Kelola metode pembayaran", () => {
       expect(res.request().postDataJSON(), "hanya nama yang berubah; akun tidak dikirim").toEqual({ namaPembayaran: namaBaru });
       expect(mintaAkun, "GET /akunkas tidak diminta tanpa read-akunkas").toBe(0);
     } finally {
-      await login(page);
+      await masukUlang(page);
       auth = await bukaDenganAuth(page, URL_DAFTAR);
       const balik = await api(page, auth, "PUT", "/metodepembayaran/" + fixture.id, { namaPembayaran: NAMA_FIXTURE });
       expect.soft(balik.status, "kembalikan nama metode fixture: " + balik.pesan).toBe(200);

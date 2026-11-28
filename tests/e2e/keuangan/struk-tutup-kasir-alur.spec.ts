@@ -15,7 +15,7 @@ import {
 } from "../../helpers/sesi-kasir-uji";
 import { masukKasirBukaTutup } from "../../helpers/terkunci-uji";
 import { api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
-import { PENGGUNA_UJI } from "../../helpers/masuk-uji";
+import { PENGGUNA_UJI, masukUlang } from "../../helpers/masuk-uji";
 import { URL_LAPORAN_TUTUP_KASIR, angkaStruk } from "../../../features/sesi-kasir/laporan";
 import type { LaporanPeriodeKasir, PeriodeKasirDetail } from "../../../types/sesiKasir";
 
@@ -231,7 +231,7 @@ test("struk tutup kasir dari transaksi nyata: tunai, non-tunai, belum dibayar, d
     const tolak = await api(page, kasir, "GET", `/sesikasir/periode/${periode.id}?format=pdf`);
     expect(tolak.status, "unduh tanpa read-sesi-kasir").toBe(403);
     expect(tolak.pesan).toContain("read-sesi-kasir");
-    await login(page);
+    await masukUlang(page);
     const authOwner = await bukaDenganAuth(page, URL_LAPORAN_TUTUP_KASIR);
 
     // Pembersihan VOID sesudah tutup tidak mengubah laporan (keputusan 5).
@@ -239,7 +239,7 @@ test("struk tutup kasir dari transaksi nyata: tunai, non-tunai, belum dibayar, d
     expect((await laporan(page, authOwner, periode.id)).laporan, "laporan dipotret saat tutup").toEqual(lap);
   } finally {
     await app.tutup();
-    await login(page);
+    await masukUlang(page);
     const akhir = await bukaDenganAuth(page, URL_MESIN);
     for (const id of penjualanUji) await batalkanPenjualanUji(page, akhir, id);
     await bersihkanMesinUji(page, akhir, laci.id);

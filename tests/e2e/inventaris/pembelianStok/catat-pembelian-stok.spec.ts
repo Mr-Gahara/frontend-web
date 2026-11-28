@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { masukUlang } from "../../../helpers/masuk-uji";
 import { api, BASIS, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import { unik } from "../../../helpers/reservasi-uji";
 import { daftarAkun, pilihAkun, saldoAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
@@ -306,7 +307,7 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
       await expect(page.getByRole("main").getByText(/Anda tidak memiliki izin membuka (halaman [^.]+|halaman ini)\./)).toBeVisible();
     } finally {
       if (idPembelian && !terhapus) {
-        await login(page);
+        await masukUlang(page);
         auth = await bukaDenganAuth(page, BASIS + r.url);
         const hapus = await api(page, auth, "DELETE", "/pembelianstok/" + idPembelian);
         expect.soft(hapus.status, `hapus sisa pembelian uji: ${hapus.pesan}`).toBe(200);

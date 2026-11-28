@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { normalizeId } from "@/lib/api/normalize";
+import { masukUlang } from "../../../helpers/masuk-uji";
 import { api, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import { masukTanpaBacaSebagian } from "../../../helpers/terkunci-uji";
 import {
@@ -111,7 +112,7 @@ test.describe("tandai selesai booking", () => {
       await expect(bagian.getByRole("button", { name: "Tandai Selesai" })).toHaveCount(0);
       expect(bacaPerBooking, "tanpa read-booking tidak ada permintaan sesibooking").toEqual([]);
     } finally {
-      await login(page);
+      await masukUlang(page);
       auth = await bukaDenganAuth(page, "/dashboard/outlet/reservasi");
       await batalkanBooking(page, auth, penjualanId);
     }
