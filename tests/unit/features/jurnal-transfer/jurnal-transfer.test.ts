@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { aksiTransfer } from "@/features/jurnal-transfer/izin";
+import { aksiTransfer, bolehBatalTransfer } from "@/features/jurnal-transfer/izin";
+import { urlSesiAsalTransfer } from "@/features/jurnal-transfer/payload";
 import {
   filterServerTransfer,
   namaAkunTransfer,
@@ -144,5 +145,19 @@ describe("aksiTransfer", () => {
       batal: true,
     });
     expect(aksiTransfer([])).toEqual({ baca: false, buat: false, batal: false });
+  });
+});
+describe("bolehBatalTransfer (PW15, B386)", () => {
+  it("Batalkan hanya untuk transfer Aktif ber-asal manual bagi pemegang izin batal", () => {
+    expect(bolehBatalTransfer({ status: "AKTIF", asal: "manual" }, true)).toBe(true);
+    expect(bolehBatalTransfer({ status: "AKTIF", asal: "buka-kasir" }, true), "VOID buka kasir selalu 409").toBe(false);
+    expect(bolehBatalTransfer({ status: "VOID", asal: "manual" }, true)).toBe(false);
+    expect(bolehBatalTransfer({ status: "AKTIF", asal: "manual" }, false), "tanpa update-jurnal-transfer").toBe(false);
+  });
+});
+
+describe("urlSesiAsalTransfer", () => {
+  it("menuju rincian sesi kasir di Mesin Kasir", () => {
+    expect(urlSesiAsalTransfer("abc123")).toBe("/dashboard/outlet/keuangan/mesinKasir/abc123");
   });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowLeftRight } from "lucide-react";
 
 import {
@@ -11,11 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pesanError } from "@/lib/api/error";
+import { IZIN } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah, formatTanggal } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { JurnalTransfer } from "@/types/jurnalTransfer";
 import { useDetailTransfer } from "./hooks";
-import { LABEL_STATUS_TRANSFER, namaAkunTransfer } from "./payload";
+import { LABEL_ASAL_BUKA_KASIR, LABEL_STATUS_TRANSFER, namaAkunTransfer, urlSesiAsalTransfer } from "./payload";
 
 const KELAS_LABEL = "text-kecil font-semibold text-navy/60";
 
@@ -24,6 +27,33 @@ function BarisRincian({ label, nilai }: { label: string; nilai: string }) {
     <div className="flex items-start justify-between gap-4 px-4 py-2.5">
       <dt className={`${KELAS_LABEL} shrink-0`}>{label}</dt>
       <dd className="text-isi font-medium text-navy text-right break-words min-w-0">{nilai}</dd>
+    </div>
+  );
+}
+
+/**
+ * Asal Pindah Dana buka kasir (PW15, B386): tautan ke rincian sesi kasirnya bagi
+ * pemegang read-sesi-kasir, teks biasa bagi yang tidak. Asal manual tidak ditampilkan.
+ */
+function BarisAsal({ transfer }: { transfer: JurnalTransfer }) {
+  const { permissions } = useSession();
+  if (transfer.asal !== "buka-kasir") return null;
+  const tautan = transfer.sesiKasirID && permissions.includes(IZIN.sesiKasir);
+  return (
+    <div className="flex items-start justify-between gap-4 px-4 py-2.5">
+      <dt className={`${KELAS_LABEL} shrink-0`}>Asal</dt>
+      <dd className="text-isi font-medium text-navy text-right break-words min-w-0">
+        {tautan ? (
+          <Link
+            href={urlSesiAsalTransfer(transfer.sesiKasirID!)}
+            className="font-semibold text-navy underline underline-offset-4 hover:text-navy/70"
+          >
+            {LABEL_ASAL_BUKA_KASIR}
+          </Link>
+        ) : (
+          LABEL_ASAL_BUKA_KASIR
+        )}
+      </dd>
     </div>
   );
 }
@@ -49,6 +79,7 @@ function IsiRincian({ transfer }: { transfer: JurnalTransfer }) {
             {LABEL_STATUS_TRANSFER[transfer.status]}
           </dd>
         </div>
+        <BarisAsal transfer={transfer} />
         <BarisRincian label="Pencatat" nilai={transfer.dicatatOleh?.nama || "-"} />
       </dl>
 

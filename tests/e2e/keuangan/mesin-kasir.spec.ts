@@ -174,7 +174,7 @@ test.describe("Mesin Kasir", () => {
     }
   });
 
-  test("laci dikosongkan saat buka di aplikasi: rincian web menampilkan yang dipindah, dan Pindah Dana-nya tidak dapat dibatalkan (PW09, B371)", async ({
+  test("laci dikosongkan saat buka di aplikasi: rincian web menampilkan yang dipindah, dan Pindah Dana-nya tanpa Batalkan, bertaut ke sesinya (PW09, PW15, B371, B386)", async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -235,8 +235,25 @@ test.describe("Mesin Kasir", () => {
       await expect(kartu.getByRole("definition").nth(3)).toHaveText(formatRupiah(0));
       await expect(kartu.getByRole("definition").nth(4)).toHaveText(saldoLaci === 0 ? `Lebih ${formatRupiah(1)}` : "Pas");
 
-      // Batalkan Pindah Dana buka kasir ditolak 409; pesannya tampil apa adanya
-      // sampai backend memberi penanda asal (laporan-untuk-backend.md).
+      // Pindah Dana buka kasir (B386, PW15): respons membawa asalnya, riwayat
+      // menandainya tanpa Batalkan, dan rincian bertaut ke sesi kasirnya.
+      const idJurnal = String(detail.pindahDanaBuka?.jurnalTransferID);
+      const jurnal = await api<{ asal: string; sesiKasirID: string | null; status: string }>(
+        page,
+        auth,
+        "GET",
+        `/jurnaltransfer/${idJurnal}`,
+      );
+      expect(jurnal.data.asal, "asal jurnal buka kasir").toBe("buka-kasir");
+      expect(jurnal.data.sesiKasirID, "sesi yang mencatatnya").toBe(sesi.id);
+      // Aturan backend tetap: VOID-nya ditolak 409 (B371), sehingga menyembunyikan
+      // Batalkan bukan sekadar tampilan.
+      const void409 = await api(page, auth, "PUT", `/jurnaltransfer/${idJurnal}`, {
+        status: "VOID",
+        catatan: "E2E batal pindah dana buka kasir",
+      });
+      expect(void409.status, "VOID pindah dana buka kasir").toBe(409);
+
       await page.goto("/dashboard/outlet/keuangan/akunkas/pindahDana");
       const baris = page
         .getByRole("row")
@@ -244,22 +261,19 @@ test.describe("Mesin Kasir", () => {
         .filter({ hasText: tujuan.namaAkun })
         .first();
       await expect(baris).toContainText(formatRupiah(jumlah), { timeout: 20_000 });
-      await baris.getByRole("button", { name: "Aksi transfer" }).click();
-      await page.getByRole("menuitem", { name: "Batalkan transfer" }).click();
-      const dialog = page.getByRole("dialog");
-      await dialog.getByLabel(/Alasan pembatalan/).fill("E2E batal pindah dana buka kasir");
-      const tBatal = tunggu(page, /\/api\/jurnaltransfer\/[a-f0-9]{24}$/i, "PUT");
-      await dialog.getByRole("button", { name: "Batalkan Transfer" }).click();
-      const batal = await tBatal;
-      expect(batal.status(), "VOID pindah dana buka kasir").toBe(409);
-      expect(batal.url()).toContain(String(detail.pindahDanaBuka?.jurnalTransferID));
-      await expect(
-        dialog.getByText("Pindah dana dari buka kasir tidak dapat dibatalkan. Catat Pindah Dana balik bila perlu dikoreksi."),
-      ).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(dialog).toBeHidden();
       await expect(baris, "transfer tetap Aktif").toContainText("Aktif");
+      await expect(baris).toContainText("Dari buka kasir");
+      await expect(baris.getByRole("button", { name: "Aksi transfer" }), "tanpa menu Batalkan").toHaveCount(0);
       expect(await saldoAkun(page, auth, tujuan.id), "saldo tujuan tidak kembali ke laci").toBe(jumlah);
+
+      await page.goto(`/dashboard/outlet/keuangan/akunkas/pindahDana?transfer=${idJurnal}`);
+      const rincian = page.getByRole("dialog");
+      await expect(rincian.getByRole("term").filter({ hasText: /^Asal$/ })).toBeVisible({ timeout: 20_000 });
+      const tautanAsal = rincian.getByRole("link", { name: "Buka kasir" });
+      await expect(tautanAsal).toHaveAttribute("href", `/dashboard/outlet/keuangan/mesinKasir/${sesi.id}`);
+      await tautanAsal.click();
+      await expect(page).toHaveURL(new RegExp(`/mesinKasir/${sesi.id}$`), { timeout: 20_000 });
+      await expect(page.getByRole("heading", { name: "Saat kasir dibuka" })).toBeVisible({ timeout: 20_000 });
     } finally {
       await bersihkanMesinUji(page, auth, laci.id);
       // Batas 10 akun kas aktif: akun tujuan dikosongkan lalu dinonaktifkan agar tidak
@@ -354,6 +368,28 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
 });
 
 test.describe("Mesin Kasir: kelola tanpa sebagian izin baca (MK11a)", () => {
+  test("rincian Pindah Dana buka kasir tanpa read-sesi-kasir: asal tampil sebagai teks tanpa tautan (PW15)", async ({
+    page,
+  }) => {
+    await login(page);
+    const auth: Auth = await bukaDenganAuth(page, "/dashboard/outlet/keuangan/akunkas/pindahDana");
+    // Skenario laci dikosongkan di atas selalu mencatat satu Pindah Dana buka kasir.
+    const daftar = await api<{ id: string; asal: string }[]>(page, auth, "GET", "/jurnaltransfer?page=1&limit=50");
+    const jurnal = daftar.data.find((t) => t.asal === "buka-kasir");
+    expect(jurnal, "ada Pindah Dana buka kasir di 50 transfer terbaru").toBeTruthy();
+    await masukSebagai(page, {
+      nama: "E2E Pindah Dana Tanpa Sesi Kasir",
+      pin: "864290",
+      deskripsi: "Peran uji e2e: izin baca Owner tanpa sesi kasir",
+      izin: (n) => n.startsWith("read-") && n !== IZIN.sesiKasir,
+    });
+    await page.goto(`/dashboard/outlet/keuangan/akunkas/pindahDana?transfer=${jurnal!.id}`);
+    const rincian = page.getByRole("dialog");
+    await expect(rincian.getByRole("term").filter({ hasText: /^Asal$/ })).toBeVisible({ timeout: 20_000 });
+    await expect(rincian.getByRole("definition").filter({ hasText: /^Buka kasir$/ })).toBeVisible();
+    await expect(rincian.getByRole("link", { name: "Buka kasir" }), "tanpa tautan ke sesi kasir").toHaveCount(0);
+  });
+
   test("kelola-perangkat-kasir tanpa read-akunkas: halaman tampil seperti tanpa izin kelola", async ({ page }) => {
     await login(page);
     await masukSebagai(page, {

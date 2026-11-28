@@ -44,10 +44,11 @@ import type { JurnalTransfer } from "@/types/jurnalTransfer";
 import { DialogBatalTransfer } from "./dialog-batal-transfer";
 import { DialogRincianTransfer } from "./dialog-rincian-transfer";
 import { useBuatTransfer, useDaftarTransfer } from "./hooks";
-import { aksiTransfer } from "./izin";
+import { aksiTransfer, bolehBatalTransfer } from "./izin";
 import {
   FILTER_AWAL_TRANSFER,
   ISIAN_AWAL_PINDAH_DANA,
+  LABEL_DARI_BUKA_KASIR,
   LABEL_STATUS_TRANSFER,
   PARAM_TRANSFER,
   jumlahFilterTransfer,
@@ -380,14 +381,20 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         id: "status",
         header: "Status",
         cell: ({ row }) => (
-          <span
-            className={cn(
-              "text-kecil font-bold",
-              row.original.status === "AKTIF" ? "text-emerald-700" : "text-red-600",
+          <div className="flex flex-col">
+            <span
+              className={cn(
+                "text-kecil font-bold",
+                row.original.status === "AKTIF" ? "text-emerald-700" : "text-red-600",
+              )}
+            >
+              {LABEL_STATUS_TRANSFER[row.original.status]}
+            </span>
+            {/* Asal buka kasir (PW15): alasan transfer Aktif ini tanpa Batalkan. */}
+            {row.original.asal === "buka-kasir" && (
+              <span className="text-kecil font-medium text-navy/60">{LABEL_DARI_BUKA_KASIR}</span>
             )}
-          >
-            {LABEL_STATUS_TRANSFER[row.original.status]}
-          </span>
+          </div>
         ),
       },
       {
@@ -395,7 +402,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         header: () => <span className="sr-only">Aksi</span>,
         // Aksi baris di menu titik tiga seperti tabel lain (TB, CV17a).
         cell: ({ row }) =>
-          bolehBatal && row.original.status === "AKTIF" ? (
+          bolehBatalTransfer(row.original, bolehBatal) ? (
             <div className="flex justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

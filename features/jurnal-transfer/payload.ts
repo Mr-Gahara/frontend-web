@@ -86,6 +86,15 @@ export const LABEL_STATUS_TRANSFER: Record<StatusTransfer, string> = {
   VOID: "Dibatalkan",
 };
 
+/** Penanda asal di riwayat dan rincian transfer (PW15): hanya untuk asal buka kasir. */
+export const LABEL_DARI_BUKA_KASIR = "Dari buka kasir";
+export const LABEL_ASAL_BUKA_KASIR = "Buka kasir";
+
+/** Rincian sesi kasir asal Pindah Dana buka kasir (rute `mesinKasir/[id]`, read-sesi-kasir). */
+export function urlSesiAsalTransfer(sesiKasirID: string) {
+  return `/dashboard/outlet/keuangan/mesinKasir/${sesiKasirID}`;
+}
+
 /** Nama akun dari salinan di respons; akun tanpa nama tampil sebagai tanda hubung. */
 export function namaAkunTransfer(akun: AkunTransfer | null): string {
   return akun?.namaAkun || "-";
