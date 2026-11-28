@@ -1,6 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
-import { penggunaDiRuang } from "../../../../features/pengguna/ruang-staf";
+import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
 import { cocok, tanggalLokal } from "../../../helpers/reservasi-uji";
 import {
   barisKaryawan,
@@ -48,26 +47,12 @@ for (const ruang of ["outlet", "gudang"] as const) {
   const url = ruang === "outlet" ? URL_JADWAL_OUTLET : URL_JADWAL_GUDANG;
 
   test.describe(`jadwal ${ruang}`, () => {
-    test("baris karyawan sama dengan pengguna ruang itu menurut aturan ruang staf (RS1a)", async ({ page }) => {
-      const auth = await bukaDenganAuth(page, url);
+    test("baris karyawan sama dengan respons pengguna ruang itu", async ({ page }) => {
+      await bukaDenganAuth(page, url);
       const pengguna = await penggunaSetelahMuatUlang(page, ruang);
       expect(pengguna.length, `respons pengguna ${ruang}`).toBeGreaterThan(0);
-      // Sejak RS1a baris kalender bukan respons workspace backend apa adanya,
-      // melainkan lokasi kerja, lalu izin dashboard (daftar workspace), lalu outlet.
-      type P = { id: string; locationID?: string | null };
-      const [semua, outlet, gudang, lokasi] = await Promise.all([
-        api<P[]>(page, auth, "GET", "/pengguna"),
-        api<P[]>(page, auth, "GET", "/pengguna?workspace=outlet"),
-        api<P[]>(page, auth, "GET", "/pengguna?workspace=gudang"),
-        api<{ id?: string; _id?: string; tipe: string }[]>(page, auth, "GET", "/location"),
-      ]);
-      const harapan = penggunaDiRuang(ruang, {
-        semua: semua.data,
-        diRuangBackend: { outlet: new Set(outlet.data.map((p) => p.id)), gudang: new Set(gudang.data.map((p) => p.id)) },
-        tipeLokasi: new Map(lokasi.data.map((l) => [String(l.id ?? l._id), l.tipe])),
-      });
       await expect(barisKaryawan(page)).toHaveCount(1, { timeout: 15_000 });
-      await expect(page.locator("tbody tr")).toHaveCount(harapan.length);
+      await expect(page.locator("tbody tr")).toHaveCount(pengguna.length);
     });
 
     test("jadwal uji tampil di sel harinya", async ({ page }) => {
