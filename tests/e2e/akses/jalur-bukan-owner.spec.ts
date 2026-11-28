@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { masukUlang } from "../../helpers/masuk-uji";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { dariLonceng } from "../../helpers/lonceng-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
@@ -178,7 +179,7 @@ test("gate stock adjustment: tanpa read-location ruang outlet ditolak; izin per 
   await ditolak(page);
 
   // Peran uji dibuat dan diselaraskan dengan sesi Owner, bukan sesi peran sebelumnya.
-  await login(page);
+  await masukUlang(page);
   await masukAdjustmentOutlet(page);
   await page.goto("/dashboard/outlet/inventaris/stockAdjustment");
   await expect(page.getByRole("heading", { name: "Akses ditolak" })).toHaveCount(0);

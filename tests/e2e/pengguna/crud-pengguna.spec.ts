@@ -1,5 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
-import { AKUN_UJI, PENGGUNA_UJI, isiLoginAkun, isiLoginPengguna, masuk } from "../../helpers/masuk-uji";
+import { AKUN_UJI, PENGGUNA_UJI, isiLoginAkun, isiLoginPengguna, masuk, masukUlang } from "../../helpers/masuk-uji";
 import { IZIN } from "../../../lib/auth/permissions";
 import { masukBacaSaja, masukSebagai, siapkanPeran } from "../../helpers/terkunci-uji";
 import { BASIS as BASIS_UJI } from "../../helpers/transfer-uji";
@@ -381,9 +381,7 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
       expect(ubah.request().postDataJSON(), "locationID tidak dikirim").not.toHaveProperty("locationID");
       expect(mintaLokasi, "GET /location tidak diminta tanpa read-location").toBe(0);
     } finally {
-      await page.goto("about:blank");
-      await page.context().clearCookies();
-      await login(page);
+      await masukUlang(page);
       if (idPengguna) {
         const auth = await bukaDenganAuth(page, "/dashboard/outlet/pengguna");
         const detail = await api<{ locationID?: string | null }>(page, auth, "GET", "/pengguna/" + idPengguna);

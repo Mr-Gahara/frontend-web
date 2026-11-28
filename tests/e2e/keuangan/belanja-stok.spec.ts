@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { masukUlang } from "../../helpers/masuk-uji";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { daftarAkun } from "../../helpers/akun-kas-uji";
@@ -291,7 +292,7 @@ test.describe("Keuangan: Belanja Stok, pengguna baca-saja", () => {
       await expect(page.getByRole("button", { name: "Hapus", exact: true })).toHaveCount(0);
     } finally {
       if (id) {
-        await login(page);
+        await masukUlang(page);
         auth = await bukaDenganAuth(page, BASIS + URL_BELANJA);
         await hapusPembelianUji(page, auth, id);
       }

@@ -8,6 +8,7 @@ import {
   siapkanSuratJalan,
   type TransferMentah,
 } from "../../../helpers/transfer-uji";
+import { masukUlang } from "../../../helpers/masuk-uji";
 import { masukBacaSaja } from "../../../helpers/terkunci-uji";
 
 /*
@@ -117,7 +118,7 @@ test.describe("Detail surat jalan: pengguna baca-saja", () => {
         await expect(page.getByRole("button", { name: /batalkan pengiriman/i })).toHaveCount(0);
       });
 
-      await login(page);
+      await masukUlang(page);
       auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
       const kirim = await api(page, auth, "PATCH", `/transferstok/${transfer.id}/kirim`, {});
       expect(kirim.status, `kirim surat jalan uji: ${kirim.pesan}`).toBe(200);
@@ -129,7 +130,7 @@ test.describe("Detail surat jalan: pengguna baca-saja", () => {
         await expect(page.getByRole("button", { name: /konfirmasi terima barang/i })).toHaveCount(0);
       });
     } finally {
-      await login(page);
+      await masukUlang(page);
       auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
       await tutupSuratJalanUji(page, auth, transfer.id);
     }

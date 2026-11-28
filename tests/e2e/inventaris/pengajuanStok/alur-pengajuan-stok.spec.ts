@@ -1,7 +1,7 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 import { api, bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
-import { masuk } from "../../../helpers/masuk-uji";
+import { masuk, masukUlang } from "../../../helpers/masuk-uji";
 import { IZIN } from "../../../../lib/auth/permissions";
 import { masukSebagai } from "../../../helpers/terkunci-uji";
 
@@ -277,7 +277,7 @@ test.describe("Alur tulis pengajuan stok", () => {
     expect(ajukan.status, `submit: ${ajukan.pesan}`).toBe(200);
 
     // Peran kedua dibuat dari sesi Owner (pola masukSebagai berturut-turut).
-    await login(page);
+    await masukUlang(page);
     await masukSebagai(page, {
       nama: "E2E Penyetuju Gudang",
       pin: "864252",

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { IZIN } from "../../../lib/auth/permissions";
 import { masukSebagai, type PeranUji } from "../../helpers/terkunci-uji";
+import { masukUlang } from "../../helpers/masuk-uji";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 
 /*
@@ -34,13 +35,7 @@ async function bukaKostum(page: Page) {
 }
 
 async function hapusPosisi(page: Page, nama: string) {
-  // Cookie sesi pengguna uji dibuang dulu (pola RG4a, `gantiKePenggunaUji`):
-  // tanpa itu /login dapat memulihkan sesi pengguna uji bersamaan dengan login
-  // Ridho, lalu login pengguna mengalihkan ke dashboard dan isian nama hilang
-  // (suite penuh PW26, 28 November 2026).
-  await page.goto("about:blank");
-  await page.context().clearCookies();
-  await login(page);
+  await masukUlang(page);
   const auth = await bukaDenganAuth(page, "/dashboard");
   const daftar = await api<{ id?: string; _id?: string; namaRole?: string }[]>(page, auth, "GET", "/role");
   const ada = (daftar.data ?? []).find((r) => r.namaRole === nama);

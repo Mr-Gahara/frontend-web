@@ -44,3 +44,17 @@ export async function masuk(
   await isiLoginPengguna(page, nama, pin);
   await page.waitForURL("**/dashboard");
 }
+/**
+ * Login ulang sebagai Ridho dari sesi pengguna lain di halaman yang sama.
+ * Cookie sesi lama dibuang dulu (pola RG4a, `gantiKePenggunaUji`): tanpa itu
+ * /login dapat memulihkan sesi lama (refreshtoken lalu pin-refresh)
+ * bersamaan dengan login baru, lalu login pengguna mengalihkan ke dashboard
+ * sebagai pengguna lama sehingga isiannya hilang (suite penuh PW26,
+ * `roles/level-bukan-owner`). localStorage tetap, karena penanda tur dari
+ * storageState ada di sana.
+ */
+export async function masukUlang(page: Page) {
+  await page.goto("about:blank");
+  await page.context().clearCookies();
+  await masuk(page);
+}
