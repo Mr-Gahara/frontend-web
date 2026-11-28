@@ -53,7 +53,7 @@ tetap `AR`, `B`, dan `P`.
 | PW19 | Lonceng kesiapan toko: akun baru mendahulukan setup sampai siap beroperasi | Keputusan | Selesai | `f606985` |
 | PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Selesai | `3198f5d` |
 | PW21 | Staf akses aplikasi tampil di daftar ruang (butir 197) | Keputusan | Selesai | `7553126` |
-| PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Belum | |
+| PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Selesai | `0d124c7` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -281,19 +281,16 @@ Jadwal, kalender Jadwal, Status Staf, dan lonceng. Laporan butir 197 di
 
 ### PW22: suite e2e penuh penutup putaran PW17 sampai PW21
 
-Dicatat atas permintaan pemilik proyek 27 November 2026. Suite terakhir
-berjalan di `81e9214` (PW14), sebelum PW18 sampai PW21. Sejak itu lonceng
-di setiap halaman dashboard meminta sumber baru (`/pengguna`,
-`/pengguna?workspace=`, `/role`, `/shift`, `/polaroster`, `/jadwalshift`
-rentang 62 hari, `/inventory` gudang, `/location`), dan daftar pengguna
-per ruang dipilah web (RS1a); e2e hanya dijalankan pada berkas
-terdampak, sehingga penunggu di spec lain (keuangan, penjualan,
-reservasi, inventaris) dapat tertabrak permintaan itu. Dijalankan seperti
-PW14: hanya atas izin pemilik proyek, charger tersambung, layanan uji
-lengkap (Mailpit, env inline), termasuk spec ber-OTP; vitest tidak
-dijalankan bersamaan (dev server pernah berhenti,
-`referensi/playwright.md`). Harapan: tanpa kegagalan. Kegagalan
-diperbaiki dan dibuktikan dengan spec terdampak saja; baseline baru di
+Selesai 28 November 2026 atas izin pemilik proyek, pada web `fb2a39f`
+dan backend `6478d29`, dengan charger tersambung dan layanan uji lengkap
+(Mailpit, env inline): e2e 839 lolos dan 1 gagal dari 840 dalam
+56,1 menit, tanpa dilewati, termasuk spec ber-OTP; vitest 1362 lolos dari
+160 berkas. Penunggu lonceng baru PW18 sampai PW21 tidak menabrak spec
+lain. Yang gagal, `keuangan/mesin-kasir` skenario memuat, menunggu
+`#judul-kasir-buka` yang sengaja diganti langkah tambah mesin saat toko
+uji tanpa mesin kasir (koleksi `perangkatkasirs` 0 dokumen); harapannya
+terbukti keliru, penandanya diganti isi riwayat (`0d124c7`), dan
+berkasnya lolos 15 dari 15. Kode aplikasi tidak berubah; baseline baru di
 `inti/pengujian.md`.
 
 ## Perubahan backend tanpa pekerjaan web

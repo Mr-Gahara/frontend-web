@@ -76,20 +76,21 @@ syarat di Tambah Pengguna, Pola Roster, dan Generate Jadwal (KS10a
 sampai KS13a). PW20 selesai (`3198f5d`): bidang ruang gudang dan staf
 per ruang di kartu itu (KS14a sampai KS16a). PW21 selesai (`7553126`):
 staf akses aplikasi tampil di daftar ruang (RS1a, butir 197). Vitest
-kini 1362 lolos dari 160 berkas. PW14 selesai: suite e2e penuh 27
-November 2026 (`81e9214`, backend `6478d29`) 837 lolos dari 837, tanpa
-gagal maupun dilewati, termasuk spec ber-OTP (Baseline
+kini 1362 lolos dari 160 berkas. PW22 selesai (`0d124c7`): suite e2e
+penuh 28 November 2026 (`fb2a39f`, backend `6478d29`) 839 lolos dan
+1 gagal dari 840, termasuk spec ber-OTP; yang gagal adalah harapan spec
+Mesin Kasir yang bergantung jumlah mesin di toko uji, diperbaiki dan
+dibuktikan dengan berkasnya, 15 lolos dari 15 (Baseline
 `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
 `PW01` sampai `PW22`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW21
+1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW22
    selesai.
 2. **Diawali dialog keputusan:** tidak ada.
-3. **Menunggu izin pemilik proyek:** PW22, suite e2e penuh penutup
-   putaran PW17 sampai PW21.
+3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
    (butir 196, `referensi/laporan-untuk-backend.md`). Langkah pertama

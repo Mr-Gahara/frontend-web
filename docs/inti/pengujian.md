@@ -12,13 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
-**Suite penuh 27 November 2026** (web `81e9214`, backend `ridho` lokal
-`6478d29`, pukul 16.18 sampai 17.13 WIB, penutup putaran PW01 sampai
-PW16, PW14): vitest 1333 lolos dari 158 berkas, dan e2e 837 lolos dari
-837 dalam 54,8 menit, tanpa gagal maupun dilewati. Termasuk spec ber-OTP.
-Ketiga merah disengaja suite sebelumnya (butir 191, 192, dan 193) lolos
-tanpa diubah, sesuai harapan sejak PW02; sebelas skenario baru sejak
-suite sebelumnya ikut lolos.
+**Suite penuh 28 November 2026** (web `fb2a39f`, backend `ridho` lokal
+`6478d29`, pukul 07.50 sampai 08.46 WIB, penutup putaran PW17 sampai
+PW21, PW22): vitest 1362 lolos dari 160 berkas, dan e2e 839 lolos dan
+1 gagal dari 840 dalam 56,1 menit, tanpa dilewati. Termasuk spec
+ber-OTP. Yang gagal, `keuangan/mesin-kasir` "memuat: kerangka tampil
+selama riwayat ditahan, lalu berganti isi", menunggu `#judul-kasir-buka`
+yang sengaja tidak dirender saat toko uji tanpa mesin kasir; harapannya
+terbukti keliru dan penandanya diganti isi riwayat (`0d124c7`), lalu
+dibuktikan dengan berkasnya saja, 15 lolos dari 15. Tiga skenario baru
+sejak suite sebelumnya ikut lolos, dan penunggu lonceng baru (PW18
+sampai PW21) tidak menabrak spec lain.
 
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
@@ -28,8 +32,9 @@ penyesuaian backend `ridho` `b5b367a` (21 Oktober 2026), dipindah ke
 20 November 2026. Baseline 18 sampai 24 November 2026, dari pembuktian
 kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
 pada 24 November 2026, suite penuh 24 dan 25 November 2026 pada
-26 November 2026, dan suite penuh 26 November 2026 pada 27 November 2026;
-yang tersisa di atas hanya suite penuh terbaru.
+26 November 2026, suite penuh 26 November 2026 pada 27 November 2026,
+dan suite penuh 27 November 2026 pada 28 November 2026; yang tersisa di
+atas hanya suite penuh terbaru.
 
 ## Kredensial uji
 
@@ -119,6 +124,7 @@ Pola kegagalan yang berulang:
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
 | Spec gagal hanya pada jam tertentu, berulang, juga di pohon kerja bersih | Cek `date` dan `date -u`, lalu bandingkan dengan `git stash -u`. Tanggal `YYYY-MM-DD` dibaca backend sebagai 00.00 UTC, sehingga tanggal hari ini ditolak antara 00.00 dan 07.00 WIB (`kontrak/temuan.md` butir 154) |
 | Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
+| Penanda "halaman sudah termuat" tidak ditemukan hanya di suite penuh, padahal halamannya tampil | Penanda itu bagian yang sengaja diganti keadaan lain menurut data toko uji (misalnya `#judul-kasir-buka` diganti langkah tambah mesin saat mesin kasir 0, PW22). Hitung datanya langsung di Mongo, jalankan uji itu sendirian, lalu pilih penanda dari bagian yang memang diuji |
 | Pengguna uji terbatas berakhir di Profil Pengguna, dan permintaan halaman tujuan tidak pernah terkirim | `/dashboard` mengalihkan sendiri menurut izin (`app/dashboard/page.tsx`) dan dapat menyalip `goto` berikutnya; layout ruang outlet dan gudang menuntut `read-dashboard-outlet` dan `read-dashboard-gudang`. Helper peran uji menunggu URL meninggalkan `/dashboard`, dan peran uji memegang izin dashboard ruang yang dibukanya (`4601d91`) |
 | `page.goto` `net::ERR_ABORTED` tepat setelah spec memasang `page.route` 403 | Halaman sebelumnya masih memuat permintaan susulan (panel dashboard) yang ikut dijawab 403 dan mengalihkan ke /login. Pasang route setelah halaman tujuan termuat, lalu `reload({ waitUntil: "commit" })` (suite penuh 8 November 2026) |
 | Opsi popover terlepas dari DOM sekali lalu tidak kembali, hanya di spec ber-`page.clock` | Radix mengembalikan fokus ke pemicu popover sebelumnya lewat `setTimeout`, yang dipalsukan `page.clock`; bila berjalan setelah popover berikutnya dibuka, popover itu menutup. Tunggu popover lepas dan fokus kembali sebelum membuka popover berikutnya (`tungguPopoverLepas` di `tests/helpers/penjualan-uji.ts`). Dibuktikan dengan `page.clock.pauseAt` lalu `runFor`, bukan dengan angka flaky (suite penuh 12 November 2026) |

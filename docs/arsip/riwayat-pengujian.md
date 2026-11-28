@@ -72,7 +72,17 @@ Suite penuh 24 November 2026 dipindah dari `inti/pengujian.md` pada
 26 November 2026, digantikan suite penuh 25 November 2026; suite penuh
 25 November 2026 dipindah pada hari yang sama, digantikan suite penuh
 26 November 2026; suite penuh 26 November 2026 dipindah pada
-27 November 2026, digantikan suite penuh 27 November 2026.
+27 November 2026, digantikan suite penuh 27 November 2026; suite penuh
+27 November 2026 dipindah pada 28 November 2026, digantikan suite penuh
+28 November 2026.
+
+**Suite penuh 27 November 2026** (web `81e9214`, backend `ridho` lokal
+`6478d29`, pukul 16.18 sampai 17.13 WIB, penutup putaran PW01 sampai
+PW16, PW14): vitest 1333 lolos dari 158 berkas, dan e2e 837 lolos dari
+837 dalam 54,8 menit, tanpa gagal maupun dilewati. Termasuk spec ber-OTP.
+Ketiga merah disengaja suite sebelumnya (butir 191, 192, dan 193) lolos
+tanpa diubah, sesuai harapan sejak PW02; sebelas skenario baru sejak
+suite sebelumnya ikut lolos.
 
 **Suite penuh 26 November 2026** (web `fb186f2`, backend `ridho` lokal
 `1718030`, pukul 11.55 sampai 12.47 WIB, sesudah LN20a dan LN21a): vitest
