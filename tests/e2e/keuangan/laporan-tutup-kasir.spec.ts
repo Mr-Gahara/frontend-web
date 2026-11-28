@@ -63,6 +63,11 @@ test.describe("Laporan Tutup Kasir", () => {
 
     await expect(page.getByRole("link", { name: "Tutup Kasir", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("heading", { name: "Laporan Tutup Kasir", level: 2 })).toBeVisible();
+    // TH1a menetralkan padding anak langsung layout Keuangan; kartu tetap
+    // berpadding karena berada di dalam pembungkus SP1a (28 November 2026).
+    const kartu = page.getByRole("region", { name: "Laporan Tutup Kasir" });
+    const padding = await kartu.evaluate((el) => getComputedStyle(el).paddingLeft);
+    expect(padding, "padding kartu Laporan Tutup Kasir di desktop").toBe("24px");
 
     const data = await isi<PeriodeKasir[]>(awal);
     test.skip(data.length === 0, "belum ada periode laporan tutup kasir");
