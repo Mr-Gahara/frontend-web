@@ -502,7 +502,13 @@ test.describe("Mesin Kasir: keadaan memuat, gagal, dan kosong", () => {
     await expect(page.locator('[data-slot="skeleton"]').first()).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText("Riwayat gagal dimuat")).toHaveCount(0);
     lepas();
-    await expect(page.locator("#judul-kasir-buka")).toBeVisible({ timeout: 20_000 });
+    // Penanda isi dari riwayat yang ditahan, bukan #judul-kasir-buka: tanpa mesin
+    // kasir sama sekali bagian itu sengaja diganti langkah tambah mesin
+    // (susunan-mesin-kasir.tsx), sehingga ada tidaknya bergantung data toko uji.
+    const riwayat = page.locator('section[aria-labelledby="judul-riwayat"]');
+    await expect(
+      riwayat.getByRole("heading", { level: 3 }).or(riwayat.getByText(/^Belum ada kasir yang ditutup/)).first(),
+    ).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('[data-slot="skeleton"]')).toHaveCount(0, { timeout: 20_000 });
     await page.unroute(POLA);
   });
