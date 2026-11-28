@@ -54,7 +54,7 @@ tetap `AR`, `B`, dan `P`.
 | PW20 | Kesiapan ruang gudang (Pro): petugas, absensi, dan barang gudang pertama | Keputusan | Selesai | `3198f5d` |
 | PW21 | Staf akses aplikasi tampil di daftar ruang (butir 197) | Keputusan | Selesai | `7553126` |
 | PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Selesai | `0d124c7` |
-| PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Belum | |
+| PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Selesai | `eda7694` |
 | PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Menunggu backend | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
@@ -297,12 +297,12 @@ berkasnya lolos 15 dari 15. Kode aplikasi tidak berubah; baseline baru di
 
 ### PW23: status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron
 
-Dicatat 28 November 2026 dari laporan sisa sesudah PW22, dokumen saja.
-Butir 31, 32, 34, dan 35 di `kontrak/temuan.md` belum memuat status
-backend AR31 (`a5357f9`): T4, T6, dan T7 `Selesai` dibuktikan backend,
-T3 `Perlu diverifikasi` tim mobile. Bagian Menunggu backend di
-`referensi/utang-pengujian.md` menulis "Tidak ada", padahal skenario 409
-Batalkan Pindah Dana di `keuangan/mesin-kasir` menunggu butir 196 (PW15).
+Selesai 28 November 2026 (`eda7694`), dokumen saja: butir 32, 34, dan 35
+di `kontrak/temuan.md` memuat status backend AR31 `Selesai` (`a5357f9`,
+dibuktikan backend), butir 31 `Perlu diverifikasi` tim mobile, dan
+skenario 409 Batalkan Pindah Dana tercatat di Menunggu backend
+`referensi/utang-pengujian.md` bersama PW15. PW24 ditambah untuk butir
+197.
 
 ### PW24: daftar ruang kembali ke `GET /pengguna?workspace=`
 

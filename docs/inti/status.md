@@ -81,20 +81,22 @@ penuh 28 November 2026 (`fb2a39f`, backend `6478d29`) 839 lolos dan
 1 gagal dari 840, termasuk spec ber-OTP; yang gagal adalah harapan spec
 Mesin Kasir yang bergantung jumlah mesin di toko uji, diperbaiki dan
 dibuktikan dengan berkasnya, 15 lolos dari 15 (Baseline
-`inti/pengujian.md`).
+`inti/pengujian.md`). PW23 selesai (`eda7694`): status temuan T3, T4,
+T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW22`, satu paket per sesi lewat
+`PW01` sampai `PW24`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW22
+1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW23
    selesai.
 2. **Diawali dialog keputusan:** tidak ada.
 3. **Menunggu izin pemilik proyek:** tidak ada.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
-   (butir 196, `referensi/laporan-untuk-backend.md`). Langkah pertama
-   setiap sesi tetap
+   (butir 196, `referensi/laporan-untuk-backend.md`); PW24, daftar
+   ruang kembali ke `GET /pengguna?workspace=` begitu backend memilah
+   ruang dari lokasi kerja (butir 197). Langkah pertama setiap sesi tetap
    memeriksa apakah cabang backend maju; bila maju, petakan paket baru
    di `referensi/antrean-web.md`. Backend dijalankan dengan env inline
    (`inti/pengujian.md`, Menjalankan layanan uji), dan kodenya tidak
