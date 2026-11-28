@@ -60,7 +60,7 @@ tetap `AR`, `B`, dan `P`.
 | PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Selesai | `eda7694` |
 | PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Selesai | `fa97abd` |
 | PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Selesai | `93a26c1` |
-| PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Belum | |
+| PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Selesai | `c20184a` |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
@@ -68,7 +68,7 @@ dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
 dimulai begitu backend menyediakan yang dibutuhkan. Urutan yang disarankan
 mengikuti tabel; PW10 sampai PW13 berurutan, dan PW11 serta PW12 butuh
 PW10. Sesudah PW25: PW24 (backend P1) lebih dulu, lalu PW15, lalu PW26
-atas izin pemilik proyek.
+atas izin pemilik proyek; ketiganya selesai.
 
 ## Rincian paket
 
@@ -341,9 +341,16 @@ Rincian di `referensi/keputusan-penyesuaian-backend.md` (`c4aae0d`).
 
 ### PW26: suite e2e penuh penutup putaran PW24 dan PW15
 
-Menunggu izin pemilik proyek, sesudah PW24 dan PW15 selesai: suite e2e
-penuh terhadap backend `c4aae0d`, termasuk spec ber-OTP, dengan charger
-tersambung dan layanan uji lengkap (Mailpit, env inline).
+Selesai 28 November 2026 atas izin pemilik proyek, pada web `5085336`
+dan backend `c4aae0d`, dengan charger tersambung dan layanan uji lengkap
+(Mailpit, env inline): e2e 840 lolos dan 1 gagal dari 841 dalam
+57,6 menit, tanpa dilewati, termasuk spec ber-OTP; vitest 1359 lolos dari
+159 berkas. Skenario baru PW24 dan PW15 ikut lolos. Yang gagal,
+`roles/level-bukan-owner` RL3a, gagal di bersih-bersih `hapusPosisi` yang
+login ulang sebagai Ridho tanpa membuang cookie sesi pengguna uji (pola
+RG4a di arah sebaliknya); cookie kini dibuang lebih dulu (`c20184a`), dan
+berkasnya lolos 6 dari 6 dengan `--repeat-each 3`. Harapan spec dan kode
+aplikasi tidak berubah; baseline baru di `inti/pengujian.md`.
 
 ## Perubahan backend tanpa pekerjaan web
 

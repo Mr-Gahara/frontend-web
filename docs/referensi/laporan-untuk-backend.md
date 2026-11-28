@@ -30,7 +30,9 @@ lalu dipindah ke `arsip/laporan-backend.md`; suite e2e penuh
 dan dikerjakan di `c4aae0d`: butir 197 lewat B385 (AR54, P90,
 `6595622`) dan butir 196 lewat B386 (AR55, R29, `df4238e`). Keduanya
 dibuktikan web (PW24 `fa97abd`, PW15 `0aef46e`) dan dipindah ke
-`arsip/laporan-backend.md`. Tidak ada laporan terbuka; di
+`arsip/laporan-backend.md`; suite e2e penuh 28 November 2026 siang
+(PW26, web `5085336`) membuktikan ulang seluruhnya, tanpa kegagalan
+yang berasal dari backend. Tidak ada laporan terbuka; di
 `docs/pengembangan/klien.md` backend kedua barisnya masih `Menunggu
 verifikasi` sampai Ridho menutupnya.
 

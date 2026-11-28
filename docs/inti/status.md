@@ -99,10 +99,13 @@ T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 `PW01` sampai `PW26`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** tidak ada; PW01 sampai PW25 selesai.
+1. **Sekarang:** tidak ada; PW01 sampai PW26 selesai.
 2. **Diawali dialog keputusan:** tidak ada paket tersendiri.
-3. **Menunggu izin pemilik proyek:** PW26, suite e2e penuh penutup
-   putaran PW24 dan PW15, terhadap backend `c4aae0d`.
+3. **Menunggu izin pemilik proyek:** tidak ada. PW26 selesai
+   (`c20184a`): suite penuh 28 November 2026 siang terhadap backend
+   `c4aae0d`, 840 lolos dan 1 gagal dari 841; yang gagal bersih-bersih
+   spec `roles/level-bukan-owner`, diperbaiki dan dibuktikan dengan
+   berkasnya (Baseline `inti/pengujian.md`).
 4. **Menunggu backend:** tidak ada. Langkah pertama setiap sesi tetap
    memeriksa apakah cabang backend maju; bila maju, petakan paket baru
    di `referensi/antrean-web.md`. Backend dijalankan dengan env inline

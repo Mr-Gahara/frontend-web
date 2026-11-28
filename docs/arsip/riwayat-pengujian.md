@@ -87,7 +87,20 @@ Suite penuh 24 November 2026 dipindah dari `inti/pengujian.md` pada
 26 November 2026; suite penuh 26 November 2026 dipindah pada
 27 November 2026, digantikan suite penuh 27 November 2026; suite penuh
 27 November 2026 dipindah pada 28 November 2026, digantikan suite penuh
-28 November 2026.
+28 November 2026 pagi; suite penuh 28 November 2026 pagi dipindah pada
+siang harinya, digantikan suite penuh 28 November 2026 siang.
+
+**Suite penuh 28 November 2026 pagi** (web `fb2a39f`, backend `ridho` lokal
+`6478d29`, pukul 07.50 sampai 08.46 WIB, penutup putaran PW17 sampai
+PW21, PW22): vitest 1362 lolos dari 160 berkas, dan e2e 839 lolos dan
+1 gagal dari 840 dalam 56,1 menit, tanpa dilewati. Termasuk spec
+ber-OTP. Yang gagal, `keuangan/mesin-kasir` "memuat: kerangka tampil
+selama riwayat ditahan, lalu berganti isi", menunggu `#judul-kasir-buka`
+yang sengaja tidak dirender saat toko uji tanpa mesin kasir; harapannya
+terbukti keliru dan penandanya diganti isi riwayat (`0d124c7`), lalu
+dibuktikan dengan berkasnya saja, 15 lolos dari 15. Tiga skenario baru
+sejak suite sebelumnya ikut lolos, dan penunggu lonceng baru (PW18
+sampai PW21) tidak menabrak spec lain.
 
 **Suite penuh 27 November 2026** (web `81e9214`, backend `ridho` lokal
 `6478d29`, pukul 16.18 sampai 17.13 WIB, penutup putaran PW01 sampai
