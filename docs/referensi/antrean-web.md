@@ -58,7 +58,7 @@ tetap `AR`, `B`, dan `P`.
 | PW21 | Staf akses aplikasi tampil di daftar ruang (butir 197) | Keputusan | Selesai | `7553126` |
 | PW22 | Suite e2e penuh penutup putaran PW17 sampai PW21 | Menunggu izin | Selesai | `0d124c7` |
 | PW23 | Status temuan T3, T4, T6, T7 dan utang pengujian PW15 sinkron | Sekarang | Selesai | `eda7694` |
-| PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Belum | |
+| PW24 | Daftar ruang kembali ke `GET /pengguna?workspace=` (butir 197) | Sekarang | Selesai | `fa97abd` |
 | PW25 | Langkah sesudah tarik backend `c4aae0d` dan pemetaan B385, B386 | Sekarang | Selesai | `93a26c1` |
 | PW26 | Suite e2e penuh penutup putaran PW24 dan PW15 | Menunggu izin | Belum | |
 
@@ -317,19 +317,18 @@ skenario 409 Batalkan Pindah Dana tercatat di Menunggu backend
 
 ### PW24: daftar ruang kembali ke `GET /pengguna?workspace=`
 
-Dapat dikerjakan sejak backend `c4aae0d` (butir 197,
-`referensi/laporan-untuk-backend.md`): `GET /pengguna?workspace=`
-memilah ruang dengan aturan RS1a (B385, P90, AR54 `6595622`): Owner di
-kedua ruang, lokasi kerja terisi menentukan ruang, tanpa lokasi kerja
-izin dashboard role, tanpa keduanya outlet; bentuk respons tidak
-berubah. Monitoring absensi staf izin tanpa lokasi kerja (P84) memakai
-aturan yang sama, sehingga staf tanpa lokasi kerja dan tanpa izin
-dashboard yang sedang izin kini ikut di monitoring Outlet (Status Staf).
-`features/pengguna/ruang-staf.ts` berhenti memuat seluruh pengguna dan
-memilah sendiri, web kembali ke `GET /pengguna?workspace=`, skenario
-RS1a di `pengguna/crud-pengguna` membuktikan staf akses aplikasi ada di
-respons `workspace=outlet`, RS1a diperbarui, dan butir 197 dipindah ke
-arsip laporan.
+Selesai 28 November 2026 (`fa97abd`). Backend `c4aae0d` memilah ruang
+staf dengan aturan RS1a (B385), sehingga `useDaftarPengguna` dan lonceng
+kembali ke versi sebelum PW21 (satu `GET /pengguna?workspace=` per ruang)
+dan `ruang-staf.ts` di `features/pengguna` beserta unit test-nya dibuang.
+Skenario RS1a `pengguna/crud-pengguna` membuktikan staf App Kasir tanpa
+izin dashboard ada di respons `workspace=outlet`, tidak di `gudang`, dan
+tampil di Pengguna serta Generate Jadwal outlet; `lihat-jadwal` kembali
+membandingkan baris dengan respons workspace. Harapan LK1a terbukti
+keliru terhadap RS1a (staf berlokasi kerja Gudang dicari di Pengguna
+outlet, dan hanya tampil di sana karena tipe lokasinya tidak terbaca
+tanpa `read-location`); kini di Pengguna gudang. Butir 197 dipindah ke
+`arsip/laporan-backend.md`.
 
 ### PW25: langkah sesudah tarik backend `c4aae0d`
 

@@ -288,14 +288,21 @@ Kasir saja tidak tampil di daftar karyawan (`7553126`, PW21).
   `GET /pengguna?workspace=` backend, sehingga Owner di kedua ruang); tanpa
   keduanya, ruang outlet, karena aplikasi kasir dipakai di outlet. Berlaku
   di halaman Pengguna, Generate Jadwal, kalender Jadwal, Status Staf, dan
-  hitungan staf lonceng (`features/pengguna/ruang-staf.ts`). Backend hanya
+  hitungan staf lonceng (`ruang-staf.ts` di `features/pengguna`). Backend hanya
   membaca izin dashboard, sehingga staf berposisi tanpa izin dashboard
-  tidak masuk ruang mana pun (`kontrak/temuan.md` butir 197).
+  tidak masuk ruang mana pun (`kontrak/temuan.md` butir 197). Sejak
+  backend `c4aae0d` (B385, P90) aturan yang sama dipilah backend di
+  `GET /pengguna?workspace=`, sehingga web kembali memakai daftar itu
+  apa adanya dan `ruang-staf.ts` di `features/pengguna` dibuang (PW24,
+  `fa97abd`, 28 November 2026). Aturan dan halaman yang dicakupnya tidak
+  berubah.
 
-Rincian penerapan, bukan bagian teks opsi: lokasi kerja yang tipenya tidak
-diketahui (tanpa `read-location`) dilewati ke izin dashboard; pengguna
-yang lokasi kerjanya diubah berpindah ruang, sehingga hilang dari daftar
-ruang tempat ia diubah.
+Rincian penerapan, bukan bagian teks opsi: pengguna yang lokasi kerjanya
+diubah berpindah ruang, sehingga hilang dari daftar ruang tempat ia
+diubah. Selama web memilah sendiri (PW21 sampai PW24), lokasi kerja yang
+tipenya tidak diketahui pengelola tanpa `read-location` dilewati ke izin
+dashboard; backend membaca tipenya sendiri, sehingga staf berlokasi kerja
+Gudang kini hanya di ruang gudang bagi siapa pun.
 
 ## Catatan
 

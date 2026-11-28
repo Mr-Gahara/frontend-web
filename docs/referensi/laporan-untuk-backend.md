@@ -28,10 +28,11 @@ lalu dipindah ke `arsip/laporan-backend.md`; suite e2e penuh
 
 **Keadaan 28 November 2026:** butir 196 dan 197 dibaca backend (AR53)
 dan dikerjakan di `c4aae0d`: butir 197 lewat B385 (AR54, P90,
-`6595622`) dan butir 196 lewat B386 (AR55, R29, `df4238e`). Keduanya
-`Menunggu verifikasi` di `docs/pengembangan/klien.md` backend, dan
-tetap di berkas ini sampai dibuktikan web (PW24 dan PW15,
-`referensi/antrean-web.md`).
+`6595622`) dan butir 196 lewat B386 (AR55, R29, `df4238e`). Butir 197
+dibuktikan web (PW24, `fa97abd`) dan dipindah ke
+`arsip/laporan-backend.md`. Yang terbuka tinggal butir 196, `Menunggu
+verifikasi` di `docs/pengembangan/klien.md` backend sampai dibuktikan
+web (PW15, `referensi/antrean-web.md`).
 
 ## Laporan 27 November 2026 (Mesin Kasir)
 
@@ -64,39 +65,8 @@ Modul akun kas dan jurnal transfer (Nizar), dikerjakan Ridho.
   `modul/keuangan.md`). Begitu penandanya ada, Batalkan disembunyikan
   untuk jurnal itu (PW15, `referensi/antrean-web.md`).
 
-### Butir 197: staf tanpa izin dashboard tidak masuk daftar ruang
-
-Modul pengguna dan RBAC (Ridho).
-
-- **Bukti:** `services/pengguna/penggunaCrudService.js` `getByWorkspace`
-  memuat Owner (`isOwnerRole`) dan pengguna yang role-nya memegang
-  `read-dashboard-outlet` atau `read-dashboard-gudang`; pengguna lain
-  dibuang (`return false`). Data development 27 November 2026: tiga staf
-  baru pemilik proyek, "nijar", "nijar hitam" (role Staff, 7 izin), dan
-  "aril" (role Kasir, 13 izin), ber-`aksesType` `["app"]` dan berlokasi
-  kerja outlet, tidak memegang kedua izin itu, sehingga
-  `GET /pengguna?workspace=outlet` tidak memuat mereka. Dibuktikan e2e
-  `pengguna/crud-pengguna` (skenario RS1a): staf akses aplikasi dengan
-  posisi tanpa izin dashboard tidak ada di respons `workspace=outlet`.
-- **Penyebab:** ruang staf diturunkan dari izin dashboard web, padahal
-  staf aplikasi (kasir) tidak membutuhkan dashboard web, dan lokasi kerja
-  (P61) yang menyatakan ruangnya tidak dibaca.
-- **Kenapa penting:** staf aplikasi hilang dari halaman Pengguna, Generate
-  Jadwal, kalender Jadwal, dan Status Staf web, sehingga tidak dapat
-  dijadwalkan dan absensinya tidak berjalan; aplikasi dan modul lain yang
-  memakai `workspace` terdampak sama.
-- **Saran:** pakai aturan yang sama dengan web (RS1a): lokasi kerja
-  terisi menentukan ruang; tanpa lokasi kerja, izin dashboard role; tanpa
-  keduanya, ruang outlet; Owner di kedua ruang.
-- **Penanganan sementara di frontend:** `features/pengguna/ruang-staf.ts`
-  memuat seluruh pengguna (`GET /pengguna`) dan memilah sendiri, memakai
-  kedua daftar `workspace` hanya sebagai sumber izin dashboard. Begitu
-  backend memakai aturan yang sama, web cukup kembali ke
-  `GET /pengguna?workspace=`.
-
 ## Prioritas seluruh laporan terbuka
 
 | Prioritas | Butir | Pemilik | Dampak |
 |---|---|---|---|
-| 8 | Butir 197: staf tanpa izin dashboard tidak masuk daftar ruang | Ridho | Staf aplikasi tidak dapat dijadwalkan; web memilah sendiri |
 | 9 | Butir 196: penanda asal Pindah Dana buka kasir | Ridho (modul Nizar) | Batalkan tampil lalu ditolak 409 |

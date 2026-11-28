@@ -1211,8 +1211,10 @@ digabung.
   kasir) ditutup `Selesai` dari bukti web PW02 sampai PW14 dan PW22.
 - **B385** (AR54, P90, butir 197): ruang staf di
   `GET /pengguna?workspace=` dan monitoring absensi memakai aturan RS1a;
-  pekerjaan web PW24.
+  pekerjaan web PW24, selesai 28 November 2026 (`fa97abd`): web kembali
+  ke daftar workspace apa adanya, `ruang-staf.ts` di `features/pengguna`
+  dibuang, dan B385 dibuktikan di `pengguna/crud-pengguna`.
 - **B386** (AR55, R29, butir 196): `asal` dan `sesiKasirID` di respons
   jurnal transfer; pekerjaan web PW15.
 - Kedua baris di `docs/pengembangan/klien.md` backend `Menunggu
-  verifikasi` sampai web membuktikannya.
+  verifikasi` sampai web membuktikannya; butir 197 terbukti di PW24.

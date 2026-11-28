@@ -39,7 +39,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 28 November 2026, sesudah PW25)
+### Mulai di sini (keadaan akhir 28 November 2026, sesudah PW24)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `6478d29` ke `c4aae0d` (28 November 2026, lima commit, AR53 sampai
@@ -49,7 +49,10 @@ B386 (AR55, R29), keduanya `Menunggu verifikasi` di
 26 November 2026 sudah ditutup `Selesai` di sana (AR53). PW25 selesai:
 seed dan migrasi tidak berubah, index parsial baru sesi kasir terbentuk,
 dan PW24 serta PW15 berpindah ke kelompok Sekarang
-(`referensi/keputusan-penyesuaian-backend.md`, `c4aae0d`). Sebelumnya
+(`referensi/keputusan-penyesuaian-backend.md`, `c4aae0d`). PW24 selesai
+(`fa97abd`): daftar ruang kembali ke `GET /pengguna?workspace=`,
+`ruang-staf.ts` di `features/pengguna` dibuang, dan butir 197 terbukti lalu
+dipindah ke arsip. Sebelumnya
 backend `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
 B384) mengerjakan seluruh laporan web 24 sampai 26 November 2026, dan
 Ridho menyatakan pekerjaan backend MVP selesai; pembuktian web dan
@@ -81,7 +84,7 @@ syarat di Tambah Pengguna, Pola Roster, dan Generate Jadwal (KS10a
 sampai KS13a). PW20 selesai (`3198f5d`): bidang ruang gudang dan staf
 per ruang di kartu itu (KS14a sampai KS16a). PW21 selesai (`7553126`):
 staf akses aplikasi tampil di daftar ruang (RS1a, butir 197). Vitest
-kini 1362 lolos dari 160 berkas. PW22 selesai (`0d124c7`): suite e2e
+kini 1357 lolos dari 159 berkas (sesudah PW24). PW22 selesai (`0d124c7`): suite e2e
 penuh 28 November 2026 (`fb2a39f`, backend `6478d29`) 839 lolos dan
 1 gagal dari 840, termasuk spec ber-OTP; yang gagal adalah harapan spec
 Mesin Kasir yang bergantung jumlah mesin di toko uji, diperbaiki dan
@@ -93,12 +96,10 @@ T6, dan T7 dari backend AR31 dan skenario 409 PW15 di utang pengujian.
 `PW01` sampai `PW26`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** PW24 lebih dulu (backend P1), daftar ruang kembali ke
-   `GET /pengguna?workspace=` dan `features/pengguna/ruang-staf.ts`
-   berhenti memilah sendiri (butir 197, B385); lalu PW15, Batalkan
-   Pindah Dana disembunyikan untuk `asal: "buka-kasir"` (butir 196,
-   B386), diawali pertanyaan apakah asal itu juga ditampilkan. PW01
-   sampai PW14 dan PW16 sampai PW23, serta PW25, selesai.
+1. **Sekarang:** PW15, Batalkan Pindah Dana disembunyikan untuk
+   `asal: "buka-kasir"` (butir 196, B386), diawali pertanyaan apakah
+   asal itu juga ditampilkan. PW01 sampai PW14 dan PW16 sampai PW25
+   selesai.
 2. **Diawali dialog keputusan:** tidak ada paket tersendiri.
 3. **Menunggu izin pemilik proyek:** PW26, suite e2e penuh sesudah PW24
    dan PW15.

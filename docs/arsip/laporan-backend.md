@@ -513,6 +513,44 @@ Modul pajak dan booking (Yoga untuk pajak, Nizar untuk booking).
   pajak per item, sedangkan pajak per transaksi tetap dikenakan
   (`reservasi/buat/buat-reservasi`).
 
+### Butir 197 (laporan 27 November 2026): staf tanpa izin dashboard tidak masuk daftar ruang
+
+Modul pengguna dan RBAC (Ridho).
+
+- **Bukti:** `services/pengguna/penggunaCrudService.js` `getByWorkspace`
+  memuat Owner (`isOwnerRole`) dan pengguna yang role-nya memegang
+  `read-dashboard-outlet` atau `read-dashboard-gudang`; pengguna lain
+  dibuang (`return false`). Data development 27 November 2026: tiga staf
+  baru pemilik proyek, "nijar", "nijar hitam" (role Staff, 7 izin), dan
+  "aril" (role Kasir, 13 izin), ber-`aksesType` `["app"]` dan berlokasi
+  kerja outlet, tidak memegang kedua izin itu, sehingga
+  `GET /pengguna?workspace=outlet` tidak memuat mereka. Dibuktikan e2e
+  `pengguna/crud-pengguna` (skenario RS1a): staf akses aplikasi dengan
+  posisi tanpa izin dashboard tidak ada di respons `workspace=outlet`.
+- **Penyebab:** ruang staf diturunkan dari izin dashboard web, padahal
+  staf aplikasi (kasir) tidak membutuhkan dashboard web, dan lokasi kerja
+  (P61) yang menyatakan ruangnya tidak dibaca.
+- **Kenapa penting:** staf aplikasi hilang dari halaman Pengguna, Generate
+  Jadwal, kalender Jadwal, dan Status Staf web, sehingga tidak dapat
+  dijadwalkan dan absensinya tidak berjalan; aplikasi dan modul lain yang
+  memakai `workspace` terdampak sama.
+- **Saran:** pakai aturan yang sama dengan web (RS1a): lokasi kerja
+  terisi menentukan ruang; tanpa lokasi kerja, izin dashboard role; tanpa
+  keduanya, ruang outlet; Owner di kedua ruang.
+- **Penanganan sementara di frontend:** `ruang-staf.ts` di `features/pengguna`
+  memuat seluruh pengguna (`GET /pengguna`) dan memilah sendiri, memakai
+  kedua daftar `workspace` hanya sebagai sumber izin dashboard. Begitu
+  backend memakai aturan yang sama, web cukup kembali ke
+  `GET /pengguna?workspace=`.
+- **Dibuktikan:** 28 November 2026 (PW24, `fa97abd`) terhadap backend
+  `c4aae0d` (B385, AR54, P90): staf App Kasir dengan posisi tanpa izin
+  dashboard ada di respons `GET /pengguna?workspace=outlet` dan tidak di
+  `workspace=gudang`, lalu tampil di daftar Pengguna dan Generate Jadwal
+  outlet (`pengguna/crud-pengguna`); staf berlokasi kerja Gudang hanya di
+  ruang gudang, juga bagi pengelola tanpa `read-location`. Web kembali ke
+  `GET /pengguna?workspace=` dan `ruang-staf.ts` di `features/pengguna`
+  dibuang.
+
 ### Kebutuhan: surat jalan dikirim per arah di ringkasan gudang (laporan 25 November 2026)
 
 Modul dashboard dan transfer stok (Yoga).
